@@ -18,11 +18,12 @@ It provides an `{{{< iconify >}}}` shortcode:
 
 For example:
 
-| Shortcode                                                      | Icon                                                       |
-| -------------------------------------------------------------- | ---------------------------------------------------------- |
-| `{{{< iconify exploding-head >}}}`                             | {{< iconify exploding-head >}}                             |
-| `{{{< iconify exploding-head size=2xl >}}}`                    | {{< iconify exploding-head size=2xl >}}                    |
-| `{{{< iconify exploding-head size=10x >}}}`                    | {{< iconify exploding-head size=10x >}}                    |
-| `{{{< iconify fluent-emoji-high-contrast 1st-place-medal >}}}` | {{< iconify fluent-emoji-high-contrast 1st-place-medal >}} |
-| `{{{< iconify twemoji 1st-place-medal >}}}`                    | {{< iconify twemoji 1st-place-medal >}}                    |
-| `{{{< iconify line-md loading-alt-loop >}}}`                   | {{< iconify line-md loading-alt-loop >}}                   |
+| Shortcode                                                       | Icon                                                       |
+| --------------------------------------------------------------- | ---------------------------------------------------------- |
+| `{{{< iconify exploding-head >}}}`                              | {{< iconify exploding-head >}}                             |
+| `{{{< iconify exploding-head size=2xl >}}}`                     | {{< iconify exploding-head size=2xl >}}                    |
+| `{{{< iconify exploding-head size=10x >}}}`                     | {{< iconify exploding-head size=10x >}}                    |
+| `{{{< iconify exploding-head size=Huge >}}}`                    | {{< iconify exploding-head size=Huge >}}                   |
+| `{{{< iconify fluent-emoji-high-contrast 1st-place-medal >}}}`  | {{< iconify fluent-emoji-high-contrast 1st-place-medal >}} |
+| `{{{< iconify twemoji 1st-place-medal >}}}`                     | {{< iconify twemoji 1st-place-medal >}}                    |
+| `{{{< iconify line-md loading-alt-loop >}}}`                    | {{< iconify line-md loading-alt-loop >}}                   |
