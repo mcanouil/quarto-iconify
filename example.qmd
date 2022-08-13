@@ -1,0 +1,28 @@
+---
+title: Iconify Quarto Extension
+format:
+   html: default
+   pdf: default
+---
+
+This extension allows you to use [Iconify](https://icon-sets.iconify.design/) icons in your Quarto HTML documents.
+It provides an `{{{< iconify >}}}` shortcode:
+
+- Mandatory `<icon-name>`:
+  ``` markdown
+  {{{< iconify <icon-name> >}}}
+  ```
+
+- Optional `<set>` (default is `fluent-emoji`):
+  ``` markdown
+  {{{< iconify <set> <icon-name> >}}}
+  ```
+
+For example:
+
+| Shortcode                                             | Icon                                              |
+| ----------------------------------------------------- | ------------------------------------------------- |
+| `{{{< iconify exploding-head >}}}`                   | {{< iconify exploding-head >}}                   |
+| `{{{< iconify fluent-emoji-high-contrast 1st-place-medal >}}}` | {{< iconify fluent-emoji-high-contrast 1st-place-medal >}} |
+| `{{{< iconify twemoji 1st-place-medal >}}}`           | {{< iconify twemoji 1st-place-medal >}}           |
+| `{{{< iconify line-md loading-alt-loop >}}}`          | {{< iconify line-md loading-alt-loop >}}          |
