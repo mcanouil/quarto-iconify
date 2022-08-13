@@ -41,29 +41,29 @@ When the size is invalid, no size changes are made.
 
 - Relative sizing: `{{< iconify exploding-head size=2xl >}}`.
 
-  | Relative Sizing Class | Font Size | Equivalent in Pixels |
-  |-----------------------|-----------|----------------------|
-  | fa-2xs                | 0.625em   | 10px                 |
-  | fa-xs                 | 0.75em    | 12px                 |
-  | fa-sm                 | 0.875em   | 14px                 |
-  | fa-lg                 | 1.25em    | 20px                 |
-  | fa-xl                 | 1.5em     | 24px                 |
-  | fa-2xl                | 2em       | 32px                 |
+  | Relative Sizing | Font Size | Equivalent in Pixels |
+  |-----------------|-----------|----------------------|
+  | 2xs             | 0.625em   | 10px                 |
+  | xs              | 0.75em    | 12px                 |
+  | sm              | 0.875em   | 14px                 |
+  | lg              | 1.25em    | 20px                 |
+  | xl              | 1.5em     | 24px                 |
+  | 2xl             | 2em       | 32px                 |
 
 - Literal sizing: `{{< iconify exploding-head size=5x >}}`.
 
-  | Literal Sizing Class | Font Size |
-  |----------------------|-----------|
-  | fa-1x                | 1em       |
-  | fa-2x                | 2em       |
-  | fa-3x                | 3em       |
-  | fa-4x                | 4em       |
-  | fa-5x                | 5em       |
-  | fa-6x                | 6em       |
-  | fa-7x                | 7em       |
-  | fa-8x                | 8em       |
-  | fa-9x                | 9em       |
-  | fa-10x               | 10em      |
+  | Literal Sizing | Font Size |
+  |----------------|-----------|
+  | 1x             | 1em       |
+  | 2x             | 2em       |
+  | 3x             | 3em       |
+  | 4x             | 4em       |
+  | 5x             | 5em       |
+  | 6x             | 6em       |
+  | 7x             | 7em       |
+  | 8x             | 8em       |
+  | 9x             | 9em       |
+  | 10x            | 10em      |
 
 - LaTeX-style sizing: `{{< iconify exploding-head size=Huge >}}`.
 
