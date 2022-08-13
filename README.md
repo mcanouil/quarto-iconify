@@ -17,8 +17,8 @@ If you're using version control, you will want to check in this directory.
 To embed an icon, use the `{{< iconify >}}` shortcode[^1]. For example:
 
 ```default
-{{< iconify 1st-place-medal >}}
-{{< iconify fluent-emoji-flat 1st-place-medal >}}
+{{< iconify exploding-head >}}
+{{< iconify fluent-emoji-high-contrast 1st-place-medal >}}
 {{< iconify twemoji 1st-place-medal >}}
 {{< iconify line-md loading-alt-loop >}}
 ```
