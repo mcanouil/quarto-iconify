@@ -1,0 +1,115 @@
+.iconify-tiny {
+  font-size: 0.5em;
+}
+
+.iconify-scriptsize {
+  font-size: 0.7em;
+}
+
+.iconify-footnotesize {
+  font-size: 0.8em;
+}
+
+.iconify-small {
+  font-size: 0.9em;
+}
+
+.iconify-normalsize {
+  font-size: 1em;
+}
+
+.iconify-large {
+  font-size: 1.2em;
+}
+
+.iconify-Large {
+  font-size: 1.5em;
+}
+
+.iconify-LARGE {
+  font-size: 1.75em;
+}
+
+.iconify-huge {
+  font-size: 2em;
+}
+
+.iconify-Huge {
+  font-size: 2.5em;
+}
+
+.iconify-1x {
+  font-size: 1em;
+}
+
+.iconify-2x {
+  font-size: 2em;
+}
+
+.iconify-3x {
+  font-size: 3em;
+}
+
+.iconify-4x {
+  font-size: 4em;
+}
+
+.iconify-5x {
+  font-size: 5em;
+}
+
+.iconify-6x {
+  font-size: 6em;
+}
+
+.iconify-7x {
+  font-size: 7em;
+}
+
+.iconify-8x {
+  font-size: 8em;
+}
+
+.iconify-9x {
+  font-size: 9em;
+}
+
+.iconify-10x {
+  font-size: 10em;
+}
+
+.iconify-2xs {
+  font-size: 0.625em;
+  line-height: 0.1em;
+  vertical-align: 0.225em;
+}
+
+.iconify-xs {
+  font-size: 0.75em;
+  line-height: 0.08333em;
+  vertical-align: 0.125em;
+}
+
+.iconify-sm {
+  font-size: 0.875em;
+  line-height: 0.07143em;
+  vertical-align: 0.05357em;
+}
+
+.iconify-lg {
+  font-size: 1.25em;
+  line-height: 0.05em;
+  vertical-align: -0.075em;
+}
+
+.iconify-xl {
+  font-size: 1.5em;
+  line-height: 0.04167em;
+  vertical-align: -0.125em;
+}
+
+.iconify-2xl {
+  font-size: 2em;
+  line-height: 0.03125em;
+  vertical-align: -0.1875em;
+}
