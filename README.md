@@ -1,6 +1,6 @@
 # Iconify Extension for Quarto
 
-This extension provides support to free and open source icons provided by [Iconify](https://icon-sets.iconify.design/).
+This extension provides support to free and open source icons provided by [Iconify](https://icon-sets.iconify.design/).  
 Icons can be used only in HTML-based documents.
 
 ## Installing
