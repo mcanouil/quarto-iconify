@@ -1,8 +1,6 @@
 ---
 title: Iconify Quarto Extension
-format:
-   html: default
-   pdf: default
+format: html
 ---
 
 This extension allows you to use [Iconify](https://icon-sets.iconify.design/) icons in your Quarto HTML documents.
