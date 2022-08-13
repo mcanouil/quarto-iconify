@@ -9,7 +9,7 @@ Icons can be used only in HTML-based documents.
 quarto install extension mcanouil/quarto-iconify
 ```
 
-This will install the extension under the `_extensions` subdirectory.
+This will install the extension under the `_extensions` subdirectory.  
 If you're using version control, you will want to check in this directory.
 
 ## Using
@@ -26,7 +26,7 @@ To embed an icon, use the `{{< iconify >}}` shortcode[^1]. For example:
 This extension includes support for thousands of icons (including animated icons).
 You can browse all of the available sets of icons here:
 
-<ttps://icon-sets.iconify.design/>
+<https://icon-sets.iconify.design/>
 
 [^1]: The default icon set is `fluent-emoji` (source: <https://github.com/microsoft/fluentui-emoji>).
 
