@@ -92,6 +92,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <link href="example_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="example_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script src="example_files/libs/quarto-contrib/iconify-2.2.1/iconify.min.js"></script>
+<link href="example_files/libs/quarto-contrib/iconify-2.2.1/size.css" rel="stylesheet">
 
 
 </head>
@@ -122,14 +123,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <ul>
 <li><p>Mandatory <code>&lt;icon-name&gt;</code>:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>{{&lt; iconify <span class="kw">&lt;icon-name&gt;</span> &gt;}}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-<li><p>Optional <code>&lt;set&gt;</code> (default is <code>fluent-emoji</code>):</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>{{&lt; iconify <span class="kw">&lt;set&gt;</span> <span class="kw">&lt;icon-name&gt;</span> &gt;}}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>Optional <code>&lt;set&gt;</code> (default is <code>fluent-emoji</code>) and <code>&lt;size=...&gt;</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>{{&lt; iconify <span class="kw">&lt;set&gt;</span> <span class="kw">&lt;icon-name&gt;</span> &lt;size=...&gt; &gt;}}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 <p>For example:</p>
 <table class="table">
 <colgroup>
-<col style="width: 51%">
-<col style="width: 48%">
+<col style="width: 52%">
+<col style="width: 47%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -143,14 +144,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td><p><span class="iconify-inline" data-icon="fluent-emoji:exploding-head" "=""></span></p></td>
 </tr>
 <tr class="even">
+<td><code>{{&lt; iconify exploding-head size=2xl &gt;}}</code></td>
+<td><p><span class="iconify-inline iconify-2xl" data-icon="fluent-emoji:exploding-head" "=""></span></p></td>
+</tr>
+<tr class="odd">
+<td><code>{{&lt; iconify exploding-head size=10x &gt;}}</code></td>
+<td><p><span class="iconify-inline iconify-10x" data-icon="fluent-emoji:exploding-head" "=""></span></p></td>
+</tr>
+<tr class="even">
+<td><code>{{&lt; iconify exploding-head size=Huge &gt;}}</code></td>
+<td><p><span class="iconify-inline iconify-Huge" data-icon="fluent-emoji:exploding-head" "=""></span></p></td>
+</tr>
+<tr class="odd">
 <td><code>{{&lt; iconify fluent-emoji-high-contrast 1st-place-medal &gt;}}</code></td>
 <td><p><span class="iconify-inline" data-icon="fluent-emoji-high-contrast:1st-place-medal" "=""></span></p></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>{{&lt; iconify twemoji 1st-place-medal &gt;}}</code></td>
 <td><p><span class="iconify-inline" data-icon="twemoji:1st-place-medal" "=""></span></p></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>{{&lt; iconify line-md loading-alt-loop &gt;}}</code></td>
 <td><p><span class="iconify-inline" data-icon="line-md:loading-alt-loop" "=""></span></p></td>
 </tr>
