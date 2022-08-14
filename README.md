@@ -39,6 +39,8 @@ You can browse all of the available sets of icons here:
 This extension provides relative, literal, and LaTeX-style sizing for icons.  
 When the size is invalid, no size changes are made.
 
+- CSS-style sizing: `{{< iconify exploding-head size=42px >}}`.
+
 - Relative sizing: `{{< iconify exploding-head size=2xl >}}`.
 
   | Relative Sizing | Font Size | Equivalent in Pixels |
@@ -79,6 +81,20 @@ When the size is invalid, no size changes are made.
   | LARGE (= `\LARGE`)               | 1.75em           |
   | huge (= `\huge`)                 | 2em              |
   | Huge (= `\Huge`)                 | 2.5em            |
+
+- `width` or `height` can be set to define icon's property while keeping aspect ratio.  
+  _Note:_ `width` and `height` are not set if `size` was defined.
+
+### Iconify Attributes
+
+Iconify API provides additional attributes: <https://docs.iconify.design/iconify-icon/>.  
+Currently, this extension supports: `width`, `height`, `title`[^2], `label`[^2] (_i.e._, `aria-label`), `flip`, and `rotate`.
+
+``` markdown
+{{< iconify <set> <icon-name> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> >}}
+```
+
+[^2]: `title` and `label` takes the following default value: `Icon <icon-name> from <set> Iconify.design set.`.
 
 ## Example
 
