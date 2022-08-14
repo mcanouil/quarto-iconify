@@ -19,12 +19,12 @@ To embed an icon, use the `{{< iconify >}}` shortcode[^1]. For example:
 ```default
 {{< iconify exploding-head >}}
 {{< iconify exploding-head size=2xl >}}
-{{< iconify exploding-head size=10x >}}
+{{< iconify exploding-head size=5x rotate=180deg >}}
+{{< iconify exploding-head size=Huge >}}
 {{< iconify fluent-emoji-high-contrast 1st-place-medal >}}
 {{< iconify twemoji 1st-place-medal >}}
 {{< iconify line-md loading-alt-loop >}}
-{{< iconify exploding-head size=2xl>}}
-{{< iconify fluent-emoji-flat exploding-head size=10x>}}
+{{< iconify fa6-brands apple width=50px height=10px rotate=90deg flip=vertical >}}
 ```
 
 This extension includes support for thousands of icons (including animated icons).
@@ -33,6 +33,17 @@ You can browse all of the available sets of icons here:
 <https://icon-sets.iconify.design/>
 
 [^1]: The default icon set is `fluent-emoji` (source: <https://github.com/microsoft/fluentui-emoji>).
+
+### Iconify Attributes
+
+Iconify API provides additional attributes: <https://docs.iconify.design/iconify-icon/>.  
+Currently, this extension supports: `width`, `height`, `title`[^2], `label`[^2] (_i.e._, `aria-label`), `flip`, and `rotate`.
+
+``` markdown
+{{< iconify <set> <icon-name> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> >}}
+```
+
+[^2]: `title` and `label` takes the following default value: `Icon <icon-name> from <set> Iconify.design set.`.
 
 ### Sizing Icons
 
@@ -84,17 +95,6 @@ When the size is invalid, no size changes are made.
 
 - `width` or `height` can be set to define icon's property while keeping aspect ratio.  
   _Note:_ `width` and `height` are not set if `size` was defined.
-
-### Iconify Attributes
-
-Iconify API provides additional attributes: <https://docs.iconify.design/iconify-icon/>.  
-Currently, this extension supports: `width`, `height`, `title`[^2], `label`[^2] (_i.e._, `aria-label`), `flip`, and `rotate`.
-
-``` markdown
-{{< iconify <set> <icon-name> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> >}}
-```
-
-[^2]: `title` and `label` takes the following default value: `Icon <icon-name> from <set> Iconify.design set.`.
 
 ## Example
 
