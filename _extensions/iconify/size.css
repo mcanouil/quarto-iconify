@@ -80,36 +80,24 @@
 
 .iconify-2xs {
   font-size: 0.625em;
-  line-height: 0.1em;
-  vertical-align: 0.225em;
 }
 
 .iconify-xs {
   font-size: 0.75em;
-  line-height: 0.08333em;
-  vertical-align: 0.125em;
 }
 
 .iconify-sm {
   font-size: 0.875em;
-  line-height: 0.07143em;
-  vertical-align: 0.05357em;
 }
 
 .iconify-lg {
   font-size: 1.25em;
-  line-height: 0.05em;
-  vertical-align: -0.075em;
 }
 
 .iconify-xl {
   font-size: 1.5em;
-  line-height: 0.04167em;
-  vertical-align: -0.125em;
 }
 
 .iconify-2xl {
   font-size: 2em;
-  line-height: 0.03125em;
-  vertical-align: -0.1875em;
 }

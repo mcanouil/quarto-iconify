@@ -11,19 +11,22 @@ It provides an `{{{< iconify >}}}` shortcode:
   {{{< iconify <icon-name> >}}}
   ```
 
-- Optional `<set>` (default is `fluent-emoji`) and  `<size=...>`:
+- Optional `<set>` (default is `fluent-emoji`) `<size=...>`, `<width=...>`, `<height=...>`, `<flip=...>`, and `<rotate=...>`:
   ``` markdown
-  {{{< iconify <set> <icon-name> <size=...> >}}}
+  {{{< iconify <set> <icon-name> <size=...> <width=...> <height=...> <flip=...> <rotate=...> >}}}
   ```
+  If `<size=...>` is defined, `<width=...>` and `<height=...>` are not used.  
+  See <https://docs.iconify.design/iconify-icon/> for more details.
 
 For example:
 
-| Shortcode                                                       | Icon                                                       |
-| --------------------------------------------------------------- | ---------------------------------------------------------- |
-| `{{{< iconify exploding-head >}}}`                              | {{< iconify exploding-head >}}                             |
-| `{{{< iconify exploding-head size=2xl >}}}`                     | {{< iconify exploding-head size=2xl >}}                    |
-| `{{{< iconify exploding-head size=10x >}}}`                     | {{< iconify exploding-head size=10x >}}                    |
-| `{{{< iconify exploding-head size=Huge >}}}`                    | {{< iconify exploding-head size=Huge >}}                   |
-| `{{{< iconify fluent-emoji-high-contrast 1st-place-medal >}}}`  | {{< iconify fluent-emoji-high-contrast 1st-place-medal >}} |
-| `{{{< iconify twemoji 1st-place-medal >}}}`                     | {{< iconify twemoji 1st-place-medal >}}                    |
-| `{{{< iconify line-md loading-alt-loop >}}}`                    | {{< iconify line-md loading-alt-loop >}}                   |
+| Shortcode                                                                              | Icon                                                                   |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `{{{< iconify exploding-head >}}}`                                                     | {{< iconify exploding-head >}}                                         |
+| `{{{< iconify exploding-head size=2xl >}}}`                                            | {{< iconify exploding-head size=2xl >}}                                |
+| `{{{< iconify exploding-head size=5x rotate=180deg >}}}`                               | {{< iconify exploding-head size=5x rotate=180deg >}}                   |
+| `{{{< iconify exploding-head size=Huge >}}}`                                           | {{< iconify exploding-head size=Huge >}}                               |
+| `{{{< iconify fluent-emoji-high-contrast 1st-place-medal >}}}`                         | {{< iconify fluent-emoji-high-contrast 1st-place-medal >}}             |
+| `{{{< iconify twemoji 1st-place-medal >}}}`                                            | {{< iconify twemoji 1st-place-medal >}}                                |
+| `{{{< iconify line-md loading-alt-loop >}}}`                                           | {{< iconify line-md loading-alt-loop >}}                               |
+| `{{{< iconify fa6-brands apple width=50px height=10px rotate=90deg flip=vertical >}}}` | {{< iconify fa6-brands apple width=50px rotate=90deg flip=vertical >}} |
