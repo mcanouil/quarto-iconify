@@ -1,3 +1,5 @@
 /.DS_Store
 example_files/
 example.html
+
+/.luarc.json
