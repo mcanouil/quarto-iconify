@@ -6,7 +6,7 @@ Icons can be used only in HTML-based documents.
 ## Installing
 
 ```sh
-quarto install extension mcanouil/quarto-iconify
+quarto add mcanouil/quarto-iconify
 ```
 
 This will install the extension under the `_extensions` subdirectory.  
