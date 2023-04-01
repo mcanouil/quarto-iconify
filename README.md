@@ -100,7 +100,7 @@ When the size is invalid, no size changes are made.
 
 Here is the source code for a minimal example: [example.qmd](example.qmd).
 
-This is the output of `example.qmd` for [HTML](https://m.canouil.fr/quarto-iconify/).
+This is the output of `example.qmd` for [HTML](https://m.canouil.dev/quarto-iconify/).
 
 ---
 
