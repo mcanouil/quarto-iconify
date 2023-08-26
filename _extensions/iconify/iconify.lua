@@ -25,7 +25,7 @@
 local function ensure_html_deps()
   quarto.doc.add_html_dependency({
     name = 'iconify',
-    version = '1.0.0-beta.2',
+    version = '1.0.7',
     scripts = {"iconify-icon.min.js"}
   })
 end
