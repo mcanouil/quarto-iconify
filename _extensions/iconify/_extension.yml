@@ -1,6 +1,6 @@
 title: Iconify support
 author: Mickaël Canouil
-version: 1.0.0
+version: 1.0.7
 quarto-required: ">=1.2.280"
 contributes:
   shortcodes:
