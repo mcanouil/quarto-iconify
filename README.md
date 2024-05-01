@@ -18,6 +18,8 @@ To embed an icon, use the `{{< iconify >}}` shortcode[^1]. For example:
 
 ```default
 {{< iconify exploding-head >}}
+{{< iconify fluent-emoji exploding-head >}}
+{{< iconify fluent-emoji:exploding-head >}}
 {{< iconify exploding-head size=2xl >}}
 {{< iconify exploding-head size=5x rotate=180deg >}}
 {{< iconify exploding-head size=Huge >}}
@@ -40,10 +42,11 @@ Iconify API provides additional attributes: <https://docs.iconify.design/iconify
 Currently, this extension supports: `width`, `height`, `title`[^2], `label`[^2] (_i.e._, `aria-label`), `flip`, and `rotate`.
 
 ``` markdown
-{{< iconify <set> <icon-name> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> >}}
+{{< iconify <set> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> >}}
+{{< iconify <set:icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> >}}
 ```
 
-[^2]: `title` and `label` takes the following default value: `Icon <icon-name> from <set> Iconify.design set.`.
+[^2]: `title` and `label` takes the following default value: `Icon <icon> from <set> Iconify.design set.`.
 
 ### Sizing Icons
 

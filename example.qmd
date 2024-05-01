@@ -6,14 +6,15 @@ format: html
 This extension allows you to use [Iconify](https://icon-sets.iconify.design/) icons in your Quarto HTML documents.
 It provides an `{{{< iconify >}}}` shortcode:
 
-- Mandatory `<icon-name>`:
+- Mandatory `<icon>`:
   ``` markdown
-  {{{< iconify <icon-name> >}}}
+  {{{< iconify <icon> >}}}
+  {{{< iconify <set:icon> >}}}
   ```
 
 - Optional `<set>` (default is `fluent-emoji`) `<size=...>`, `<width=...>`, `<height=...>`, `<flip=...>`, and `<rotate=...>`:
   ``` markdown
-  {{{< iconify <set> <icon-name> <size=...> <width=...> <height=...> <flip=...> <rotate=...> >}}}
+  {{{< iconify <set> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> >}}}
   ```
   If `<size=...>` is defined, `<width=...>` and `<height=...>` are not used.  
   See <https://docs.iconify.design/iconify-icon/> for more details.
@@ -23,6 +24,8 @@ For example:
 | Shortcode                                                                              | Icon                                                                   |
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | `{{{< iconify exploding-head >}}}`                                                     | {{< iconify exploding-head >}}                                         |
+| `{{{< iconify fluent-emoji exploding-head >}}}`                                        | {{< iconify exploding-head >}}                                         |
+| `{{{< iconify fluent-emoji:exploding-head >}}}`                                        | {{< iconify exploding-head >}}                                         |
 | `{{{< iconify exploding-head size=2xl >}}}`                                            | {{< iconify exploding-head size=2xl >}}                                |
 | `{{{< iconify exploding-head size=5x rotate=180deg >}}}`                               | {{< iconify exploding-head size=5x rotate=180deg >}}                   |
 | `{{{< iconify exploding-head size=Huge >}}}`                                           | {{< iconify exploding-head size=Huge >}}                               |
