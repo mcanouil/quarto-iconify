@@ -82,10 +82,15 @@ return {
       local icon = pandoc.utils.stringify(args[1])
       local set = "fluent-emoji"
 
+      if #args > 1 and string.find(pandoc.utils.stringify(args[2]), ":") then
+        quarto.log.warning(
+          'Use "set:icon" or "set icon" syntax, not both! ' ..
+          'Using "set:icon" syntax and discarding first argument!'
+        )
+        icon = pandoc.utils.stringify(args[2])
+      end
+
       if string.find(icon, ":") then
-        if #args > 1 then
-          print('Warning: use "set:icon" or "set icon" syntax, not both.')
-        end
         set = string.sub(icon, 1, string.find(icon, ":") - 1)
         icon = string.sub(icon, string.find(icon, ":") + 1)
       elseif #args > 1 then
