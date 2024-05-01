@@ -79,9 +79,16 @@ return {
     -- detect html (excluding epub which won't handle fa)
     if quarto.doc.is_format("html:js") then
       ensure_html_deps()
-      local set = "fluent-emoji"
       local icon = pandoc.utils.stringify(args[1])
-      if #args > 1 then
+      local set = "fluent-emoji"
+
+      if string.find(icon, ":") then
+        if #args > 1 then
+          print('Warning: use "set:icon" or "set icon" syntax, not both.')
+        end
+        set = string.sub(icon, 1, string.find(icon, ":") - 1)
+        icon = string.sub(icon, string.find(icon, ":") + 1)
+      elseif #args > 1 then
         set = icon
         icon = pandoc.utils.stringify(args[2])
       end
