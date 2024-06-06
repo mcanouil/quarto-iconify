@@ -33,3 +33,4 @@ For example:
 | `{{{< iconify twemoji 1st-place-medal >}}}`                                            | {{< iconify twemoji 1st-place-medal >}}                                |
 | `{{{< iconify line-md loading-alt-loop >}}}`                                           | {{< iconify line-md loading-alt-loop >}}                               |
 | `{{{< iconify fa6-brands apple width=50px height=10px rotate=90deg flip=vertical >}}}` | {{< iconify fa6-brands apple width=50px rotate=90deg flip=vertical >}} |
+| `{{{< iconify simple-icons:quarto >}}}`                                                | {{< iconify simple-icons:quarto >}}                                    |
