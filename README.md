@@ -27,6 +27,7 @@ To embed an icon, use the `{{< iconify >}}` shortcode[^1]. For example:
 {{< iconify twemoji 1st-place-medal >}}
 {{< iconify line-md loading-alt-loop >}}
 {{< iconify fa6-brands apple width=50px height=10px rotate=90deg flip=vertical >}}
+{{< iconify simple-icons:quarto >}}
 ```
 
 This extension includes support for thousands of icons (including animated icons).
