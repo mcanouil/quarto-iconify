@@ -141,7 +141,7 @@ return {
 
       return pandoc.RawInline(
         'html',
-        '<iconify-icon inline' .. attributes .. '></iconify-icon>'
+        '<iconify-icon inline=true role="img"' .. attributes .. '></iconify-icon>'
       )
     else
       return pandoc.Null()
