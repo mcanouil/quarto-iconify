@@ -139,9 +139,15 @@ return {
         attributes = attributes .. ' rotate="' .. rotate .. '"'
       end
 
+      local inline = pandoc.utils.stringify(kwargs["inline"])
+      if is_empty(inline) or inline ~= "false" then
+        attributes = ' inline ' .. attributes
+      end
+      
+
       return pandoc.RawInline(
         'html',
-        '<iconify-icon inline=true role="img"' .. attributes .. '></iconify-icon>'
+        '<iconify-icon role="img"' .. attributes .. '></iconify-icon>'
       )
     else
       return pandoc.Null()
