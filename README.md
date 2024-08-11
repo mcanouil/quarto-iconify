@@ -40,14 +40,15 @@ You can browse all of the available sets of icons here:
 ### Iconify Attributes
 
 Iconify API provides additional attributes: <https://docs.iconify.design/iconify-icon/>.  
-Currently, this extension supports: `width`, `height`, `title`[^2], `label`[^2] (_i.e._, `aria-label`), `flip`, and `rotate`.
+Currently, this extension supports: `size`, `width`, `height`, `flip`, `rotate`, `title`[^2], `label`[^2] (_i.e._, `aria-label`), and `inline`[^3].
 
 ``` markdown
-{{< iconify <set> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> >}}
-{{< iconify <set:icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> >}}
+{{< iconify <set> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> >}}
+{{< iconify <set:icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> >}}
 ```
 
 [^2]: `title` and `label` takes the following default value: `Icon <icon> from <set> Iconify.design set.`.
+[^3]: `inline` is a boolean attribute that can be set to `true` or `false`. Default is `true`.
 
 ### Sizing Icons
 

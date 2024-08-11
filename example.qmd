@@ -12,9 +12,9 @@ It provides an `{{{< iconify >}}}` shortcode:
   {{{< iconify <set:icon> >}}}
   ```
 
-- Optional `<set>` (default is `fluent-emoji`) `<size=...>`, `<width=...>`, `<height=...>`, `<flip=...>`, and `<rotate=...>`:
+- Optional `<set>` (default is `fluent-emoji`) `<size=...>`, `<width=...>`, `<height=...>`, `<flip=...>`, `<rotate=...>`, `<title=...>`, `<label=...>`, and `<inline=...>`:
   ``` markdown
-  {{{< iconify <set> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> >}}}
+  {{{< iconify <set> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> >}}}
   ```
   If `<size=...>` is defined, `<width=...>` and `<height=...>` are not used.  
   See <https://docs.iconify.design/iconify-icon/> for more details.
