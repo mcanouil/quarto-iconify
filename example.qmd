@@ -1,6 +1,8 @@
 ---
 title: Iconify Quarto Extension
-format: html
+format:
+  html:
+    output-file: index
 ---
 
 This extension allows you to use [Iconify](https://icon-sets.iconify.design/) icons in your Quarto HTML documents.
