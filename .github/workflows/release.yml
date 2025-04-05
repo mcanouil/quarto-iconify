@@ -1,0 +1,30 @@
+name: Release Quarto Extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: choice
+        description: "Version"
+        required: false
+        default: "patch"
+        options:
+          - "patch"
+          - "minor"
+          - "major"
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+  pages: write
+
+jobs:
+  release:
+    uses: mcanouil/quarto-extension-actions/.github/workflows/release.yml@main
+    secrets: inherit
+    with:
+      version: "${{ github.event.inputs.version }}"
+      formats: "html"
+      tinytex: false
+      quarto: "release"
