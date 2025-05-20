@@ -112,7 +112,7 @@ function iconify(args, kwargs, meta)
     local icon = stringify(args[1])
     local set = 'octicon'
     if not is_empty(meta['iconify']) and not is_empty(meta['iconify']['set']) then
-      set = meta['iconify']['set']
+      set = stringify(meta['iconify']['set'])
     end
 
     if #args > 1 and string.find(stringify(args[2]), ':') then
