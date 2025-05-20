@@ -14,20 +14,20 @@ If you're using version control, you will want to check in this directory.
 
 ## Using
 
-To embed an icon, use the `{{< iconify >}}` shortcode[^1]. For example:
+To embed an icon, use the `{{< iconify >}}` shortcode. For example:
 
-```default
-{{< iconify exploding-head >}}
+```markdown
+{{< iconify copilot-24 >}}
 {{< iconify fluent-emoji exploding-head >}}
 {{< iconify fluent-emoji:exploding-head >}}
-{{< iconify exploding-head size=2xl >}}
-{{< iconify exploding-head size=5x rotate=180deg >}}
-{{< iconify exploding-head size=Huge >}}
+{{< iconify copilot-24 size=2xl >}}
+{{< iconify copilot-24 size=5x rotate=180deg >}}
+{{< iconify copilot-24 size=Huge >}}
 {{< iconify fluent-emoji-high-contrast 1st-place-medal >}}
 {{< iconify twemoji 1st-place-medal >}}
 {{< iconify line-md loading-alt-loop >}}
 {{< iconify fa6-brands apple width=50px height=10px rotate=90deg flip=vertical >}}
-{{< iconify simple-icons:quarto >}}
+{{< iconify simple-icons:quarto style="color:#74aadb;" >}}
 ```
 
 This extension includes support for thousands of icons (including animated icons).
@@ -35,20 +35,39 @@ You can browse all of the available sets of icons here:
 
 <https://icon-sets.iconify.design/>
 
-[^1]: The default icon set is `fluent-emoji` (source: <https://github.com/microsoft/fluentui-emoji>).
-
 ### Iconify Attributes
 
 Iconify API provides additional attributes: <https://docs.iconify.design/iconify-icon/>.  
-Currently, this extension supports: `size`, `width`, `height`, `flip`, `rotate`, `title`[^2], `label`[^2] (_i.e._, `aria-label`), and `inline`[^3].
+Currently, this extension supports: `<set>`[^1], `size`[^2], `width`[^2], `height`[^2], `flip`, `rotate`, `title`[^3], `label`[^3] (_i.e._, `aria-label`), `inline`[^4], `mode`[^5], and `style`[^6].
 
-``` markdown
-{{< iconify <set> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> >}}
-{{< iconify <set:icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> >}}
+```markdown
+{{< iconify <set=...> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> <mode=...> <style=...> >}}
+{{< iconify <set:icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> <mode=...> <style=...> >}}
 ```
 
-[^2]: `title` and `label` takes the following default value: `Icon <icon> from <set> Iconify.design set.`.
-[^3]: `inline` is a boolean attribute that can be set to `true` or `false`. Default is `true`.
+Defining default values for attributes[^7]:
+
+```yaml
+iconify:
+  set: "octicon"
+  size: "Huge"
+  width: "1em"
+  height: "1em"
+  flip: "horizontal"
+  rotate: "90deg"
+  inline: true
+  mode: "svg"
+  style: "color: #b22222;"
+```
+
+[^1]: The default icon set is `octicon` (source: <https://github.com/microsoft/fluentui-emoji>).
+[^2]: If `<size=...>` is defined, `<width=...>` and `<height=...>` are not used.
+[^3]: `title` and `label` takes the following default value: `Icon <icon> from <set> Iconify.design set.`.
+[^4]: `inline` is a boolean attribute that can be set to `true` or `false`. Default is `true`.
+[^5]: `mode` is a string attribute that can be set to `"svg"`, `"style"`, `"bg"`, and `"mask"`. Default is `"svg"`. See [Iconify renderings mode](https://iconify.design/docs/iconify-icon/modes.html) for more details.
+[^6]: `style` is a string attribute expected to be a CSS style.
+[^7]: The default values can be defined in the YAML header of the document.
+  `icon`, `title`, and `label` have to be defined in the shortcode.
 
 ### Sizing Icons
 

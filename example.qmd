@@ -3,36 +3,75 @@ title: Iconify Quarto Extension
 format:
   html:
     output-file: index
+    reference-location: margin
+    code-overflow: wrap
+    code-tools: true
+iconify:
+  style: "color: #b22222;"
 ---
 
-This extension allows you to use [Iconify](https://icon-sets.iconify.design/) icons in your Quarto HTML documents.
+This extension provides support to free and open source icons provided by [Iconify](https://icon-sets.iconify.design/).
+Icons can be used only in HTML-based documents.
+
 It provides an `{{{< iconify >}}}` shortcode:
 
 - Mandatory `<icon>`:
-  ``` markdown
+-
+  ```markdown
   {{{< iconify <icon> >}}}
+  ```
+
+  ```markdown
   {{{< iconify <set:icon> >}}}
   ```
 
-- Optional `<set>` (default is `fluent-emoji`) `<size=...>`, `<width=...>`, `<height=...>`, `<flip=...>`, `<rotate=...>`, `<title=...>`, `<label=...>`, and `<inline=...>`:
-  ``` markdown
-  {{{< iconify <set> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> >}}}
+- Optional `<set>`[^1], `size`[^2], `width`[^2], `height`[^2], `flip`, `rotate`, `title`[^3], `label`[^3] (_i.e._, `aria-label`), `inline`[^4], `mode`[^5], and `style`[^6].
+
+  ```markdown
+  {{{< iconify <set=...> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> <mode=...> <style=...> >}}}
   ```
-  If `<size=...>` is defined, `<width=...>` and `<height=...>` are not used.  
+
+  ```markdown
+  {{{< iconify <set:icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> <mode=...> <style=...> >}}}
+  ```
+
   See <https://docs.iconify.design/iconify-icon/> for more details.
+
+- Defining default values for attributes[^7]:
+
+  ```yaml
+  iconify:
+    set: "octicon"
+    width: "1em"
+    height: "1em"
+    flip: "horizontal"
+    rotate: "90deg"
+    inline: true
+    mode: "svg"
+    style: "color: #b22222;"
+  ```
+
+[^1]: The default icon set is `octicon` (source: <https://github.com/microsoft/fluentui-emoji>).
+[^2]: If `<size=...>` is defined, `<width=...>` and `<height=...>` are not used.
+[^3]: `title` and `label` takes the following default value: `Icon <icon> from <set> Iconify.design set.`.
+[^4]: `inline` is a boolean attribute that can be set to `true` or `false`. Default is `true`.
+[^5]: `mode` is a string attribute that can be set to `"svg"`, `"style"`, `"bg"`, and `"mask"`. Default is `"svg"`. See [Iconify renderings mode](https://iconify.design/docs/iconify-icon/modes.html) for more details.
+[^6]: `style` is a string attribute expected to be a CSS style.
+[^7]: The default values can be defined in the YAML header of the document.
+  `icon`, `title`, and `label` have to be defined in the shortcode.
 
 For example:
 
 | Shortcode                                                                              | Icon                                                                   |
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `{{{< iconify exploding-head >}}}`                                                     | {{< iconify exploding-head >}}                                         |
-| `{{{< iconify fluent-emoji exploding-head >}}}`                                        | {{< iconify exploding-head >}}                                         |
-| `{{{< iconify fluent-emoji:exploding-head >}}}`                                        | {{< iconify exploding-head >}}                                         |
-| `{{{< iconify exploding-head size=2xl >}}}`                                            | {{< iconify exploding-head size=2xl >}}                                |
-| `{{{< iconify exploding-head size=5x rotate=180deg >}}}`                               | {{< iconify exploding-head size=5x rotate=180deg >}}                   |
-| `{{{< iconify exploding-head size=Huge >}}}`                                           | {{< iconify exploding-head size=Huge >}}                               |
+| `{{{< iconify copilot-24 >}}}`                                                         | {{< iconify copilot-24 >}}                                             |
+| `{{{< iconify fluent-emoji exploding-head >}}}`                                        | {{< iconify fluent-emoji exploding-head >}}                            |
+| `{{{< iconify fluent-emoji:exploding-head >}}}`                                        | {{< iconify fluent-emoji:exploding-head >}}                            |
+| `{{{< iconify copilot-24 size=2xl >}}}`                                                | {{< iconify copilot-24 size=2xl >}}                                    |
+| `{{{< iconify copilot-24 size=5x rotate=180deg >}}}`                                   | {{< iconify copilot-24 size=5x rotate=180deg >}}                       |
+| `{{{< iconify copilot-24 size=Huge >}}}`                                               | {{< iconify copilot-24 size=Huge >}}                                   |
 | `{{{< iconify fluent-emoji-high-contrast 1st-place-medal >}}}`                         | {{< iconify fluent-emoji-high-contrast 1st-place-medal >}}             |
 | `{{{< iconify twemoji 1st-place-medal >}}}`                                            | {{< iconify twemoji 1st-place-medal >}}                                |
 | `{{{< iconify line-md loading-alt-loop >}}}`                                           | {{< iconify line-md loading-alt-loop >}}                               |
 | `{{{< iconify fa6-brands apple width=50px height=10px rotate=90deg flip=vertical >}}}` | {{< iconify fa6-brands apple width=50px rotate=90deg flip=vertical >}} |
-| `{{{< iconify simple-icons:quarto >}}}`                                                | {{< iconify simple-icons:quarto >}}                                    |
+| `{{{< iconify simple-icons:quarto style="color:#74aadb;" >}}}`                         | {{< iconify simple-icons:quarto style="color:#74aadb;" >}}             |
