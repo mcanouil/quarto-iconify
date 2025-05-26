@@ -198,6 +198,32 @@ function iconify(args, kwargs, meta)
   end
 end
 
+--- Render Quarto icon using the iconify function with preset styling.
+--- @param args table Icon arguments (ignored as we're using a preset icon)
+--- @param kwargs table Key-value options that might override default styling
+--- @param meta table Document metadata
+--- @return pandoc.Inline|pandoc.Null
+function iconify_quarto(args, kwargs, meta)
+  local quarto_args = { "simple-icons:quarto" }
+  local quarto_kwargs = kwargs or {}
+  quarto_kwargs["label"] = "Quarto icon"
+  quarto_kwargs["title"] = "Quarto icon"
+  local quarto_colour = "color:#74aadb;"
+  
+  if not is_empty(quarto_kwargs["style"]) then
+    local style = stringify(quarto_kwargs["style"])
+    if string.match(style, "color:[^;]+;") then
+      quarto_kwargs["style"] = string.gsub(style, "color:[^;]+;", quarto_colour)
+    else
+      quarto_kwargs["style"] = quarto_colour .. style
+    end
+  else
+    quarto_kwargs["style"] = quarto_colour
+  end
+  return iconify(quarto_args, quarto_kwargs, meta)
+end
+
 return {
-  ["iconify"] = iconify
+  ["iconify"] = iconify,
+  ["quarto"] = iconify_quarto
 }

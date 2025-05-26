@@ -75,3 +75,4 @@ For example:
 | `{{{< iconify line-md loading-alt-loop >}}}`                                           | {{< iconify line-md loading-alt-loop >}}                               |
 | `{{{< iconify fa6-brands apple width=50px height=10px rotate=90deg flip=vertical >}}}` | {{< iconify fa6-brands apple width=50px rotate=90deg flip=vertical >}} |
 | `{{{< iconify simple-icons:quarto style="color:#74aadb;" >}}}`                         | {{< iconify simple-icons:quarto style="color:#74aadb;" >}}             |
+| `{{{< quarto >}}}`                                                                     | {{< quarto >}}                                                         |
