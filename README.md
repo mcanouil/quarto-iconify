@@ -48,17 +48,20 @@ Currently, this extension supports: `<set>`[^1], `size`[^2], `width`[^2], `heigh
 Defining default values for attributes[^7]:
 
 ```yaml
-iconify:
-  set: "octicon"
-  size: "Huge"
-  width: "1em"
-  height: "1em"
-  flip: "horizontal"
-  rotate: "90deg"
-  inline: true
-  mode: "svg"
-  style: "color: #b22222;"
+extensions:
+  iconify:
+    set: "octicon"
+    size: "Huge"
+    width: "1em"
+    height: "1em"
+    flip: "horizontal"
+    rotate: "90deg"
+    inline: true
+    mode: "svg"
+    style: "color: #b22222;"
 ```
+
+**Note:** The top-level `iconify:` configuration is deprecated but still supported for backward compatibility. A warning will be displayed when using the deprecated format. Please migrate to the new nested structure shown above.
 
 [^1]: The default icon set is `octicon` (source: <https://github.com/microsoft/fluentui-emoji>).
 [^2]: If `<size=...>` is defined, `<width=...>` and `<height=...>` are not used.
@@ -66,7 +69,7 @@ iconify:
 [^4]: `inline` is a boolean attribute that can be set to `true` or `false`. Default is `true`.
 [^5]: `mode` is a string attribute that can be set to `"svg"`, `"style"`, `"bg"`, and `"mask"`. Default is `"svg"`. See [Iconify renderings mode](https://iconify.design/docs/iconify-icon/modes.html) for more details.
 [^6]: `style` is a string attribute expected to be a CSS style.
-[^7]: The default values can be defined in the YAML header of the document.
+[^7]: The default values can be defined in the YAML header of the document using the new nested structure under `extensions.iconify`. The old top-level `iconify` configuration is deprecated but still supported.
   `icon`, `title`, and `label` have to be defined in the shortcode.
 
 ### Sizing Icons
