@@ -22,6 +22,7 @@
 # SOFTWARE.
 ]]
 
+--- @type function
 local stringify = pandoc.utils.stringify
 
 --- Ensure Iconify HTML dependencies are included.
@@ -48,6 +49,7 @@ local function is_valid_size(size)
   if is_empty(size) then
     return ''
   end
+  --- @type table<string, string>
   local size_table = {
     ["tiny"]         = "0.5em",
     ["scriptsize"]   = "0.7em",
@@ -85,11 +87,12 @@ local function is_valid_size(size)
 end
 
 --- Get iconify option from arguments or metadata.
---- @param x string
---- @param arg table
---- @param meta table
---- @return string
+--- @param x string The option name to retrieve
+--- @param arg table<string, any> Arguments table containing options
+--- @param meta table<string, any> Document metadata table
+--- @return string The option value as a string
 local function get_iconify_options(x, arg, meta)
+  --- @type string
   local arg_value = stringify(arg[x])
   if is_empty(meta['iconify']) or not is_empty(arg_value) then
     return arg_value
@@ -101,15 +104,17 @@ local function get_iconify_options(x, arg, meta)
 end
 
 --- Render an Iconify icon as a Pandoc RawInline for HTML output.
---- @param args table Icon arguments (icon set and name).
---- @param kwargs table Key-value options for the icon.
---- @param meta table Document metadata.
---- @return pandoc.Inline|pandoc.Null
+--- @param args table<integer, any> Icon arguments (icon set and name)
+--- @param kwargs table<string, any> Key-value options for the icon
+--- @param meta table<string, any> Document metadata
+--- @return any Pandoc RawInline for HTML or Pandoc Null for other formats
 function iconify(args, kwargs, meta)
   -- detect html (excluding epub which won't handle fa)
   if quarto.doc.is_format("html:js") then
     ensure_html_deps()
+    --- @type string
     local icon = stringify(args[1])
+    --- @type string
     local set = 'octicon'
     if not is_empty(meta['iconify']) and not is_empty(meta['iconify']['set']) then
       set = stringify(meta['iconify']['set'])
@@ -131,10 +136,14 @@ function iconify(args, kwargs, meta)
       icon = stringify(args[2])
     end
 
+    --- @type string
     local attributes = ' icon="' .. set .. ':' .. icon .. '"'
+    --- @type string
     local default_label = 'Icon ' .. icon .. ' from ' .. set .. ' Iconify.design set.'
 
+    --- @type string
     local size = is_valid_size(get_iconify_options("size", kwargs, meta))
+    --- @type string
     local style = get_iconify_options("style", kwargs, meta)
 
     if is_empty(style) and not is_empty(size) then
@@ -145,6 +154,7 @@ function iconify(args, kwargs, meta)
       attributes = attributes .. ' style="' .. style .. '"'
     end
 
+    --- @type string
     local aria_label = stringify(kwargs["label"])
     if is_empty(aria_label) then
       aria_label =  ' aria-label="' .. default_label .. '"'
@@ -152,6 +162,7 @@ function iconify(args, kwargs, meta)
       aria_label =  ' aria-label="' .. aria_label .. '"'
     end
 
+    --- @type string
     local title = stringify(kwargs["title"])
     if is_empty(title) then
       title =  ' title="' .. default_label .. '"'
@@ -161,29 +172,36 @@ function iconify(args, kwargs, meta)
 
     attributes = attributes .. aria_label .. title
 
+    --- @type string
     local width = get_iconify_options("width", kwargs, meta)
     if not is_empty(width) and is_empty(size) then
       attributes = attributes .. ' width="' .. width .. '"'
     end
+    --- @type string
     local height = get_iconify_options("height", kwargs, meta)
     if not is_empty(height) and is_empty(size)  then
       attributes = attributes .. ' height="' .. height .. '"'
     end
+    --- @type string
     local flip = get_iconify_options("flip", kwargs, meta)
     if not is_empty(flip) then
       attributes = attributes .. ' flip="' .. flip.. '"'
     end
+    --- @type string
     local rotate = get_iconify_options("rotate", kwargs, meta)
     if not is_empty(rotate) then
       attributes = attributes .. ' rotate="' .. rotate .. '"'
     end
 
+    --- @type string
     local inline = get_iconify_options("inline", kwargs, meta)
     if is_empty(inline) or inline ~= "false" then
       attributes = ' inline ' .. attributes
     end
 
+    --- @type string
     local mode = get_iconify_options("mode", kwargs, meta)
+    --- @type table<string, boolean>
     local valid_modes = { svg = true, style = true, bg = true, mask = true }
     if not is_empty(mode) and valid_modes[mode] then
       attributes = attributes .. ' mode="' .. mode .. '"'
@@ -199,18 +217,22 @@ function iconify(args, kwargs, meta)
 end
 
 --- Render Quarto icon using the iconify function with preset styling.
---- @param args table Icon arguments (ignored as we're using a preset icon)
---- @param kwargs table Key-value options that might override default styling
---- @param meta table Document metadata
---- @return pandoc.Inline|pandoc.Null
+--- @param args table<integer, any> Icon arguments (ignored as we're using a preset icon)
+--- @param kwargs table<string, any>|nil Key-value options that might override default styling
+--- @param meta table<string, any> Document metadata
+--- @return any Pandoc RawInline for HTML or Pandoc Null for other formats
 function iconify_quarto(args, kwargs, meta)
+  --- @type table<integer, string>
   local quarto_args = { "simple-icons:quarto" }
+  --- @type table<string, any>
   local quarto_kwargs = kwargs or {}
   quarto_kwargs["label"] = "Quarto icon"
   quarto_kwargs["title"] = "Quarto icon"
+  --- @type string
   local quarto_colour = "color:#74aadb;"
   
   if not is_empty(quarto_kwargs["style"]) then
+    --- @type string
     local style = stringify(quarto_kwargs["style"])
     if string.match(style, "color:[^;]+;") then
       quarto_kwargs["style"] = string.gsub(style, "color:[^;]+;", quarto_colour)
@@ -223,6 +245,7 @@ function iconify_quarto(args, kwargs, meta)
   return iconify(quarto_args, quarto_kwargs, meta)
 end
 
+--- @type table<string, function>
 return {
   ["iconify"] = iconify,
   ["quarto"] = iconify_quarto
