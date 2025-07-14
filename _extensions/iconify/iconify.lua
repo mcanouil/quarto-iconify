@@ -25,6 +25,10 @@
 --- @type function
 local stringify = pandoc.utils.stringify
 
+--- Flag to track if deprecation warning has been shown
+--- @type boolean
+local deprecation_warning_shown = false
+
 --- Ensure Iconify HTML dependencies are included.
 --- @return nil
 local function ensure_html_deps()
@@ -48,13 +52,16 @@ end
 --- @return string|nil The value from deprecated config, or nil if not found
 local function check_deprecated_config(meta, key)
   if not is_empty(meta['iconify']) and not is_empty(meta['iconify'][key]) then
-    quarto.log.warning(
-      'Top-level "iconify" configuration is deprecated. ' ..
-      'Please use:\n' ..
-      'extensions:\n' ..
-      '  iconify:\n' ..
-      '    ' .. key .. ': value'
-    )
+    if not deprecation_warning_shown then
+      quarto.log.warning(
+        'Top-level "iconify" configuration is deprecated. ' ..
+        'Please use:\n' ..
+        'extensions:\n' ..
+        '  iconify:\n' ..
+        '    ' .. key .. ': value'
+      )
+      deprecation_warning_shown = true
+    end
     return stringify(meta['iconify'][key])
   end
   return nil
