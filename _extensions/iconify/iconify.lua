@@ -22,6 +22,9 @@
 # SOFTWARE.
 ]]
 
+--- Extension name constant
+local EXTENSION_NAME = "iconify"
+
 --- Load utils module
 local utils_path = quarto.utils.resolve_path("_modules/utils.lua")
 local utils = require(utils_path)
@@ -150,7 +153,8 @@ local function iconify(args, kwargs, meta)
     end
 
     if #args > 1 and string.find(utils.stringify(args[2]), ':') then
-      quarto.log.warning(
+      utils.log_warning(
+        EXTENSION_NAME,
         'Use "set:icon" or "set icon" syntax, not both! ' ..
         'Using "set:icon" syntax and discarding first argument!'
       )
