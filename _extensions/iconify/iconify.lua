@@ -9,10 +9,10 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -113,13 +113,13 @@ local function get_iconify_options(x, arg, meta)
   if not utils.is_empty(meta_value) then
     return meta_value
   end
-  
+
   -- Check deprecated top-level structure: iconify.x (with warning)
   local deprecated_value = check_deprecated_config(meta, x)
   if deprecated_value then
     return deprecated_value
   end
-  
+
   return arg_value
 end
 
@@ -128,7 +128,7 @@ end
 --- @param kwargs table<string, any> Key-value options for the icon
 --- @param meta table<string, any> Document metadata
 --- @return any Pandoc RawInline for HTML or Pandoc Null for other formats
-function iconify(args, kwargs, meta)
+local function iconify(args, kwargs, meta)
   -- detect html (excluding epub which won't handle fa)
   if quarto.doc.is_format('html:js') then
     ensure_html_deps()
@@ -136,7 +136,7 @@ function iconify(args, kwargs, meta)
     local icon = utils.stringify(args[1])
     --- @type string
     local set = 'octicon'
-    
+
     -- Check new nested structure for default set
     local meta_set = utils.get_metadata_value(meta, 'iconify', 'set')
     if not utils.is_empty(meta_set) then
@@ -186,17 +186,17 @@ function iconify(args, kwargs, meta)
     --- @type string
     local aria_label = utils.stringify(kwargs['label'])
     if utils.is_empty(aria_label) then
-      aria_label =  ' aria-label="' .. default_label .. '"'
+      aria_label = ' aria-label="' .. default_label .. '"'
     else
-      aria_label =  ' aria-label="' .. aria_label .. '"'
+      aria_label = ' aria-label="' .. aria_label .. '"'
     end
 
     --- @type string
     local title = utils.stringify(kwargs['title'])
     if utils.is_empty(title) then
-      title =  ' title="' .. default_label .. '"'
+      title = ' title="' .. default_label .. '"'
     else
-      title =  ' title="' .. title .. '"'
+      title = ' title="' .. title .. '"'
     end
 
     attributes = attributes .. aria_label .. title
@@ -208,13 +208,13 @@ function iconify(args, kwargs, meta)
     end
     --- @type string
     local height = get_iconify_options('height', kwargs, meta)
-    if not utils.is_empty(height) and utils.is_empty(size)  then
+    if not utils.is_empty(height) and utils.is_empty(size) then
       attributes = attributes .. ' height="' .. height .. '"'
     end
     --- @type string
     local flip = get_iconify_options('flip', kwargs, meta)
     if not utils.is_empty(flip) then
-      attributes = attributes .. ' flip="' .. flip.. '"'
+      attributes = attributes .. ' flip="' .. flip .. '"'
     end
     --- @type string
     local rotate = get_iconify_options('rotate', kwargs, meta)
@@ -250,7 +250,7 @@ end
 --- @param kwargs table<string, any>|nil Key-value options that might override default styling
 --- @param meta table<string, any> Document metadata
 --- @return any Pandoc RawInline for HTML or Pandoc Null for other formats
-function iconify_quarto(args, kwargs, meta)
+local function iconify_quarto(args, kwargs, meta)
   --- @type table<integer, string>
   local quarto_args = { 'simple-icons:quarto' }
   --- @type table<string, any>
@@ -259,7 +259,7 @@ function iconify_quarto(args, kwargs, meta)
   quarto_kwargs['title'] = 'Quarto icon'
   --- @type string
   local quarto_colour = 'color:#74aadb;'
-  
+
   if not utils.is_empty(quarto_kwargs['style']) then
     --- @type string
     local style = utils.stringify(quarto_kwargs['style'])
