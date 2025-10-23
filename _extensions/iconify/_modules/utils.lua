@@ -66,7 +66,7 @@ end
 function utils_module.split(str, sep)
   local fields = {}
   local pattern = string.format("([^%s]+)", sep)
-  str:gsub(pattern, function(c) fields[#fields+1] = c end)
+  str:gsub(pattern, function(c) fields[#fields + 1] = c end)
   return fields
 end
 
@@ -193,7 +193,7 @@ end
 --- @return pandoc.Link|nil A Pandoc Link element or nil if text or uri is empty
 function utils_module.create_link(text, uri)
   if not utils_module.is_empty(uri) and not utils_module.is_empty(text) then
-    return pandoc.Link({pandoc.Str(text --[[@as string]])}, uri --[[@as string]])
+    return pandoc.Link({ pandoc.Str(text --[[@as string]]) }, uri --[[@as string]])
   end
   return nil
 end
@@ -319,6 +319,133 @@ function utils_module.raw_header(level, text, id, classes, attributes)
     end
   end
   return string.format('<h%d%s>%s</h%d>', level, attr_str, text or '', level)
+end
+
+-- ============================================================================
+-- HTML DEPENDENCY UTILITIES
+-- ============================================================================
+
+--- Managed HTML dependency tracker
+--- Tracks which dependencies have been added to prevent duplication
+--- @type table<string, boolean>
+local dependency_tracker = {}
+
+--- Ensure HTML dependency is added only once per document.
+--- Prevents duplicate dependency injection by tracking dependencies by name.
+--- Returns true if dependency was added, false if already present.
+---
+--- @param config table Dependency configuration with fields: name (required), version, scripts, stylesheets, head
+--- @return boolean True if dependency was added, false if already added
+--- @usage utils_module.ensure_html_dependency({name = 'my-lib', version = '1.0.0', scripts = {'lib.js'}})
+function utils_module.ensure_html_dependency(config)
+  if not config or not config.name then
+    error("HTML dependency configuration must include a 'name' field")
+  end
+
+  --- @type string Unique key for this dependency
+  local dep_key = config.name
+
+  -- Check if already added
+  if dependency_tracker[dep_key] then
+    return false
+  end
+
+  -- Add the dependency
+  quarto.doc.add_html_dependency(config)
+
+  -- Mark as added
+  dependency_tracker[dep_key] = true
+  return true
+end
+
+--- Reset dependency tracker.
+--- Useful for testing or when processing multiple independent documents.
+--- In normal usage, this should not be called as dependencies persist per document.
+---
+--- @return nil
+function utils_module.reset_dependencies()
+  dependency_tracker = {}
+end
+
+-- ============================================================================
+-- ENHANCED METADATA/CONFIGURATION UTILITIES
+-- ============================================================================
+
+--- Get option value with fallback hierarchy: args → extensions.{extension}.{key} → defaults.
+--- Provides a standardised way to read configuration values with multiple fallback levels.
+--- Priority: 1. Named arguments (kwargs), 2. Document metadata, 3. Default values.
+---
+--- @param spec table Configuration spec with fields: extension (string), key (string), args (table|nil), meta (table|nil), default (any|nil)
+--- @return any The resolved option value (type depends on what's stored in config)
+--- @usage local duration = utils_module.get_option_with_fallbacks({extension = 'animate', key = 'duration', args = kwargs, meta = meta, default = '3s'})
+function utils_module.get_option_with_fallbacks(spec)
+  -- Validate required fields
+  if not spec.extension or not spec.key then
+    error("Configuration spec must include 'extension' and 'key' fields")
+  end
+
+  --- @type string The extension name
+  local extension = spec.extension
+  --- @type string The configuration key
+  local key = spec.key
+  --- @type table|nil Named arguments table
+  local args = spec.args
+  --- @type table|nil Document metadata
+  local meta = spec.meta
+  --- @type any Default value if not found elsewhere
+  local default = spec.default
+
+  -- Priority 1: Check named arguments (kwargs)
+  if args and args[key] then
+    local arg_value = utils_module.stringify(args[key])
+    if not utils_module.is_empty(arg_value) then
+      return arg_value
+    end
+  end
+
+  -- Priority 2: Check metadata extensions.{extension}.{key}
+  if meta then
+    local meta_value = utils_module.get_metadata_value(meta, extension, key)
+    if not utils_module.is_empty(meta_value) then
+      return meta_value
+    end
+  end
+
+  -- Priority 3: Return default value
+  return default
+end
+
+--- Get multiple option values at once with fallback hierarchy.
+--- Batch version of get_option_with_fallbacks for retrieving multiple configuration values.
+--- Returns a table mapping each key to its resolved value.
+---
+--- @param spec table Configuration spec with fields: extension (string), keys (table<integer, string>), args (table|nil), meta (table|nil), defaults (table<string, any>|nil)
+--- @return table<string, any> Table mapping each key to its resolved value
+--- @usage local opts = utils_module.get_options({extension = 'animate', keys = {'duration', 'delay'}, args = kwargs, meta = meta, defaults = {duration = '3s', delay = '2s'}})
+function utils_module.get_options(spec)
+  -- Validate required fields
+  if not spec.extension or not spec.keys then
+    error("Configuration spec must include 'extension' and 'keys' fields")
+  end
+
+  --- @type table<string, any> Result table
+  local result = {}
+
+  --- @type table Default values table
+  local defaults = spec.defaults or {}
+
+  -- Get each key using the single-option fallback logic
+  for _, key in ipairs(spec.keys) do
+    result[key] = utils_module.get_option_with_fallbacks({
+      extension = spec.extension,
+      key = key,
+      args = spec.args,
+      meta = spec.meta,
+      default = defaults[key]
+    })
+  end
+
+  return result
 end
 
 -- ============================================================================
