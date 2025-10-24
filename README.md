@@ -1,18 +1,20 @@
 # Iconify Extension for Quarto
 
-This extension provides support to free and open source icons provided by [Iconify](https://icon-sets.iconify.design/).  
+This extension provides support to free and open source icons provided by [Iconify](https://icon-sets.iconify.design/).
+
 Icons can be used only in HTML-based documents.
 
-## Installing
+## Installation
 
 ```sh
 quarto add mcanouil/quarto-iconify
 ```
 
-This will install the extension under the `_extensions` subdirectory.  
+This will install the extension under the `_extensions` subdirectory.
+
 If you're using version control, you will want to check in this directory.
 
-## Using
+## Usage
 
 To embed an icon, use the `{{< iconify >}}` shortcode. For example:
 
@@ -37,7 +39,8 @@ You can browse all of the available sets of icons here:
 
 ### Iconify Attributes
 
-Iconify API provides additional attributes: <https://docs.iconify.design/iconify-icon/>.  
+Iconify API provides additional attributes: <https://docs.iconify.design/iconify-icon/>.
+
 Currently, this extension supports: `<set>`[^1], `size`[^2], `width`[^2], `height`[^2], `flip`, `rotate`, `title`[^3], `label`[^3] (_i.e._, `aria-label`), `inline`[^4], `mode`[^5], and `style`[^6].
 
 ```markdown
@@ -74,7 +77,8 @@ extensions:
 
 ### Sizing Icons
 
-This extension provides relative, literal, and LaTeX-style sizing for icons.  
+This extension provides relative, literal, and LaTeX-style sizing for icons.
+
 When the size is invalid, no size changes are made.
 
 - CSS-style sizing: `{{< iconify exploding-head size=42px >}}`.
@@ -120,14 +124,15 @@ When the size is invalid, no size changes are made.
   | huge (= `\huge`)                 | 2em              |
   | Huge (= `\Huge`)                 | 2.5em            |
 
-- `width` or `height` can be set to define icon's property while keeping aspect ratio.  
-  _Note:_ `width` and `height` are not set if `size` was defined.
+- `width` or `height` can be set to define icon's property whilst keeping aspect ratio. _Note:_ `width` and `height` are not set if `size` was defined.
 
 ## Example
 
 Here is the source code for a minimal example: [example.qmd](example.qmd).
 
-This is the output of `example.qmd` for [HTML](https://m.canouil.dev/quarto-iconify/).
+Output of `example.qmd`:
+
+- [HTML](https://m.canouil.dev/quarto-iconify/)
 
 ---
 
