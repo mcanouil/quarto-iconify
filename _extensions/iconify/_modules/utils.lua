@@ -162,11 +162,30 @@ end
 --- Check for deprecated top-level configuration and emit warning
 --- @param meta table The document metadata table
 --- @param extension_name string The extension name
---- @param key string The configuration key being accessed
+--- @param key string|nil The configuration key being accessed (nil to check entire extension config)
 --- @param deprecation_warning_shown boolean Flag to track if warning has been shown
---- @return string|nil The value from deprecated config, or nil if not found
+--- @return any|nil The value from deprecated config, or nil if not found
 --- @return boolean Updated deprecation warning flag
 function utils_module.check_deprecated_config(meta, extension_name, key, deprecation_warning_shown)
+  -- Handle array-based configuration (when key is nil)
+  if key == nil then
+    if not utils_module.is_empty(meta[extension_name]) then
+      if not deprecation_warning_shown then
+        quarto.log.warning(
+          'Top-level "' .. extension_name .. '" configuration is deprecated. ' ..
+          'Please use:\n' ..
+          'extensions:\n' ..
+          '  ' .. extension_name .. ':\n' ..
+          '    - (configuration array)'
+        )
+        deprecation_warning_shown = true
+      end
+      return meta[extension_name], deprecation_warning_shown
+    end
+    return nil, deprecation_warning_shown
+  end
+
+  -- Handle key-value configuration (original behavior)
   if not utils_module.is_empty(meta[extension_name]) and not utils_module.is_empty(meta[extension_name][key]) then
     if not deprecation_warning_shown then
       quarto.log.warning(
