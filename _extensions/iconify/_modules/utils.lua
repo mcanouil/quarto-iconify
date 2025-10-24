@@ -171,7 +171,8 @@ function utils_module.check_deprecated_config(meta, extension_name, key, depreca
   if key == nil then
     if not utils_module.is_empty(meta[extension_name]) then
       if not deprecation_warning_shown then
-        quarto.log.warning(
+        utils_module.log_warning(
+          extension_name,
           'Top-level "' .. extension_name .. '" configuration is deprecated. ' ..
           'Please use:\n' ..
           'extensions:\n' ..
@@ -188,7 +189,8 @@ function utils_module.check_deprecated_config(meta, extension_name, key, depreca
   -- Handle key-value configuration (original behavior)
   if not utils_module.is_empty(meta[extension_name]) and not utils_module.is_empty(meta[extension_name][key]) then
     if not deprecation_warning_shown then
-      quarto.log.warning(
+      utils_module.log_warning(
+        extension_name,
         'Top-level "' .. extension_name .. '" configuration is deprecated. ' ..
         'Please use:\n' ..
         'extensions:\n' ..
