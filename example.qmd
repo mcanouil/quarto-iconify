@@ -1,5 +1,6 @@
 ---
 title: Iconify Quarto Extension
+toc: true
 format:
   html:
     output-file: index
@@ -12,12 +13,30 @@ extensions:
 ---
 
 This extension provides support to free and open source icons provided by [Iconify](https://icon-sets.iconify.design/).
+
 Icons can be used only in HTML-based documents.
 
-It provides an `{{{< iconify >}}}` shortcode:
+This extension includes support for thousands of icons (including animated icons).  
+You can browse all of the available sets of icons here: <https://icon-sets.iconify.design/>
+
+## Installation
+
+```sh
+quarto add mcanouil/quarto-iconify
+```
+
+This will install the extension under the `_extensions` subdirectory.
+
+If you're using version control, you will want to check in this directory.
+
+## Usage
+
+To embed an icon, use the `{{{< iconify >}}}` shortcode.
+
+For convenience, a special `{{{< quarto >}}}` shortcode is also available to quickly insert the Quarto logo with preset styling.
 
 - Mandatory `<icon>`:
--
+
   ```markdown
   {{{< iconify <icon> >}}}
   ```
@@ -26,43 +45,134 @@ It provides an `{{{< iconify >}}}` shortcode:
   {{{< iconify <set:icon> >}}}
   ```
 
-- Optional `<set>`[^1], `size`[^2], `width`[^2], `height`[^2], `flip`, `rotate`, `title`[^3], `label`[^3] (_i.e._, `aria-label`), `inline`[^4], `mode`[^5], and `style`[^6].
+### Iconify Attributes
 
-  ```markdown
-  {{{< iconify <set=...> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> <mode=...> <style=...> >}}}
-  ```
+Iconify API provides additional attributes: <https://docs.iconify.design/iconify-icon/>.
 
-  ```markdown
-  {{{< iconify <set:icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> <mode=...> <style=...> >}}}
-  ```
+Currently, this extension supports the following attributes:
 
-  See <https://docs.iconify.design/iconify-icon/> for more details.
+```markdown
+{{{< iconify <set=...> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> <mode=...> <style=...> >}}}
+```
 
-- Defining default values for attributes[^7]:
+```markdown
+{{{< iconify <set:icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> <mode=...> <style=...> >}}}
+```
 
-  ```yaml
-  extensions:
-    iconify:
-      set: "octicon"
-      width: "1em"
-      height: "1em"
-      flip: "horizontal"
-      rotate: "90deg"
-      inline: true
-      mode: "svg"
-      style: "color: #b22222;"
-  ```
+#### Available Attributes
 
-[^1]: The default icon set is `octicon` (source: <https://github.com/microsoft/fluentui-emoji>).
-[^2]: If `<size=...>` is defined, `<width=...>` and `<height=...>` are not used.
-[^3]: `title` and `label` takes the following default value: `Icon <icon> from <set> Iconify.design set.`.
-[^4]: `inline` is a boolean attribute that can be set to `true` or `false`. Default is `true`.
-[^5]: `mode` is a string attribute that can be set to `"svg"`, `"style"`, `"bg"`, and `"mask"`. Default is `"svg"`. See [Iconify renderings mode](https://iconify.design/docs/iconify-icon/modes.html) for more details.
-[^6]: `style` is a string attribute expected to be a CSS style.
-[^7]: The default values can be defined in the YAML header of the document using the new nested structure under `extensions.iconify`. The old top-level `iconify` configuration is deprecated but still supported.
-  `icon`, `title`, and `label` have to be defined in the shortcode.
+- `set`: The icon set to use. Default is `octicon` (source: <https://github.com/microsoft/fluentui-emoji>).
 
-For example:
+- `size`: Sets both width and height. When `size` is defined, `width` and `height` are ignored. See [Sizing Icons](#sizing-icons) for available size options.
+
+- `width` and `height`: Set icon dimensions whilst keeping aspect ratio. Not used if `size` is defined.
+
+- `flip`: Flip the icon horizontally, vertically, or both.
+
+- `rotate`: Rotate the icon by a specified angle (e.g., `90deg`, `180deg`).
+
+- `title`: Tooltip text for the icon. Default: `Icon <icon> from <set> Iconify.design set.`.
+
+- `label` (i.e., `aria-label`): Accessibility label for screen readers. Default: `Icon <icon> from <set> Iconify.design set.`.
+
+- `inline`: Boolean attribute (`true` or `false`). When `true`, the icon is displayed inline with text. Default is `true`.
+
+- `mode`: Rendering mode. Can be `"svg"` (default), `"style"`, `"bg"`, or `"mask"`. See [Iconify renderings mode](https://iconify.design/docs/iconify-icon/modes.html) for more details.
+
+- `style`: CSS style string to apply custom styling to the icon.
+
+#### Setting Default Values
+
+You can define default values for most attributes in the YAML header using the nested structure under `extensions.iconify`:
+
+```yaml
+extensions:
+  iconify:
+    set: "octicon"
+    size: "Huge"
+    width: "1em"
+    height: "1em"
+    flip: "horizontal"
+    rotate: "90deg"
+    inline: true
+    mode: "svg"
+    style: "color: #b22222;"
+```
+
+:::: {.callout-note}
+
+The attributes `icon`, `title`, and `label` must be defined in the shortcode itself and cannot have default values in the YAML header.
+
+:::
+
+:::: {.callout-warning}
+
+The top-level `iconify:` configuration is deprecated but still supported for backward compatibility.
+A warning will be displayed when using the deprecated format.
+Please migrate to the new nested structure shown above.
+
+:::
+
+### Sizing Icons
+
+This extension provides relative, literal, and LaTeX-style sizing for icons.
+
+When the size is invalid, no size changes are made.
+
+- CSS-style sizing: `{{{< iconify exploding-head size=42px >}}}`.
+
+- Relative sizing: `{{{< iconify exploding-head size=2xl >}}}`.
+
+  | Relative Sizing | Font Size | Equivalent in Pixels |
+  |-----------------|-----------|----------------------|
+  | 2xs             | 0.625em   | 10px                 |
+  | xs              | 0.75em    | 12px                 |
+  | sm              | 0.875em   | 14px                 |
+  | lg              | 1.25em    | 20px                 |
+  | xl              | 1.5em     | 24px                 |
+  | 2xl             | 2em       | 32px                 |
+
+- Literal sizing: `{{{< iconify exploding-head size=5x >}}}`.
+
+  | Literal Sizing | Font Size |
+  |----------------|-----------|
+  | 1x             | 1em       |
+  | 2x             | 2em       |
+  | 3x             | 3em       |
+  | 4x             | 4em       |
+  | 5x             | 5em       |
+  | 6x             | 6em       |
+  | 7x             | 7em       |
+  | 8x             | 8em       |
+  | 9x             | 9em       |
+  | 10x            | 10em      |
+
+- LaTeX-style sizing: `{{{< iconify exploding-head size=Huge >}}}`.
+
+  | Sizing Command                   | Font Size (HTML) |
+  | -------------------------------- | ---------------- |
+  | tiny (= `\tiny`)                 | 0.5em            |
+  | scriptsize (= `\scriptsize`)     | 0.7em            |
+  | footnotesize (= `\footnotesize`) | 0.8em            |
+  | small (= `\small`)               | 0.9em            |
+  | normalsize (= `\normalsize`)     | 1em              |
+  | large (= `\large`)               | 1.25em           |
+  | Large (= `\Large`)               | 1.5em            |
+  | LARGE (= `\LARGE`)               | 1.75em           |
+  | huge (= `\huge`)                 | 2em              |
+  | Huge (= `\Huge`)                 | 2.5em            |
+
+- `width` or `height` can be set to define icon's property whilst keeping aspect ratio.
+
+  :::: {.callout-note}
+
+  `width` and `height` are not set if `size` was defined.
+
+  :::
+
+## Examples
+
+The following table demonstrates various ways to use the iconify shortcode, including the special `{{{< quarto >}}}` shortcode for the Quarto logo:
 
 | Shortcode                                                                              | Icon                                                                   |
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |

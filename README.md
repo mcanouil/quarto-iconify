@@ -1,20 +1,26 @@
 # Iconify Extension for Quarto
 
-This extension provides support to free and open source icons provided by [Iconify](https://icon-sets.iconify.design/).  
+This extension provides support to free and open source icons provided by [Iconify](https://icon-sets.iconify.design/).
+
 Icons can be used only in HTML-based documents.
 
-## Installing
+## Installation
 
 ```sh
 quarto add mcanouil/quarto-iconify
 ```
 
-This will install the extension under the `_extensions` subdirectory.  
+This will install the extension under the `_extensions` subdirectory.
+
 If you're using version control, you will want to check in this directory.
 
-## Using
+## Usage
 
-To embed an icon, use the `{{< iconify >}}` shortcode. For example:
+To embed an icon, use the `{{< iconify >}}` shortcode.
+
+For convenience, a special `{{< quarto >}}` shortcode is also available to quickly insert the Quarto logo with preset styling.
+
+For example:
 
 ```markdown
 {{< iconify copilot-24 >}}
@@ -28,6 +34,7 @@ To embed an icon, use the `{{< iconify >}}` shortcode. For example:
 {{< iconify line-md loading-alt-loop >}}
 {{< iconify fa6-brands apple width=50px height=10px rotate=90deg flip=vertical >}}
 {{< iconify simple-icons:quarto style="color:#74aadb;" >}}
+{{< quarto >}}
 ```
 
 This extension includes support for thousands of icons (including animated icons).
@@ -37,15 +44,40 @@ You can browse all of the available sets of icons here:
 
 ### Iconify Attributes
 
-Iconify API provides additional attributes: <https://docs.iconify.design/iconify-icon/>.  
-Currently, this extension supports: `<set>`[^1], `size`[^2], `width`[^2], `height`[^2], `flip`, `rotate`, `title`[^3], `label`[^3] (_i.e._, `aria-label`), `inline`[^4], `mode`[^5], and `style`[^6].
+Iconify API provides additional attributes: <https://docs.iconify.design/iconify-icon/>.
+
+Currently, this extension supports the following attributes:
 
 ```markdown
 {{< iconify <set=...> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> <mode=...> <style=...> >}}
 {{< iconify <set:icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> <mode=...> <style=...> >}}
 ```
 
-Defining default values for attributes[^7]:
+#### Available Attributes
+
+- `set`: The icon set to use. Default is `octicon` (source: <https://github.com/microsoft/fluentui-emoji>).
+
+- `size`: Sets both width and height. When `size` is defined, `width` and `height` are ignored. See [Sizing Icons](#sizing-icons) for available size options.
+
+- `width` and `height`: Set icon dimensions whilst keeping aspect ratio. Not used if `size` is defined.
+
+- `flip`: Flip the icon horizontally, vertically, or both.
+
+- `rotate`: Rotate the icon by a specified angle (e.g., `90deg`, `180deg`).
+
+- `title`: Tooltip text for the icon. Default: `Icon <icon> from <set> Iconify.design set.`.
+
+- `label` (i.e., `aria-label`): Accessibility label for screen readers. Default: `Icon <icon> from <set> Iconify.design set.`.
+
+- `inline`: Boolean attribute (`true` or `false`). When `true`, the icon is displayed inline with text. Default is `true`.
+
+- `mode`: Rendering mode. Can be `"svg"` (default), `"style"`, `"bg"`, or `"mask"`. See [Iconify renderings mode](https://iconify.design/docs/iconify-icon/modes.html) for more details.
+
+- `style`: CSS style string to apply custom styling to the icon.
+
+#### Setting Default Values
+
+You can define default values for most attributes in the YAML header using the nested structure under `extensions.iconify`:
 
 ```yaml
 extensions:
@@ -61,20 +93,14 @@ extensions:
     style: "color: #b22222;"
 ```
 
-**Note:** The top-level `iconify:` configuration is deprecated but still supported for backward compatibility. A warning will be displayed when using the deprecated format. Please migrate to the new nested structure shown above.
+**Note:** The attributes `icon`, `title`, and `label` must be defined in the shortcode itself and cannot have default values in the YAML header.
 
-[^1]: The default icon set is `octicon` (source: <https://github.com/microsoft/fluentui-emoji>).
-[^2]: If `<size=...>` is defined, `<width=...>` and `<height=...>` are not used.
-[^3]: `title` and `label` takes the following default value: `Icon <icon> from <set> Iconify.design set.`.
-[^4]: `inline` is a boolean attribute that can be set to `true` or `false`. Default is `true`.
-[^5]: `mode` is a string attribute that can be set to `"svg"`, `"style"`, `"bg"`, and `"mask"`. Default is `"svg"`. See [Iconify renderings mode](https://iconify.design/docs/iconify-icon/modes.html) for more details.
-[^6]: `style` is a string attribute expected to be a CSS style.
-[^7]: The default values can be defined in the YAML header of the document using the new nested structure under `extensions.iconify`. The old top-level `iconify` configuration is deprecated but still supported.
-  `icon`, `title`, and `label` have to be defined in the shortcode.
+**Deprecation warning:** The top-level `iconify:` configuration is deprecated but still supported for backward compatibility. A warning will be displayed when using the deprecated format. Please migrate to the new nested structure shown above.
 
 ### Sizing Icons
 
-This extension provides relative, literal, and LaTeX-style sizing for icons.  
+This extension provides relative, literal, and LaTeX-style sizing for icons.
+
 When the size is invalid, no size changes are made.
 
 - CSS-style sizing: `{{< iconify exploding-head size=42px >}}`.
@@ -120,14 +146,15 @@ When the size is invalid, no size changes are made.
   | huge (= `\huge`)                 | 2em              |
   | Huge (= `\Huge`)                 | 2.5em            |
 
-- `width` or `height` can be set to define icon's property while keeping aspect ratio.  
-  _Note:_ `width` and `height` are not set if `size` was defined.
+- `width` or `height` can be set to define icon's property whilst keeping aspect ratio. _Note:_ `width` and `height` are not set if `size` was defined.
 
 ## Example
 
 Here is the source code for a minimal example: [example.qmd](example.qmd).
 
-This is the output of `example.qmd` for [HTML](https://m.canouil.dev/quarto-iconify/).
+Output of `example.qmd`:
+
+- [HTML](https://m.canouil.dev/quarto-iconify/)
 
 ---
 

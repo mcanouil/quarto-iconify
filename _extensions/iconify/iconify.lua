@@ -9,10 +9,10 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,8 +22,11 @@
 # SOFTWARE.
 ]]
 
---- @type function
-local stringify = pandoc.utils.stringify
+--- Extension name constant
+local EXTENSION_NAME = "iconify"
+
+--- Load utils module
+local utils = require(quarto.utils.resolve_path("_modules/utils.lua"):gsub("%.lua$", ""))
 
 --- Flag to track if deprecation warning has been shown
 --- @type boolean
@@ -39,39 +42,21 @@ local function ensure_html_deps()
   })
 end
 
---- Check if a string is empty or nil.
---- @param s string|nil
---- @return boolean
-local function is_empty(s)
-  return s == nil or s == ''
-end
-
 --- Check for deprecated top-level iconify configuration and emit warning.
 --- @param meta table<string, any> Document metadata table
 --- @param key string The configuration key being accessed
 --- @return string|nil The value from deprecated config, or nil if not found
 local function check_deprecated_config(meta, key)
-  if not is_empty(meta['iconify']) and not is_empty(meta['iconify'][key]) then
-    if not deprecation_warning_shown then
-      quarto.log.warning(
-        'Top-level "iconify" configuration is deprecated. ' ..
-        'Please use:\n' ..
-        'extensions:\n' ..
-        '  iconify:\n' ..
-        '    ' .. key .. ': value'
-      )
-      deprecation_warning_shown = true
-    end
-    return stringify(meta['iconify'][key])
-  end
-  return nil
+  local value
+  value, deprecation_warning_shown = utils.check_deprecated_config(meta, 'iconify', key, deprecation_warning_shown)
+  return value
 end
 
 --- Validate and convert size keyword to CSS font-size.
 --- @param size string|nil
 --- @return string
 local function is_valid_size(size)
-  if is_empty(size) then
+  if utils.is_empty(size) then
     return ''
   end
   --- @type table<string, string>
@@ -118,26 +103,25 @@ end
 --- @return string The option value as a string
 local function get_iconify_options(x, arg, meta)
   --- @type string
-  local arg_value = stringify(arg[x])
-  
+  local arg_value = utils.stringify(arg[x])
+
   -- Return argument value if provided
-  if not is_empty(arg_value) then
+  if not utils.is_empty(arg_value) then
     return arg_value
   end
-  
+
   -- Check new nested structure: extensions.iconify.x
-  if not is_empty(meta['extensions']) and 
-     not is_empty(meta['extensions']['iconify']) and 
-     not is_empty(meta['extensions']['iconify'][x]) then
-    return stringify(meta['extensions']['iconify'][x])
+  local meta_value = utils.get_metadata_value(meta, 'iconify', x)
+  if not utils.is_empty(meta_value) then
+    return meta_value
   end
-  
+
   -- Check deprecated top-level structure: iconify.x (with warning)
   local deprecated_value = check_deprecated_config(meta, x)
   if deprecated_value then
     return deprecated_value
   end
-  
+
   return arg_value
 end
 
@@ -146,20 +130,19 @@ end
 --- @param kwargs table<string, any> Key-value options for the icon
 --- @param meta table<string, any> Document metadata
 --- @return any Pandoc RawInline for HTML or Pandoc Null for other formats
-function iconify(args, kwargs, meta)
+local function iconify(args, kwargs, meta)
   -- detect html (excluding epub which won't handle fa)
   if quarto.doc.is_format('html:js') then
     ensure_html_deps()
     --- @type string
-    local icon = stringify(args[1])
+    local icon = utils.stringify(args[1])
     --- @type string
     local set = 'octicon'
-    
+
     -- Check new nested structure for default set
-    if not is_empty(meta['extensions']) and 
-       not is_empty(meta['extensions']['iconify']) and 
-       not is_empty(meta['extensions']['iconify']['set']) then
-      set = stringify(meta['extensions']['iconify']['set'])
+    local meta_set = utils.get_metadata_value(meta, 'iconify', 'set')
+    if not utils.is_empty(meta_set) then
+      set = meta_set
     else
       -- Check deprecated top-level structure for default set (with warning)
       local deprecated_set = check_deprecated_config(meta, 'set')
@@ -168,12 +151,13 @@ function iconify(args, kwargs, meta)
       end
     end
 
-    if #args > 1 and string.find(stringify(args[2]), ':') then
-      quarto.log.warning(
+    if #args > 1 and string.find(utils.stringify(args[2]), ':') then
+      utils.log_warning(
+        EXTENSION_NAME,
         'Use "set:icon" or "set icon" syntax, not both! ' ..
         'Using "set:icon" syntax and discarding first argument!'
       )
-      icon = stringify(args[2])
+      icon = utils.stringify(args[2])
     end
 
     if string.find(icon, ':') then
@@ -181,7 +165,7 @@ function iconify(args, kwargs, meta)
       icon = string.sub(icon, string.find(icon, ':') + 1)
     elseif #args > 1 then
       set = icon
-      icon = stringify(args[2])
+      icon = utils.stringify(args[2])
     end
 
     --- @type string
@@ -194,56 +178,56 @@ function iconify(args, kwargs, meta)
     --- @type string
     local style = get_iconify_options('style', kwargs, meta)
 
-    if is_empty(style) and not is_empty(size) then
+    if utils.is_empty(style) and not utils.is_empty(size) then
       attributes = attributes .. ' style="' .. size .. '"'
-    elseif not is_empty(style) and not is_empty(size) then
+    elseif not utils.is_empty(style) and not utils.is_empty(size) then
       attributes = attributes .. ' style="' .. style .. ';' .. size .. '"'
-    elseif not is_empty(style) then
+    elseif not utils.is_empty(style) then
       attributes = attributes .. ' style="' .. style .. '"'
     end
 
     --- @type string
-    local aria_label = stringify(kwargs['label'])
-    if is_empty(aria_label) then
-      aria_label =  ' aria-label="' .. default_label .. '"'
+    local aria_label = utils.stringify(kwargs['label'])
+    if utils.is_empty(aria_label) then
+      aria_label = ' aria-label="' .. default_label .. '"'
     else
-      aria_label =  ' aria-label="' .. aria_label .. '"'
+      aria_label = ' aria-label="' .. aria_label .. '"'
     end
 
     --- @type string
-    local title = stringify(kwargs['title'])
-    if is_empty(title) then
-      title =  ' title="' .. default_label .. '"'
+    local title = utils.stringify(kwargs['title'])
+    if utils.is_empty(title) then
+      title = ' title="' .. default_label .. '"'
     else
-      title =  ' title="' .. title .. '"'
+      title = ' title="' .. title .. '"'
     end
 
     attributes = attributes .. aria_label .. title
 
     --- @type string
     local width = get_iconify_options('width', kwargs, meta)
-    if not is_empty(width) and is_empty(size) then
+    if not utils.is_empty(width) and utils.is_empty(size) then
       attributes = attributes .. ' width="' .. width .. '"'
     end
     --- @type string
     local height = get_iconify_options('height', kwargs, meta)
-    if not is_empty(height) and is_empty(size)  then
+    if not utils.is_empty(height) and utils.is_empty(size) then
       attributes = attributes .. ' height="' .. height .. '"'
     end
     --- @type string
     local flip = get_iconify_options('flip', kwargs, meta)
-    if not is_empty(flip) then
-      attributes = attributes .. ' flip="' .. flip.. '"'
+    if not utils.is_empty(flip) then
+      attributes = attributes .. ' flip="' .. flip .. '"'
     end
     --- @type string
     local rotate = get_iconify_options('rotate', kwargs, meta)
-    if not is_empty(rotate) then
+    if not utils.is_empty(rotate) then
       attributes = attributes .. ' rotate="' .. rotate .. '"'
     end
 
     --- @type string
     local inline = get_iconify_options('inline', kwargs, meta)
-    if is_empty(inline) or inline ~= 'false' then
+    if utils.is_empty(inline) or inline ~= 'false' then
       attributes = ' inline ' .. attributes
     end
 
@@ -251,7 +235,7 @@ function iconify(args, kwargs, meta)
     local mode = get_iconify_options('mode', kwargs, meta)
     --- @type table<string, boolean>
     local valid_modes = { svg = true, style = true, bg = true, mask = true }
-    if not is_empty(mode) and valid_modes[mode] then
+    if not utils.is_empty(mode) and valid_modes[mode] then
       attributes = attributes .. ' mode="' .. mode .. '"'
     end
 
@@ -269,7 +253,7 @@ end
 --- @param kwargs table<string, any>|nil Key-value options that might override default styling
 --- @param meta table<string, any> Document metadata
 --- @return any Pandoc RawInline for HTML or Pandoc Null for other formats
-function iconify_quarto(args, kwargs, meta)
+local function iconify_quarto(args, kwargs, meta)
   --- @type table<integer, string>
   local quarto_args = { 'simple-icons:quarto' }
   --- @type table<string, any>
@@ -278,10 +262,10 @@ function iconify_quarto(args, kwargs, meta)
   quarto_kwargs['title'] = 'Quarto icon'
   --- @type string
   local quarto_colour = 'color:#74aadb;'
-  
-  if not is_empty(quarto_kwargs['style']) then
+
+  if not utils.is_empty(quarto_kwargs['style']) then
     --- @type string
-    local style = stringify(quarto_kwargs['style'])
+    local style = utils.stringify(quarto_kwargs['style'])
     if string.match(style, 'color:[^;]+;') then
       quarto_kwargs['style'] = string.gsub(style, 'color:[^;]+;', quarto_colour)
     else
