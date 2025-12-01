@@ -186,7 +186,7 @@ function utils_module.check_deprecated_config(meta, extension_name, key, depreca
     return nil, deprecation_warning_shown
   end
 
-  -- Handle key-value configuration (original behavior)
+  -- Handle key-value configuration (original behaviour)
   if not utils_module.is_empty(meta[extension_name]) and not utils_module.is_empty(meta[extension_name][key]) then
     if not deprecation_warning_shown then
       utils_module.log_warning(
