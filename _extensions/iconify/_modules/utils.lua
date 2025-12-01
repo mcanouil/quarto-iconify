@@ -245,7 +245,7 @@ end
 --- @param name string The class name to add
 function utils_module.add_class(classes, name)
   if not utils_module.has_class(classes, name) then
-    classes:insert(name)
+    table.insert(classes, name)
   end
 end
 
