@@ -32,6 +32,7 @@ jobs:
     uses: mcanouil/quarto-workflows/.github/workflows/release-extension.yml@main
     secrets: inherit
     with:
+      gh-app-id: ${{ vars.APP_ID }}
       version: "${{ github.event.inputs.version }}"
       formats: "html"
       tinytex: false
