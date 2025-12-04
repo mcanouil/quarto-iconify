@@ -507,6 +507,36 @@ function utils_module.log_output(extension_name, message)
 end
 
 -- ============================================================================
+-- PATH UTILITIES
+-- ============================================================================
+
+--- Resolve a path relative to the project directory.
+--- If the path starts with `/`, it is treated as relative to the project directory.
+--- If `quarto.project.directory` is available, it is prepended to the path.
+--- If `quarto.project.directory` is nil, the leading `/` is removed.
+--- @param path string The path to resolve (may start with `/`)
+--- @return string The resolved path
+--- @usage local resolved = utils_module.resolve_project_path("/config.yml")
+--- @usage local resolved = utils_module.resolve_project_path("config.yml")
+function utils_module.resolve_project_path(path)
+  if utils_module.is_empty(path) then
+    return path
+  end
+
+  if path:sub(1, 1) == "/" then
+    if quarto.project.directory then
+      -- Prepend project directory to absolute path
+      return quarto.project.directory .. path
+    else
+      -- Remove leading `/` if no project directory
+      return path:sub(2)
+    end
+  else
+    return path
+  end
+end
+
+-- ============================================================================
 -- MODULE EXPORT
 -- ============================================================================
 
