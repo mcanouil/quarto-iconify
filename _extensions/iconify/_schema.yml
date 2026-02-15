@@ -1,12 +1,5 @@
-# _schema.yml for "iconify" shortcode extension
-# Describes options and shortcode arguments for IDE tooling and runtime validation.
+# Schema for the iconify extension
 
-# Extension-level metadata options.
-# Configured in _quarto.yml, _metadata.yml, or document front matter:
-#   extensions:
-#     iconify:
-#       set: "octicon"
-#       size: "1.2em"
 options:
   set:
     type: string
