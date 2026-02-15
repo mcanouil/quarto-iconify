@@ -25,12 +25,9 @@ options:
     type: string
     description: "Default rotation for icons (e.g., '90deg', '180deg', '1')."
   inline:
-    type: string
-    default: "true"
+    type: boolean
+    default: true
     description: "Whether to render icons inline by default."
-    enum:
-      - "true"
-      - "false"
   mode:
     type: string
     description: "Default rendering mode for icons."
