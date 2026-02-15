@@ -109,6 +109,36 @@ shortcodes:
       size:
         type: string
         description: "Icon size as a keyword or CSS value."
+      width:
+        type: string
+        description: "Icon width."
+      height:
+        type: string
+        description: "Icon height."
+      flip:
+        type: string
+        description: "Flip transformation for the icon."
+        enum:
+          - horizontal
+          - vertical
+          - horizontal,vertical
+      rotate:
+        type: string
+        description: "Rotation for the icon (e.g., '90deg', '180deg', '1')."
+      inline:
+        type: string
+        description: "Whether to render the icon inline."
+        enum:
+          - "true"
+          - "false"
+      mode:
+        type: string
+        description: "Rendering mode for the icon."
+        enum:
+          - svg
+          - style
+          - bg
+          - mask
       style:
         type: string
         description: "Additional inline CSS styles for the icon."
