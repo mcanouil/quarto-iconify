@@ -103,9 +103,9 @@ This extension provides relative, literal, and LaTeX-style sizing for icons.
 
 When the size is invalid, no size changes are made.
 
-- CSS-style sizing: `{{< iconify exploding-head size=42px >}}`.
+- CSS-style sizing: `{{< iconify fluent-emoji:exploding-head size=42px >}}`.
 
-- Relative sizing: `{{< iconify exploding-head size=2xl >}}`.
+- Relative sizing: `{{< iconify fluent-emoji:exploding-head size=2xl >}}`.
 
   | Relative Sizing | Font Size | Equivalent in Pixels |
   |-----------------|-----------|----------------------|
@@ -116,7 +116,7 @@ When the size is invalid, no size changes are made.
   | xl              | 1.5em     | 24px                 |
   | 2xl             | 2em       | 32px                 |
 
-- Literal sizing: `{{< iconify exploding-head size=5x >}}`.
+- Literal sizing: `{{< iconify fluent-emoji:exploding-head size=5x >}}`.
 
   | Literal Sizing | Font Size |
   |----------------|-----------|
@@ -131,7 +131,7 @@ When the size is invalid, no size changes are made.
   | 9x             | 9em       |
   | 10x            | 10em      |
 
-- LaTeX-style sizing: `{{< iconify exploding-head size=Huge >}}`.
+- LaTeX-style sizing: `{{< iconify fluent-emoji:exploding-head size=Huge >}}`.
 
   | Sizing Command                   | Font Size (HTML) |
   | -------------------------------- | ---------------- |
