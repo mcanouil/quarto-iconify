@@ -24,6 +24,9 @@ options:
   rotate:
     type: string
     description: "Default rotation for icons (e.g., '90deg', '180deg', '1')."
+  style:
+    type: string
+    description: "Default additional inline CSS styles applied to all icons."
   inline:
     type: boolean
     default: true
