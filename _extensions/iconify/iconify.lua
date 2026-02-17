@@ -6,12 +6,17 @@
 --- Extension name constant
 local EXTENSION_NAME = "iconify"
 
---- Load utils module
+--- Load utils and schema modules
 local utils = require(quarto.utils.resolve_path("_modules/utils.lua"):gsub("%.lua$", ""))
+local schema = require(quarto.utils.resolve_path("_modules/schema.lua"):gsub("%.lua$", ""))
 
 --- Flag to track if deprecation warning has been shown
 --- @type boolean
 local deprecation_warning_shown = false
+
+--- Cached validated options from schema (lazily initialised on first shortcode call)
+--- @type table|nil
+local validated_options = nil
 
 --- Ensure Iconify HTML dependencies are included.
 --- @return nil
@@ -77,7 +82,7 @@ local function is_valid_size(size)
   return 'font-size: ' .. size .. ';'
 end
 
---- Get iconify option from arguments or metadata.
+--- Get iconify option from arguments, validated options, or metadata.
 --- @param x string The option name to retrieve
 --- @param arg table<string, any> Arguments table containing options
 --- @param meta table<string, any> Document metadata table
@@ -91,10 +96,9 @@ local function get_iconify_options(x, arg, meta)
     return arg_value
   end
 
-  -- Check new nested structure: extensions.iconify.x
-  local meta_value = utils.get_metadata_value(meta, 'iconify', x)
-  if not utils.is_empty(meta_value) then
-    return meta_value
+  -- Check validated options (includes defaults and normalisation)
+  if validated_options and validated_options[x] ~= nil then
+    return tostring(validated_options[x])
   end
 
   -- Check deprecated top-level structure: iconify.x (with warning)
@@ -112,6 +116,10 @@ end
 --- @param meta table<string, any> Document metadata
 --- @return any Pandoc RawInline for HTML or Pandoc Null for other formats
 local function iconify(args, kwargs, meta)
+  if validated_options == nil then
+    validated_options = schema.validate_options(meta, EXTENSION_NAME, quarto.utils.resolve_path('_schema.yml'))
+  end
+
   -- detect html (excluding epub which won't handle fa)
   if quarto.doc.is_format('html:js') then
     ensure_html_deps()
@@ -120,10 +128,9 @@ local function iconify(args, kwargs, meta)
     --- @type string
     local set = 'octicon'
 
-    -- Check new nested structure for default set
-    local meta_set = utils.get_metadata_value(meta, 'iconify', 'set')
-    if not utils.is_empty(meta_set) then
-      set = meta_set
+    -- Check validated options for default set
+    if validated_options and validated_options.set and validated_options.set ~= '' then
+      set = validated_options.set
     else
       -- Check deprecated top-level structure for default set (with warning)
       local deprecated_set = check_deprecated_config(meta, 'set')
