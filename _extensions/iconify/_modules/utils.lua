@@ -32,7 +32,7 @@ end
 --- @return string The escaped string
 --- @usage local escaped = M.escape_pattern("user/repo#123")
 function M.escape_pattern(s)
-  local escaped = s:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+  local escaped = s:gsub('([%^%$%(%)%%%.%[%]%*%+%-%?])', '%%%1')
   return escaped
 end
 
@@ -43,7 +43,7 @@ end
 --- @usage local parts = M.split("a.b.c", ".")
 function M.split(str, sep)
   local fields = {}
-  local pattern = string.format("([^%s]+)", sep)
+  local pattern = string.format('([^%s]+)', sep)
   str:gsub(pattern, function(c) fields[#fields + 1] = c end)
   return fields
 end
@@ -80,16 +80,16 @@ end
 --- @param text string The text to escape
 --- @return string The escaped text safe for LaTeX
 function M.escape_latex(text)
-  text = string.gsub(text, "\\", "\\textbackslash{}")
-  text = string.gsub(text, "%{", "\\{")
-  text = string.gsub(text, "%}", "\\}")
-  text = string.gsub(text, "%$", "\\$")
-  text = string.gsub(text, "%&", "\\&")
-  text = string.gsub(text, "%%", "\\%%")
-  text = string.gsub(text, "%#", "\\#")
-  text = string.gsub(text, "%^", "\\textasciicircum{}")
-  text = string.gsub(text, "%_", "\\_")
-  text = string.gsub(text, "~", "\\textasciitilde{}")
+  text = string.gsub(text, '\\', '\\textbackslash{}')
+  text = string.gsub(text, '%{', '\\{')
+  text = string.gsub(text, '%}', '\\}')
+  text = string.gsub(text, '%$', '\\$')
+  text = string.gsub(text, '%&', '\\&')
+  text = string.gsub(text, '%%', '\\%%')
+  text = string.gsub(text, '%#', '\\#')
+  text = string.gsub(text, '%^', '\\textasciicircum{}')
+  text = string.gsub(text, '%_', '\\_')
+  text = string.gsub(text, '~', '\\textasciitilde{}')
   return text
 end
 
@@ -97,7 +97,7 @@ end
 --- @param text string The text to escape
 --- @return string The escaped text safe for Typst
 function M.escape_typst(text)
-  text = string.gsub(text, "%#", "\\#")
+  text = string.gsub(text, '%#', '\\#')
   return text
 end
 
@@ -105,18 +105,18 @@ end
 --- @param text string The text containing characters to escape
 --- @return string The escaped text safe for Lua patterns
 function M.escape_lua_pattern(text)
-  text = string.gsub(text, "%%", "%%%%")
-  text = string.gsub(text, "%^", "%%^")
-  text = string.gsub(text, "%$", "%%$")
-  text = string.gsub(text, "%(", "%%(")
-  text = string.gsub(text, "%)", "%%)")
-  text = string.gsub(text, "%.", "%%.")
-  text = string.gsub(text, "%[", "%%[")
-  text = string.gsub(text, "%]", "%%]")
-  text = string.gsub(text, "%*", "%%*")
-  text = string.gsub(text, "%+", "%%+")
-  text = string.gsub(text, "%-", "%%-")
-  text = string.gsub(text, "%?", "%%?")
+  text = string.gsub(text, '%%', '%%%%')
+  text = string.gsub(text, '%^', '%%^')
+  text = string.gsub(text, '%$', '%%$')
+  text = string.gsub(text, '%(', '%%(')
+  text = string.gsub(text, '%)', '%%)')
+  text = string.gsub(text, '%.', '%%.')
+  text = string.gsub(text, '%[', '%%[')
+  text = string.gsub(text, '%]', '%%]')
+  text = string.gsub(text, '%*', '%%*')
+  text = string.gsub(text, '%+', '%%+')
+  text = string.gsub(text, '%-', '%%-')
+  text = string.gsub(text, '%?', '%%?')
   return text
 end
 
@@ -168,7 +168,7 @@ function M.escape_text(text, format)
   if escape then
     return escape(text)
   else
-    error("Unsupported escape format: " .. format)
+    error('Unsupported escape format: ' .. format)
   end
 end
 
@@ -176,7 +176,7 @@ end
 --- @param text string The text to convert
 --- @return string The HTML id
 function M.ascii_id(text)
-  local id = text:lower():gsub("[^a-z0-9 ]", ""):gsub(" +", "-")
+  local id = text:lower():gsub('[^a-z0-9 ]', ''):gsub(' +', '-')
   return id
 end
 
@@ -184,26 +184,15 @@ end
 -- METADATA UTILITIES
 -- ============================================================================
 
---- Get configuration from extensions.mcanouil namespace.
+--- Get configuration from extensions.name namespace.
 --- @param meta table Document metadata
---- @param key string The key to retrieve
---- @return any The value or nil
---- @usage local value = M.get_mcanouil_config(meta, 'section-outline')
-function M.get_mcanouil_config(meta, key)
-  local mcanouil_ext = meta.extensions and meta.extensions.mcanouil
-  if not mcanouil_ext then return nil end
-  return mcanouil_ext[key]
-end
-
---- Get a section config table from extensions.mcanouil.{section}.
---- @param meta table Document metadata
---- @param section string The section name (e.g., 'code-window', 'typst-markdown')
---- @return table|nil The section config table or nil
---- @usage local config = M.get_mcanouil_section(meta, 'code-window')
-function M.get_mcanouil_section(meta, section)
-  local mcanouil_ext = meta.extensions and meta.extensions.mcanouil
-  if not mcanouil_ext then return nil end
-  return mcanouil_ext[section]
+--- @param extension_name string The extension name (e.g., "github", "iconify")
+--- @return any The value/table or nil
+--- @usage local value = M.get_extension_config(meta, 'section-outline')
+function M.get_extension_config(meta, extension_name)
+  local config_ext = meta.extensions and meta.extensions[extension_name]
+  if not config_ext then return nil end
+  return config_ext
 end
 
 --- Extract metadata value from document meta using nested structure.
@@ -314,18 +303,18 @@ end
 --- @return string The output format ("pptx", "html", "latex", "typst", "docx", or "unknown")
 --- @return string The language of the output format
 function M.get_quarto_format()
-  if quarto.doc.is_format("html:js") then
-    return "html", "html"
-  elseif quarto.doc.is_format("latex") then
-    return "latex", "latex"
-  elseif quarto.doc.is_format("typst") then
-    return "typst", "typst"
-  elseif quarto.doc.is_format("docx") then
-    return "docx", "openxml"
-  elseif quarto.doc.is_format("pptx") then
-    return "pptx", "openxml"
+  if quarto.doc.is_format('html:js') then
+    return 'html', 'html'
+  elseif quarto.doc.is_format('latex') then
+    return 'latex', 'latex'
+  elseif quarto.doc.is_format('typst') then
+    return 'typst', 'typst'
+  elseif quarto.doc.is_format('docx') then
+    return 'docx', 'openxml'
+  elseif quarto.doc.is_format('pptx') then
+    return 'pptx', 'openxml'
   else
-    return "unknown", "unknown"
+    return 'unknown', 'unknown'
   end
 end
 
@@ -346,7 +335,7 @@ function M.is_object_empty(obj)
     end
     return count
   end
-  if pandoc.utils.type(obj) == "table" or pandoc.utils.type(obj) == "List" then
+  if pandoc.utils.type(obj) == 'table' or pandoc.utils.type(obj) == 'List' then
     return obj == nil or obj == '' or length(obj) == 0
   else
     return obj == nil or obj == ''
@@ -357,14 +346,14 @@ end
 --- @param obj any The object to check
 --- @return boolean true if the object is a string, number, or boolean
 function M.is_type_simple(obj)
-  return pandoc.utils.type(obj) == "string" or pandoc.utils.type(obj) == "number" or pandoc.utils.type(obj) == "boolean"
+  return pandoc.utils.type(obj) == 'string' or pandoc.utils.type(obj) == 'number' or pandoc.utils.type(obj) == 'boolean'
 end
 
 --- Check if an object is a function or userdata
 --- @param obj any The object to check
 --- @return boolean true if the object is a function or userdata
 function M.is_function_userdata(obj)
-  return pandoc.utils.type(obj) == "function" or pandoc.utils.type(obj) == "userdata"
+  return pandoc.utils.type(obj) == 'function' or pandoc.utils.type(obj) == 'userdata'
 end
 
 --- Get nested value from object using field path
@@ -561,7 +550,7 @@ end
 --- @param message string The error message to display
 --- @usage M.log_error("external", "Could not open file 'example.md'.")
 function M.log_error(extension_name, message)
-  quarto.log.error("[" .. extension_name .. "] " .. message)
+  quarto.log.error('[' .. extension_name .. '] ' .. message)
 end
 
 --- Format and log a warning message with extension prefix.
@@ -572,7 +561,7 @@ end
 --- @param message string The warning message to display
 --- @usage M.log_warning("lua-env", "No variable name provided.")
 function M.log_warning(extension_name, message)
-  quarto.log.warning("[" .. extension_name .. "] " .. message)
+  quarto.log.warning('[' .. extension_name .. '] ' .. message)
 end
 
 --- Format and log an output message with extension prefix.
@@ -583,7 +572,7 @@ end
 --- @param message string The informational message to display
 --- @usage M.log_output("lua-env", "Exported metadata to: output.json")
 function M.log_output(extension_name, message)
-  quarto.log.output("[" .. extension_name .. "] " .. message)
+  quarto.log.output('[' .. extension_name .. '] ' .. message)
 end
 
 -- ============================================================================
@@ -603,7 +592,7 @@ function M.resolve_project_path(path)
     return path
   end
 
-  if path:sub(1, 1) == "/" then
+  if path:sub(1, 1) == '/' then
     if quarto.project.directory then
       -- Prepend project directory to absolute path
       return quarto.project.directory .. path
