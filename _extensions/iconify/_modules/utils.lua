@@ -594,10 +594,8 @@ function M.resolve_project_path(path)
 
   if path:sub(1, 1) == '/' then
     if quarto.project.directory then
-      -- Prepend project directory to absolute path
-      return quarto.project.directory .. path
+      return pandoc.path.join({ quarto.project.directory, path:sub(2) })
     else
-      -- Remove leading `/` if no project directory
       return path:sub(2)
     end
   else
