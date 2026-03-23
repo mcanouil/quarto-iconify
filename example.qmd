@@ -27,7 +27,7 @@ You can browse all of the available sets of icons here: <https://icon-sets.iconi
 ## Installation
 
 ```sh
-quarto add mcanouil/quarto-iconify@3.1.0
+quarto add mcanouil/quarto-iconify@3.2.0
 ```
 
 This will install the extension under the `_extensions` subdirectory.

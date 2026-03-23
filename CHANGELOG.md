@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.2.0 (2026-03-23)
+
 ### Refactoring
 
 - refactor: Replace monolithic `utils.lua` with focused modules (`string.lua`, `logging.lua`, `metadata.lua`, `pandoc-helpers.lua`, `html.lua`, `paths.lua`, `colour.lua`).
