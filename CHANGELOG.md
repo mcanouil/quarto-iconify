@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-No user-facing changes.
+### Refactoring
+
+- refactor: Replace monolithic `utils.lua` with focused modules (`string.lua`, `logging.lua`, `metadata.lua`, `pandoc-helpers.lua`, `html.lua`, `paths.lua`, `colour.lua`).
 
 ## 3.1.0 (2026-02-21)
 
@@ -69,8 +71,6 @@ No user-facing changes.
 
 ## 2.3.0 (2025-03-22)
 
-No user-facing changes.
-
 ## 2.1.2 (2024-08-11)
 
 ### Bug Fixes
@@ -101,8 +101,6 @@ No user-facing changes.
 - fix: Title/label args (#17).
 
 ## 1.0.8 (2023-12-21)
-
-No user-facing changes.
 
 ## 1.0.7 (2023-08-27)
 
