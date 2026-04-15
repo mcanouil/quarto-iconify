@@ -44,6 +44,17 @@ function M.log_output(extension_name, message)
   quarto.log.output('[' .. extension_name .. '] ' .. message)
 end
 
+--- Format and log a debug message with extension prefix.
+--- Provides standardised debug messages with consistent formatting across extensions.
+--- Format: [extension-name] Message with details.
+---
+--- @param extension_name string The name of the extension (e.g., "lua-env")
+--- @param message string The debug message to display
+--- @usage M.log_debug("lua-env", "Variable 'x' has value: 42")
+function M.log_debug(extension_name, message)
+  quarto.log.debug('[' .. extension_name .. '] ' .. message)
+end
+
 -- ============================================================================
 -- MODULE EXPORT
 -- ============================================================================
