@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.2.1 (2026-04-15)
+
 ### Refactoring
 
 - refactor: Synchronise shared module (`logging.lua`) with canonical version.
