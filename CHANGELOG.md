@@ -2,8 +2,6 @@
 
 ## Unreleased
 
-## 3.3.0 (2026-05-28)
-
 ### New Features
 
 - feat: Add `fallback` attribute (text or emoji) shown when an icon fails to load (unknown name, offline, or CDN unreachable).
