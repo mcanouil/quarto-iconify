@@ -41,6 +41,14 @@ options:
       - style
       - bg
       - mask
+  fallback:
+    type: string
+    description: "Default fallback text or emoji shown when an icon cannot be loaded (e.g. unknown name, offline, CDN unreachable)."
+  preload:
+    type: array
+    description: "List of local file paths containing Iconify icon-collection JSON to preload, enabling offline rendering of those icons. Requires the iconify filter to be active (e.g. `filters: [iconify]`)."
+    items:
+      type: string
 
 # Per-shortcode schemas.
 # Describes positional arguments and named attributes for {{< iconify >}} and {{< quarto >}}.
@@ -98,6 +106,9 @@ shortcodes:
       title:
         type: string
         description: "Title attribute for the icon tooltip."
+      fallback:
+        type: string
+        description: "Text or emoji shown when the icon cannot be loaded (e.g. unknown name, offline, CDN unreachable)."
   quarto:
     description: "Renders the Quarto icon with default blue styling from the simple-icons set."
     attributes:
@@ -143,3 +154,6 @@ shortcodes:
       title:
         type: string
         description: "Title attribute for the icon tooltip."
+      fallback:
+        type: string
+        description: "Text or emoji shown when the icon cannot be loaded."

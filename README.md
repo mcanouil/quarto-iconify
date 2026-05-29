@@ -7,7 +7,7 @@ Icons can be used only in HTML-based documents.
 ## Installation
 
 ```sh
-quarto add mcanouil/quarto-iconify@3.2.1
+quarto add mcanouil/quarto-iconify@3.3.0
 ```
 
 This will install the extension under the `_extensions` subdirectory.
@@ -75,6 +75,8 @@ Currently, this extension supports the following attributes:
 
 - `style`: CSS style string to apply custom styling to the icon.
 
+- `fallback`: Text or emoji shown when the icon cannot be loaded (unknown name, offline, or CDN unreachable). See [Fallback](#fallback) for details.
+
 #### Setting Default Values
 
 You can define default values for most attributes in the YAML header using the nested structure under `extensions.iconify`:
@@ -95,7 +97,51 @@ extensions:
 
 **Note:** The attributes `icon`, `title`, and `label` must be defined in the shortcode itself and cannot have default values in the YAML header.
 
-**Deprecation warning:** The top-level `iconify:` configuration is deprecated but still supported for backward compatibility. A warning will be displayed when using the deprecated format. Please migrate to the new nested structure shown above.
+**Deprecation warning:** The top-level `iconify:` configuration is deprecated but still supported for backward compatibility. A warning is emitted at least once per attribute name when the deprecated format is used. Please migrate to the new nested structure shown above.
+
+### Input Validation
+
+Since version 3.3.0, the extension validates a few common authoring mistakes and warns at render time:
+
+- Invalid icon or set names (anything outside lowercase letters, digits, and single hyphens) produce a warning. The icon is still emitted so the malformed name is visible in the output.
+- Invalid `size` values (not a known keyword, not a CSS length) produce a warning and the size is dropped, matching the README contract that "When the size is invalid, no size changes are made.".
+
+### Fallback
+
+The `fallback` attribute lets you declare text or an emoji that is shown when the icon fails to load.
+Loading can fail for three reasons:
+
+- The icon set or icon name does not exist.
+- The browser is offline.
+- The Iconify CDN is unreachable from the reader's network.
+
+The wrapper renders the `<iconify-icon>` web component plus a hidden fallback span; a small companion script monitors the icon and reveals the fallback once the component reports a failure.
+
+```markdown
+{{< iconify fluent-emoji exploding-head fallback="🤯" >}}
+```
+
+You can also set a document-wide default fallback under `extensions.iconify.fallback`.
+
+### Offline / Preloaded Icons
+
+For documents that must render offline (or simply do not want to rely on the Iconify CDN for known icons), you can preload one or more Iconify icon-collection JSON files.
+This requires the iconify filter to be enabled.
+
+```yaml
+filters:
+  - iconify
+extensions:
+  iconify:
+    preload:
+      - icons/octicon.json
+      - icons/fluent-emoji.json
+```
+
+Each file must contain a valid Iconify icon collection (an object beginning with `{`).
+The extension injects them as `window.IconifyPreload`, which the Iconify Web Component consumes at boot instead of calling the CDN.
+
+You can download icon collections from <https://github.com/iconify/icon-sets> or from the Iconify API (`https://api.iconify.design/<prefix>.json?icons=<comma-separated-names>`).
 
 ### Sizing Icons
 
