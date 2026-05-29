@@ -319,22 +319,15 @@ local function iconify(args, kwargs, meta)
   end
 
   --- @type string
-  local fallback = str.stringify(kwargs['fallback'])
-  if str.is_empty(fallback) then
-    fallback = get_iconify_options('fallback', kwargs, meta)
-  end
+  local fallback = get_iconify_options('fallback', kwargs, meta)
 
   if not str.is_empty(fallback) then
     ensure_fallback_runtime()
-    --- @type string
-    local fallback_attribute = ' data-iconify-fallback'
-    --- @type string
-    local fallback_span = '<span class="iconify-icon-fallback" hidden>' .. fallback .. '</span>'
     return pandoc.RawInline(
       'html',
-      '<span class="iconify-icon-wrapper"' .. fallback_attribute .. '>' ..
+      '<span class="iconify-icon-wrapper" data-iconify-fallback>' ..
       '<iconify-icon role="img"' .. attributes .. '></iconify-icon>' ..
-      fallback_span ..
+      '<span class="iconify-icon-fallback" hidden>' .. fallback .. '</span>' ..
       '</span>'
     )
   end
