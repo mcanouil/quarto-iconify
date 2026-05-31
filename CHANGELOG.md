@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+### New Features
+
+- feat: Add `fallback` attribute (text or emoji) shown when an icon fails to load (unknown name, offline, or CDN unreachable).
+- feat: Add `extensions.iconify.preload` metadata to inject local Iconify icon-collection JSON files as `window.IconifyPreload`, enabling offline rendering of preloaded icons. Requires the iconify filter to be active.
+
+### Bug Fixes
+
+- fix: Deprecation warning for the top-level `iconify:` configuration now fires at least once per attribute name instead of only once per render.
+- fix: Validate icon and set names against the Iconify name pattern (`^[a-z0-9]+(-[a-z0-9]+)*$`) and emit a warning when a name is invalid.
+- fix: Validate `size` values; unknown keywords and malformed CSS lengths are now dropped with a warning, honouring the README contract that "no size changes are made" when invalid.
+
+### Documentation
+
+- docs: Document the `fallback` attribute, the offline/preload workflow, and the new input-validation behaviour.
+
+### Refactoring
+
+- refactor: Synchronise shared modules (`string.lua`, `logging.lua`, `metadata.lua`) with the canonical versions.
+
 ## 3.2.1 (2026-04-15)
 
 ### Refactoring

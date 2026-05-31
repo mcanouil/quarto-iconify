@@ -1,5 +1,5 @@
 --- MC Metadata - Extension configuration and metadata access for Quarto Lua filters and shortcodes
---- @module metadata
+--- @module "metadata"
 --- @license MIT
 --- @copyright 2026 Mickaël Canouil
 --- @author Mickaël Canouil

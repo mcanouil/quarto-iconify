@@ -193,3 +193,13 @@ The following table demonstrates various ways to use the iconify shortcode, incl
 | `{{{< iconify fa6-brands apple width=50px height=10px rotate=90deg flip=vertical >}}}` | {{< iconify fa6-brands apple width=50px rotate=90deg flip=vertical >}} |
 | `{{{< iconify simple-icons:quarto style="color:#74aadb;" >}}}`                         | {{< iconify simple-icons:quarto style="color:#74aadb;" >}}             |
 | `{{{< quarto >}}}`                                                                     | {{< quarto >}}                                                         |
+
+### Fallback
+
+The `fallback` attribute shows text or an emoji when the icon cannot be loaded (unknown name, offline, or CDN unreachable).
+
+| Shortcode                                                                 | Icon                                                                  |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `{{{< iconify fluent-emoji no-such-icon-9999 fallback="🤯" >}}}`          | {{< iconify fluent-emoji no-such-icon-9999 fallback="🤯" >}}          |
+| `{{{< iconify fluent-emoji also-missing fallback=":exploding-head:" >}}}` | {{< iconify fluent-emoji also-missing fallback=":exploding-head:" >}} |
+| `{{{< iconify fluent-emoji exploding-head fallback="(missing)" >}}}`      | {{< iconify fluent-emoji exploding-head fallback="(missing)" >}}      |
