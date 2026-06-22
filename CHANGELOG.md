@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### New Features
+
+- feat: Render icons in Typst output. The SVG for each icon is retrieved from the Iconify API at render time, cached on disk, and emitted as a Typst `#image(...)`. `flip`, `rotate`, and `color` are applied by the API; `size` becomes the image height; `label`/`title` become `alt` text; `fallback` text is shown when an icon cannot be retrieved.
+- feat: Cache retrieved SVGs under `.quarto/iconify-svg/` (configurable via `extensions.iconify.typst-cache`). A populated cache renders fully offline. The cache is pruned automatically and is concurrency-safe via `extensions.iconify.typst-cache-max-age` (default 30 days) and `extensions.iconify.typst-cache-max-entries` (default unlimited).
+
+### Documentation
+
+- docs: Document Typst output, the on-disk cache, and the cache-bounding options.
+
 ## 3.3.0 (2026-05-31)
 
 ### New Features
