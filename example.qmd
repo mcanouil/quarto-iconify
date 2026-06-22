@@ -12,6 +12,7 @@ format:
     reference-location: margin
     code-overflow: wrap
     code-tools: true
+  typst: default
 extensions:
   iconify:
     style: "color: #b22222;"
@@ -19,7 +20,7 @@ extensions:
 
 This extension provides support to free and open source icons provided by [Iconify](https://icon-sets.iconify.design/).
 
-Icons can be used only in HTML-based documents.
+Icons render in HTML-based documents and in Typst output (where the SVG is retrieved from the Iconify API and cached locally).
 
 This extension includes support for thousands of icons (including animated icons).  
 You can browse all of the available sets of icons here: <https://icon-sets.iconify.design/>

@@ -2,7 +2,9 @@
 
 This extension provides support to free and open source icons provided by [Iconify](https://icon-sets.iconify.design/).
 
-Icons can be used only in HTML-based documents.
+Icons are rendered in HTML-based documents (via the Iconify web component) and in Typst output (via cached SVGs retrieved from the Iconify API).
+See [Typst output](#typst-output) for details.
+Other formats (LaTeX, `docx`, …) render nothing.
 
 ## Installation
 
@@ -142,6 +144,46 @@ Each file must contain a valid Iconify icon collection (an object beginning with
 The extension injects them as `window.IconifyPreload`, which the Iconify Web Component consumes at boot instead of calling the CDN.
 
 You can download icon collections from <https://github.com/iconify/icon-sets> or from the Iconify API (`https://api.iconify.design/<prefix>.json?icons=<comma-separated-names>`).
+
+### Typst Output
+
+For Typst output (including PDF produced with the Typst engine), the extension retrieves each icon's SVG from the Iconify API at render time, caches it on disk, and emits a Typst `#image(...)` referencing the cached file.
+The same shortcodes work without changes:
+
+```markdown
+{{< iconify octicon heart-fill-16 >}}
+{{< iconify mdi home size=2em >}}
+{{< iconify fa6-brands apple color=red flip=vertical rotate=90deg >}}
+{{< quarto >}}
+```
+
+How the options map to Typst:
+
+- `size` is applied as the Typst image height so the icon scales with the surrounding text. Use a Typst-compatible unit (`em`, `pt`, `cm`, `mm`, `in`, `%`); `px` and other CSS-only units fall back to `1em` with a warning.
+- `flip`, `rotate`, and `color` are baked into the fetched SVG by the Iconify API. Monochrome icons use `currentColor`, which renders black in Typst unless you set `color`; multi-colour icons (e.g. emoji) are unaffected.
+- `label` (or `title`) becomes the image `alt` text.
+- `inline` keeps the icon in the text flow (default); `inline=false` emits a standalone image.
+- `mode` and `style` are HTML-only and ignored for Typst (a `color:` declaration inside `style` is still honoured).
+- `fallback` text is rendered in place of the icon when it cannot be retrieved (unknown name, or offline with an empty cache).
+
+#### Caching
+
+Retrieved SVGs are cached under `.quarto/iconify-svg/` in the project root (Quarto's cache location, which is gitignored).
+Once cached, an icon is reused on later renders without any network access, so a populated cache renders fully offline.
+Point the cache elsewhere to commit a reproducible, offline cache:
+
+```yaml
+extensions:
+  iconify:
+    typst-cache: assets/iconify-svg
+```
+
+The cache is pruned automatically so it does not grow without bound:
+
+- `typst-cache-max-age` (default `30`): entries unused for this many days are removed. Set to `0` to disable age-based pruning.
+- `typst-cache-max-entries` (default `0`, unlimited): caps the number of cached icons, removing the least-recently-used beyond the cap. Recently-used icons are never removed, so a single document needing more icons than the cap still renders.
+
+Pruning is concurrency-safe: independent `quarto render` processes sharing one cache will not remove icons another render is currently using.
 
 ### Sizing Icons
 
