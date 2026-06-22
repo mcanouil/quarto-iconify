@@ -12,7 +12,15 @@ format:
     reference-location: margin
     code-overflow: wrap
     code-tools: true
-  typst: default
+  typst:
+    output-file: highlight-typst
+    papersize: a4
+    margin:
+      x: 2.5cm
+      y: 2.5cm
+format-links:
+  - html
+  - typst
 extensions:
   iconify:
     style: "color: #b22222;"
