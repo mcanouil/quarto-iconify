@@ -9,7 +9,7 @@ Other formats (LaTeX, `docx`, …) render nothing.
 ## Installation
 
 ```sh
-quarto add mcanouil/quarto-iconify@3.3.0
+quarto add mcanouil/quarto-iconify@4.0.0
 ```
 
 This will install the extension under the `_extensions` subdirectory.
