@@ -13,7 +13,7 @@ format:
     code-overflow: wrap
     code-tools: true
   typst:
-    output-file: highlight-typst
+    output-file: iconify-typst
     papersize: a4
     margin:
       x: 2.5cm

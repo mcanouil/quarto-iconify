@@ -243,6 +243,7 @@ Here is the source code for a minimal example: [example.qmd](example.qmd).
 Output of `example.qmd`:
 
 - [HTML](https://m.canouil.dev/quarto-iconify/)
+- [Typst/PDF](https://m.canouil.dev/quarto-iconify/iconify-typst.pdf)
 
 ---
 
