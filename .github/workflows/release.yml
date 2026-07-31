@@ -1,4 +1,4 @@
-name: Release Quarto Extension
+name: Release
 
 on:
   workflow_dispatch:
@@ -6,7 +6,6 @@ on:
       version:
         type: choice
         description: "Version"
-        required: false
         default: "minor"
         options:
           - "patch"
@@ -15,23 +14,24 @@ on:
       quarto:
         type: choice
         description: "Quarto version"
-        required: false
         default: "release"
         options:
           - "release"
           - "pre-release"
 
 permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
-  pages: write
+  contents: read
 
 jobs:
   release:
     uses: mcanouil/quarto-workflows/.github/workflows/release.yml@main
+    permissions:
+      contents: write
+      pull-requests: write
+      pages: write
+      id-token: write
     secrets: inherit
     with:
       gh-app-id: ${{ vars.APP_ID }}
-      version: "${{ github.event.inputs.version }}"
-      quarto: "${{ github.event.inputs.quarto }}"
+      version: ${{ inputs.version }}
+      quarto: ${{ inputs.quarto }}
