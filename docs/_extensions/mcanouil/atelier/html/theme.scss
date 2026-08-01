@@ -539,6 +539,36 @@ body.docked .sidebar-navigation {
   --gitlink-widget-menu-fg: var(--atelier-sidebar-fg);
 }
 
+// Quarto gives the sidebar `overflow-y: auto` and leaves `overflow-x` at
+// `visible`, which computes to `auto`, so anything wider than the column
+// scrolls it sideways rather than being clipped. The widget's menu is anchored
+// to its trigger's left edge and sized to its content, and the rules above
+// centre the tools row, so the menu starts a third of the way in and runs past
+// the right edge. It raises the scrollbar even while shut, because it is
+// hidden with `visibility` and so still takes part in layout. Anchoring it to
+// the tools row, which spans the column, keeps it inside.
+//
+// The marker class is the one widget.js sets on whichever tools container held
+// the placeholder, so this follows the widget into either the main row or the
+// collapsed one, which is where it lands when the project also has a navbar.
+#quarto-sidebar .gitlink-widget-tools {
+  position: relative;
+}
+
+// The widget is `position: relative` in widget.css, so without this it stays
+// the dropdown's containing block and the row below has no effect.
+#quarto-sidebar .gitlink-widget-tools .gitlink-widget {
+  position: static;
+}
+
+// `width` has to give way with it: widget.css sizes the menu to `max-content`,
+// and a specified width over-constrains the box, which drops `right`.
+#quarto-sidebar .gitlink-widget-tools .gitlink-widget-dropdown {
+  left: 0;
+  right: 0;
+  width: auto;
+}
+
 // Structure ships with the extension's widget.css; match the radius of the
 // navbar dropdown menus above.
 body .navbar .gitlink-widget-dropdown {
