@@ -133,14 +133,13 @@ h6 {
 // not an image as a bare <embed class="embed-art"> inside a paragraph, with no
 // wrapper to hang a descendant selector on, so `margin-inline: auto` is what
 // centres it rather than a `text-align: center` wrapper around it.
+// The frame carries no size of its own, so it takes the shape of what it
+// frames and the padding stays the same on all four sides. Forcing a shape on
+// the card instead would letterbox anything that did not match it, which reads
+// as a wide band of padding down one axis and none on the other.
 .embed-art {
   display: block;
-  width: var(--atelier-embed-art-width, 560px);
   max-width: 100%;
-  aspect-ratio: var(--atelier-embed-art-ratio, 1.5);
-  // Without this, an <img> whose own ratio differs from the card's is
-  // stretched to fill it; `contain` letterboxes it instead.
-  object-fit: contain;
   margin-inline: auto;
   padding: 0.75rem;
   background: $body-bg;
@@ -149,6 +148,16 @@ h6 {
   box-shadow: 4px 4px 0 0 $body-color;
   transform: rotate(var(--atelier-embed-art-tilt, -1.25deg));
   transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+// An <embed> is the one case with no size to follow: a nested browsing context
+// does not report the page dimensions of the document inside it to the layout
+// around it. Pandoc passes `width=` and `height=` on the image straight
+// through, so an author who gives the card a size gets it; these defaults are
+// only what an <embed> falls back to when neither is set.
+embed.embed-art:not([width]) {
+  width: var(--atelier-embed-art-width, 560px);
+  aspect-ratio: var(--atelier-embed-art-ratio, 1.5);
 }
 
 // Hover relaxes the card toward straight. Taking a proportion of the resting
