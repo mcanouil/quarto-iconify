@@ -88,10 +88,8 @@ format:
         - assets/theme.scss
 
 filters:
-  - at: pre-quarto
-    path: code-window
-  - at: post-quarto
-    path: gitlink
+  - code-window
+  - gitlink
 
 extensions:
   # Quarto keeps the `website` block out of the metadata it hands to Lua
