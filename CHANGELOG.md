@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Bug Fixes
+
+- fix: Honour `inline: false` written as a bare YAML boolean. The value was read as an absent option, so icons kept the `inline` attribute that the default applies.
+
 ### Documentation
 
 - docs: Add a documentation website under `docs/`, built on the `atelier` project type and published to <https://m.canouil.dev/quarto-iconify/>, drawing its icons with the extension itself.
