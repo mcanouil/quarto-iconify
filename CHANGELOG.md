@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.0.1 (2026-08-01)
+
 ### Bug Fixes
 
 - fix: Honour `inline: false` written as a bare YAML boolean. The value was read as an absent option, so icons kept the `inline` attribute that the default applies.
