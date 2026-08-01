@@ -53,13 +53,33 @@ The `color` attribute is for Typst output, where the colour is baked into the re
 
 ## Accessibility
 
-An icon that carries meaning needs a label; one that repeats the text beside it does not.
+Every icon is announced, so label every icon.
 
 ```markdown
 {{{< iconify octicon:alert-16 label="Warning" title="Warning" >}}}
 ```
 
-{{< iconify octicon:alert-16 size=2x label="Warning" title="Warning" >}} carries an `aria-label` and a tooltip.
+{{< iconify octicon:alert-16 size=2x label="Warning" title="Warning" >}} carries an `aria-label` and a tooltip reading `Warning`.
+
+Left unset, both fall back to a generated string naming the set and the file:
+
+| Source | Announced as |
+| --- | --- |
+| `{{{< iconify octicon:alert-16 >}}}` | `Icon alert-16 from octicon Iconify.design set.` |
+| `{{{< iconify octicon:alert-16 label="Warning" >}}}` | `Warning` |
+
+: What a screen reader reads out, with and without a label. {.striped .hover tbl-colwidths="[55,45]"}
+
+## The Quarto icon
+
+`quarto` is a second shortcode, drawing `simple-icons:quarto` in the Quarto blue:
+
+| Source | Renders as |
+| --- | --- |
+| `{{{< quarto >}}}` | {{< quarto >}} |
+| `{{{< quarto size=2x >}}}` | {{< quarto size=2x >}} |
+
+: The `quarto` shortcode, which takes the same attributes as `iconify`. {.striped .hover tbl-colwidths="[55,45]"}
 
 ## Defaults
 
