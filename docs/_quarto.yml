@@ -23,6 +23,9 @@ website:
   # with a leading-slash image path, without normalising.
   site-url: &site-url https://m.canouil.dev/quarto-iconify
   repo-url: https://github.com/mcanouil/quarto-iconify
+  # The Quarto project root is `docs/`, so without this every edit and issue
+  # link points at a path one level up from the page it was built for.
+  repo-subdir: docs
   page-navigation: true
   # atelier defaults search to an overlay button in the navbar. With no navbar
   # the search belongs in the sidebar, as a field rather than a button.
