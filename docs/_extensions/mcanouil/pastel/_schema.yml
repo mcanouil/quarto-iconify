@@ -1,0 +1,14 @@
+# _schema.yml for the "pastel" brand extension.
+# Describes the extension for IDE tooling and runtime validation.
+
+$schema: https://m.canouil.dev/quarto-wizard/assets/schema/v2/extension-schema.json
+
+# The extension takes no YAML options. It is consumed as a brand file plus a
+# stylesheet, wired in through `brand:` and `format.<name>.theme`.
+#
+# The two knobs it does expose are Sass defaults, overridden by setting them in
+# a project stylesheet loaded before pastel.scss:
+#
+#   $pastel-tint-alpha: 0.2;      // strength of the pastel washes
+#   $pastel-grain-opacity: 0;     // 0 turns the paper tooth off
+options: {}

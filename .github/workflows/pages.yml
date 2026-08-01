@@ -1,0 +1,40 @@
+name: Pages
+
+# The documentation website under docs/ is what this repository serves from
+# GitHub Pages. A pull request renders it as a check, from its own head.
+# Publishing happens at a release, through the Release workflow, or on a manual
+# dispatch here.
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "_extensions/**"
+      - "CHANGELOG.md"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+    inputs:
+      use-main-as-release:
+        type: boolean
+        description: "Render from the default branch instead of the latest version tag"
+        default: false
+      quarto:
+        type: choice
+        description: "Quarto version"
+        default: "release"
+        options:
+          - "release"
+          - "pre-release"
+
+permissions:
+  contents: read
+
+jobs:
+  pages:
+    uses: mcanouil/quarto-workflows/.github/workflows/pages.yml@main
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    with:
+      use-main-as-release: ${{ inputs.use-main-as-release || false }}
+      quarto: ${{ inputs.quarto || 'release' }}

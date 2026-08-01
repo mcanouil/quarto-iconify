@@ -1,0 +1,144 @@
+---
+title: "Reference"
+subtitle: "Every option the iconify extension accepts."
+description: "The complete iconify configuration: the shortcode syntax, every attribute, document defaults, offline preloading, and the Typst SVG cache."
+---
+
+## Shortcodes
+
+### `iconify`
+
+```markdown
+{{{< iconify set:icon >}}}
+{{{< iconify set icon >}}}
+```
+
+Both forms are accepted.
+With a default set configured, the set can be left out entirely.
+
+Naming the set both ways at once, as in `{{{< iconify octicon mdi:home >}}}`, warns and keeps the second argument.
+
+Icon names come from [icon-sets.iconify.design](https://icon-sets.iconify.design).
+A set or icon name outside the pattern Iconify enforces, lowercase letters and digits separated by single hyphens, warns and still renders, so the wrong name is visible in the output.
+
+### `quarto`
+
+```markdown
+{{{< quarto >}}}
+```
+
+Draws `simple-icons:quarto` in the Quarto blue, `#74aadb`: {{< quarto >}}.
+It takes the same attributes as `iconify`, except that `label` and `title` are fixed to `Quarto icon`.
+A `style` attribute is kept, with its `color` replaced by the Quarto blue.
+
+## Attributes
+
+| Attribute | Description |
+| --- | --- |
+| `size` | A keyword or CSS length. Sets `font-size`, and suppresses `width` and `height`. |
+| `width`, `height` | Explicit dimensions, used only when `size` is absent. |
+| `flip` | `horizontal`, `vertical`, or `horizontal,vertical`. |
+| `rotate` | `90deg`, `180deg`, or a quarter-turn count such as `1`. |
+| `color` | Typst output only. Applied to monochrome icons through the Iconify API. |
+| `inline` | Anything but `false` keeps the icon on the text baseline. |
+| `mode` | `svg`, `style`, `bg`, or `mask`. Any other value is dropped. |
+| `style` | Extra inline CSS, written before the `font-size` that `size` generates. |
+| `label` | The `aria-label`. Replaces the generated one. |
+| `title` | The tooltip. Replaces the generated one. |
+| `fallback` | Text or an emoji revealed when the icon fails to load. |
+
+: Attributes accepted on both shortcodes. {.striped .hover tbl-colwidths="[22,78]"}
+
+### Size values
+
+`size` takes a CSS length in `px`, `em`, `rem`, `pt`, `pc`, `ex`, `ch`, `cm`, `mm`, `in`, `vh`, `vw`, `vmin`, `vmax`, or `%`, or one of the keywords below.
+A bare number is not a length, and `0` is the only exception.
+Anything else warns and leaves the size alone.
+
+| Keywords | Value |
+| --- | --- |
+| `tiny`, `scriptsize`, `footnotesize`, `small`, `normalsize` | `0.5em`, `0.7em`, `0.8em`, `0.9em`, `1em` |
+| `large`, `Large`, `LARGE`, `huge`, `Huge` | `1.2em`, `1.5em`, `1.75em`, `2em`, `2.5em` |
+| `1x` to `10x` | `1em` to `10em` |
+| `2xs`, `xs`, `sm`, `lg`, `xl`, `2xl` | `0.625em`, `0.75em`, `0.875em`, `1.25em`, `1.5em`, `2em` |
+
+: Size keywords and the CSS lengths they map to. {.striped .hover tbl-colwidths="[55,45]"}
+
+### Accessibility
+
+Every icon carries `role="img"`, an `aria-label`, and a `title`.
+Left unset, both read `Icon <name> from <set> Iconify.design set.`, which a screen reader announces verbatim.
+
+::: {.callout-note}
+Set `label` on every icon that carries meaning, and on every icon that does not.
+There is no decorative mode: an icon with no `label` is announced by its set and file name rather than skipped.
+:::
+
+## Document defaults
+
+Every attribute except `label` and `title` has a matching option, applied to all icons:
+
+```yaml
+extensions:
+  iconify:
+    set: octicon
+    size: 1.2em
+    inline: true
+```
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `set` | `octicon` | The icon set used when the shortcode names none. |
+| `size`, `width`, `height` | | Default dimensions. |
+| `flip`, `rotate`, `style` | | Default transformations and CSS. |
+| `inline` | `true` | Whether icons sit inline by default. |
+| `mode` | | Default rendering mode. |
+| `fallback` | | Text or an emoji shown when an icon cannot be loaded, whether the name is wrong, the CDN is unreachable, or the reader is offline. |
+| `preload` | | Paths to Iconify collection JSON files, for offline rendering. |
+
+: Document and project options. {.striped .hover tbl-colwidths="[26,14,60]"}
+
+An attribute on a shortcode overrides the default for that icon.
+Values resolve in one order throughout: the shortcode attribute, then `extensions.iconify`, then the deprecated top-level `iconify` key, which warns once per key.
+
+## Offline icons
+
+```yaml
+filters:
+  - iconify
+extensions:
+  iconify:
+    preload:
+      - icons/octicon.json
+```
+
+Preloading needs the filter to be active, not the shortcode alone.
+The named collections are then available without the CDN.
+
+Unlike every other option, `preload` is read from `extensions.iconify` only, with no top-level fallback.
+A file that cannot be read, or whose content does not begin with `{`, is skipped with a warning and the remaining files still load.
+
+## Typst output
+
+An icon in Typst output is a real SVG, retrieved once and cached on disk.
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `typst-cache` | `.quarto/iconify-svg` | Where the SVGs are kept, relative to the project root. Point it at a tracked directory to commit a reproducible offline cache. |
+| `typst-cache-max-age` | `30` | Days before an unused entry is pruned. `0` disables pruning by age. |
+| `typst-cache-max-entries` | `0` | Cap on the number of entries, least recently used pruned first. `0` is unlimited. |
+
+: The Typst SVG cache. {.striped .hover tbl-colwidths="[28,16,56]"}
+
+`color` applies to monochrome icons in Typst, since the colour is baked into the retrieved SVG.
+With no `color`, a `color:` declaration inside `style` is read instead, so one `style` attribute covers both outputs.
+
+`size` becomes the image height, so the icon scales with the surrounding text.
+Typst accepts `em`, `pt`, `cm`, `mm`, `in`, and `%`; any other unit warns and falls back to `1em`.
+
+## Limitations
+
+- HTML and Typst only. The HTML path requires a format that runs JavaScript, so EPUB renders nothing.
+- In HTML the icon is fetched from the Iconify CDN at page load unless preloaded, so a reader offline sees the `fallback`.
+- `color` is Typst only; in HTML use `style` or the surrounding text colour.
+- `label` and `title` take no document default; set them per icon.

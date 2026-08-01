@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Documentation
+
+- docs: Add a documentation website under `docs/`, built on the `atelier` project type and published to <https://m.canouil.dev/quarto-iconify/>, drawing its icons with the extension itself.
+- docs: Trim `README.md` to a landing page pointing at the website.
+- docs: Add the Pages workflow, which renders `docs/` on pull requests and deploys it from the release tag.
+- docs: Add the Quarto Extensions Updates workflow, scanning `docs` for the website's own dependencies.
+
 ## 4.0.0 (2026-06-22)
 
 ### New Features

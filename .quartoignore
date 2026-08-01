@@ -1,0 +1,11 @@
+# Files kept out of a project created by `quarto use template`.
+# Quarto already excludes dot files, README.md, CHANGELOG.md, LICENSE,
+# COPYING.md, COPYRIGHT, CLAUDE.md, and AGENTS.md, so only what it misses
+# is listed here.
+
+# The documentation website. Quarto's built-in `_extensions` exclude matches
+# the repository root only, so docs/_extensions/mcanouil/ is not covered by it.
+docs
+
+# The repository's own citation metadata, not the new project's.
+CITATION.cff

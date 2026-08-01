@@ -1,0 +1,121 @@
+---
+title: "Examples"
+subtitle: "Icons, and the attributes that shape them."
+description: "Iconify icons drawn by the extension, one section per attribute, with the shortcode alongside each."
+---
+
+Every icon below is drawn by the extension as this page renders.
+The site sets `octicon` as its default set.
+
+## Naming an icon
+
+| Source | Renders as |
+| --- | --- |
+| `{{{< iconify octicon:rocket-16 >}}}` | {{< iconify octicon:rocket-16 >}} |
+| `{{{< iconify octicon rocket-16 >}}}` | {{< iconify octicon rocket-16 >}} |
+| `{{{< iconify mdi:home >}}}` | {{< iconify mdi:home >}} |
+| `{{{< iconify simple-icons:quarto >}}}` | {{< iconify simple-icons:quarto >}} |
+
+: The two syntaxes, and icons from three sets. {.striped .hover tbl-colwidths="[55,45]"}
+
+## Size
+
+| Source | Renders as |
+| --- | --- |
+| `{{{< iconify mdi:home >}}}` | {{< iconify mdi:home >}} |
+| `{{{< iconify mdi:home size=2x >}}}` | {{< iconify mdi:home size=2x >}} |
+| `{{{< iconify mdi:home size=3em >}}}` | {{< iconify mdi:home size=3em >}} |
+| `{{{< iconify mdi:home width=48 height=48 >}}}` | {{< iconify mdi:home width=48 height=48 >}} |
+
+: Keywords, multiples, CSS values, and explicit dimensions. {.striped .hover tbl-colwidths="[55,45]"}
+
+## Rotation and flipping
+
+| Source | Renders as |
+| --- | --- |
+| `{{{< iconify mdi:arrow-up size=2x >}}}` | {{< iconify mdi:arrow-up size=2x >}} |
+| `{{{< iconify mdi:arrow-up size=2x rotate=90deg >}}}` | {{< iconify mdi:arrow-up size=2x rotate=90deg >}} |
+| `{{{< iconify mdi:arrow-up size=2x flip=vertical >}}}` | {{< iconify mdi:arrow-up size=2x flip=vertical >}} |
+
+: Rotating and flipping. {.striped .hover tbl-colwidths="[55,45]"}
+
+## Style
+
+`style` takes any inline CSS, which is how an icon is coloured in HTML:
+
+| Source | Renders as |
+| --- | --- |
+| `{{{< iconify mdi:heart size=2x style="color: firebrick;" >}}}` | {{< iconify mdi:heart size=2x style="color: firebrick;" >}} |
+
+: Colouring an icon in HTML. {.striped .hover tbl-colwidths="[55,45]"}
+
+The `color` attribute is for Typst output, where the colour is baked into the retrieved SVG.
+
+## Accessibility
+
+Every icon is announced, so label every icon.
+
+```markdown
+{{{< iconify octicon:alert-16 label="Warning" title="Warning" >}}}
+```
+
+{{< iconify octicon:alert-16 size=2x label="Warning" title="Warning" >}} carries an `aria-label` and a tooltip reading `Warning`.
+
+Left unset, both fall back to a generated string naming the set and the file:
+
+| Source | Announced as |
+| --- | --- |
+| `{{{< iconify octicon:alert-16 >}}}` | `Icon alert-16 from octicon Iconify.design set.` |
+| `{{{< iconify octicon:alert-16 label="Warning" >}}}` | `Warning` |
+
+: What a screen reader reads out, with and without a label. {.striped .hover tbl-colwidths="[55,45]"}
+
+## The Quarto icon
+
+`quarto` is a second shortcode, drawing `simple-icons:quarto` in the Quarto blue:
+
+| Source | Renders as |
+| --- | --- |
+| `{{{< quarto >}}}` | {{< quarto >}} |
+| `{{{< quarto size=2x >}}}` | {{< quarto size=2x >}} |
+
+: The `quarto` shortcode, which takes the same attributes as `iconify`. {.striped .hover tbl-colwidths="[55,45]"}
+
+## Defaults
+
+Set them once and drop them from every shortcode:
+
+```yaml
+extensions:
+  iconify:
+    set: octicon
+    size: 1.2em
+    inline: true
+```
+
+With a default set, `{{{< iconify rocket-16 >}}}` is enough: {{< iconify rocket-16 >}}.
+
+## When an icon cannot be loaded
+
+```yaml
+extensions:
+  iconify:
+    fallback: "•"
+```
+
+The fallback is shown when the name is wrong, the CDN is unreachable, or the reader is offline.
+
+Preloading avoids the question entirely, and needs the filter as well as the shortcode:
+
+```yaml
+filters:
+  - iconify
+extensions:
+  iconify:
+    preload:
+      - icons/octicon.json
+```
+
+## Source
+
+The repository ships a short, standalone starting point you can copy: [`example.qmd`](https://github.com/mcanouil/quarto-iconify/blob/main/example.qmd).

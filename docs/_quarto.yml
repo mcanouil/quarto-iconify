@@ -1,0 +1,130 @@
+project:
+  type: atelier
+  # Generates changelog.qmd from CHANGELOG.md and removes it afterwards. The
+  # leading ./ is required; a bare name fails to spawn. The scripts live in
+  # _scripts/, whose leading underscore keeps Quarto from treating it as
+  # content.
+  #
+  # The iconify extension itself cannot be staged here. Quarto builds its
+  # extension registry while reading this file, before any pre-render script
+  # runs, and does not follow symlinks, so a shortcode from a linked or
+  # pre-render-copied extension is reported as not found.
+  # ./_scripts/sync-extension.sh copies it from the repository root beforehand
+  # instead: run that script before previewing locally, and note that the
+  # Pages workflow runs it before every render. See
+  # _extensions/README.md.
+  pre-render: ./_scripts/pre-render.sh
+  post-render: ./_scripts/post-render.sh
+
+website:
+  title: "Iconify"
+  description: "A Quarto shortcode for Iconify icons: over two hundred thousand of them, in HTML and Typst."
+  # No trailing slash: Quarto builds the social image URL by concatenating this
+  # with a leading-slash image path, without normalising.
+  site-url: &site-url https://m.canouil.dev/quarto-iconify
+  repo-url: https://github.com/mcanouil/quarto-iconify
+  # The Quarto project root is `docs/`, so without this every edit and issue
+  # link points at a path one level up from the page it was built for.
+  repo-subdir: docs
+  page-navigation: true
+  # atelier defaults search to an overlay button in the navbar. With no navbar
+  # the search belongs in the sidebar, as a field rather than a button.
+  search:
+    location: sidebar
+    type: textbox
+  # Book-like layout: a docked sidebar carries the navigation and the search,
+  # and there is no navbar. The gitlink widget replaces the sidebar tool
+  # pointing at #gitlink-widget, and atelier themes the docked sidebar from the
+  # same tokens as the navbar it replaces.
+  navbar: false
+  sidebar:
+    # `background` and `foreground` are left out: atelier repaints a docked
+    # sidebar from the chrome palette, so neither has any effect on it.
+    style: docked
+    search: true
+    pinned: true
+    align: center
+    collapse-level: 2
+    tools:
+      - href: "#gitlink-widget"
+        text: "GitHub"
+        icon: github
+    # Plain labels, no icons: Quarto expands no shortcode in a sidebar item's
+    # text, and the raw web component leaks out of the sidebar into the
+    # breadcrumbs, which reuse the same string.
+    contents:
+      - href: index.qmd
+        text: "Home"
+      - href: reference.qmd
+        text: "Reference"
+      - href: examples.qmd
+        text: "Examples"
+      - text: "---"
+      - href: changelog.qmd
+        text: "Changelog"
+  page-footer:
+    left: |
+      Powered by [{{< iconify simple-icons:quarto title="Quarto" label="Quarto" >}} Quarto](https://quarto.org).
+    center: |
+      &copy; []{#current-year} [Mickaël Canouil](https://mickael.canouil.fr). [{{< iconify octicon:heart-fill-16 title="Heart" label="Heart" >}} Sponsor](https://github.com/sponsors/mcanouil?o=esb).
+    right: |
+      Licence: [MIT](https://github.com/mcanouil/quarto-iconify?tab=MIT-1-ov-file#readme).
+
+brand: _extensions/mcanouil/pastel/brand.yml
+
+format:
+  # Configure the extension format by name. Declaring `html` would replace
+  # `atelier-html` rather than configure it, silently dropping the theme, the
+  # bundled scripts, and the social-metadata filter.
+  atelier-html:
+    theme:
+      light:
+        - brand
+        - _extensions/mcanouil/pastel/pastel.scss
+        - assets/theme.scss
+      dark:
+        - brand
+        - _extensions/mcanouil/pastel/pastel.scss
+        - assets/theme.scss
+
+filters:
+  - at: pre-quarto
+    path: code-window
+  - at: post-quarto
+    path: gitlink
+
+extensions:
+  # Quarto keeps the `website` block out of the metadata it hands to Lua
+  # filters, so the social-metadata filter cannot read `website.site-url` to
+  # build `og:url` and the canonical link. The anchor above republishes the same
+  # scalar here, without a second copy of the string.
+  atelier:
+    site-url: *site-url
+  gitlink:
+    # Widget only: the platform and repository come from `website.repo-url`, and
+    # in-text reference rewriting stays off so prose is left alone.
+    enabled: false
+    widget:
+      enabled: true
+      extra-links:
+        - text: "Ideas / Feature Requests"
+          href: "/discussions/categories/ideas"
+          icon: discussion
+        - text: "Q&A"
+          href: "/discussions/categories/q-a"
+          icon: question
+      sponsor: "mcanouil"
+      # There is no navbar; the widget sits in the docked sidebar instead, so
+      # there are no navbar tools to restyle.
+      style-navbar-tools: false
+  code-window:
+    style: "macos"
+    # Blocks here are configuration to copy rather than files to save, so a
+    # filename derived from the language would only add noise.
+    auto-filename: false
+  iconify:
+    # Resolved from the copy sync-extension.sh takes from the repository root,
+    # not from a committed dependency: this repository publishes iconify, so
+    # the site runs the version being released. The footer glyphs on every page
+    # are drawn by it.
+    set: octicon

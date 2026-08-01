@@ -1,0 +1,337 @@
+/*-- scss:functions --*/
+
+// atelier defines the same helper, but a stylesheet cannot rely on another
+// bundle's functions being in scope, so it is redefined here. brand injects a
+// different $body-bg / $body-color into the light and dark compiles, so this
+// resolves to the correct per-scheme surface from one source of truth.
+@function pastel-mix($weight) {
+  @return mix($body-bg, $body-color, $weight);
+}
+
+/*-- scss:defaults --*/
+
+// The pastels are decoration only in the light scheme: they measure 1.25 to
+// 1.72 against the paper, below even the 3:1 threshold for interface
+// elements. Tints use them at low alpha; every edge is a pastel-mix() rule or
+// a deep-pigment line that is actually perceivable.
+$pastel-tint-alpha: 0.28 !default;
+
+// 0.07, not the 0.045 first tried: on toned paper the lower value is invisible.
+$pastel-grain-opacity: 0.07 !default;
+
+/*-- scss:rules --*/
+
+// ===========================================================================
+// SCHEME SELECTION
+// ===========================================================================
+// Quarto compiles this file twice, once per colour scheme, and brand injects a
+// different $body-bg into each. Comparing its lightness is therefore how a
+// single stylesheet picks the deep hue for light paper and the chalk hue for
+// the dark ground, at compile time, with no duplicated blocks.
+$pastel-light: lightness($body-bg) > 50%;
+
+@function pastel-ink($deep, $chalk) {
+  @return if($pastel-light, $deep, $chalk);
+}
+
+// A tint of a stick over the page background. The dark scheme takes a lighter
+// hand: mixing a pale pastel into a dark ground lifts far more than the same
+// weight does on paper, so an equal weight would make the dark surfaces shout.
+@function pastel-tint($stick, $light-weight, $dark-weight: null) {
+  $w: if($pastel-light, $light-weight, if($dark-weight, $dark-weight, $light-weight));
+  @return mix($stick, $body-bg, $w);
+}
+
+$pastel-h1: pastel-ink($brand-mint-deep, $brand-mint-chalk);
+$pastel-h2: pastel-ink($brand-sky-deep, $brand-sky-chalk);
+$pastel-h3: pastel-ink($brand-peach-deep, $brand-peach-chalk);
+$pastel-accent: pastel-ink($brand-coral-deep, $brand-coral-chalk);
+$pastel-link: pastel-ink($brand-mint-deep, $brand-mint-chalk);
+
+// The table of contents panel, a sky tint of the page in each scheme. It reads
+// as a panel without becoming a block of colour: 1.05 against the paper and
+// 1.30 against the night.
+$pastel-panel: pastel-tint($brand-sky, 12%);
+$pastel-blush: pastel-tint(pastel-ink($brand-coral, $brand-coral-chalk), 18%, 8%);
+$pastel-header: pastel-tint(pastel-ink($brand-lemon, $brand-lemon-chalk), 22%, 8%);
+
+// ===========================================================================
+// HEADINGS
+// ===========================================================================
+// Quarto leaves every heading the same colour as body text, so a page has no
+// visual hierarchy beyond size. Three of the six sticks carry it instead.
+h1, .h1, #title-block-header .title {
+  color: $pastel-h1;
+}
+
+h2, .h2 {
+  color: $pastel-h2;
+  border-bottom-color: pastel-mix(85%);
+}
+
+h3, .h3, h4, .h4 {
+  color: $pastel-h3;
+}
+
+h5, .h5, h6, .h6 {
+  color: pastel-mix(35%);
+}
+
+// ===========================================================================
+// LINKS
+// ===========================================================================
+// Quarto ships no hover treatment at all, so a link gives no feedback.
+a {
+  color: $pastel-link;
+
+  &:hover,
+  &:focus-visible {
+    color: $pastel-accent;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+  }
+}
+
+// `strong` inherits 0.6 alpha from the theme, which makes emphasis fainter
+// than the text it is meant to emphasise. Put it back at full strength.
+strong, b {
+  color: $body-color;
+  font-weight: 700;
+}
+
+// ===========================================================================
+// CODE
+// ===========================================================================
+// Code blocks are left alone. The `code-window` extension decorates them, and
+// atelier already gives them a scheme-correct surface, so a third treatment
+// here would only fight both. Only inline code is styled.
+//
+// Everything here is anchored on #quarto-document-content. Quarto loads its own
+// stylesheet after the theme bundle, and atelier's rules sit later in the bundle
+// than this file, so at equal specificity both win on order alone. An id
+// selector settles it outright, and scoping to the article is honest about
+// intent: these rules are for page content, not for chrome.
+#quarto-document-content {
+  // Inline code sits in running prose, so it takes the quietest tint of all
+  // and the accent hue, which keeps it distinct from a link.
+  code:not(.sourceCode) {
+    color: $pastel-accent;
+    background-color: $pastel-blush;
+    padding: 0.1em 0.35em;
+    border-radius: 0.25rem;
+  }
+
+  // Quarto styles code inside prose with its own, more specific selectors.
+  p code.sourceCode,
+  li code.sourceCode,
+  td code.sourceCode {
+    background-color: $pastel-blush;
+  }
+
+  // Bootstrap 5.3 paints every cell through var(--bs-table-bg), so the variable
+  // is re-pointed here rather than fighting `.table > :not(caption) > * > *`.
+  // Quarto then resets the header cell background to transparent further down
+  // its own stylesheet, so the colour is also set outright on the cell.
+  .table > thead {
+    --bs-table-bg: #{$pastel-header};
+
+    > tr > th {
+      background-color: $pastel-header;
+    }
+  }
+
+  .table > :not(caption) > * > * {
+    border-bottom-color: pastel-mix(85%);
+  }
+}
+
+// ===========================================================================
+// TABLE OF CONTENTS
+// ===========================================================================
+// The active entry was previously identical to every other entry, so the panel
+// never showed where the reader was.
+//
+// The contents render inside #quarto-margin-sidebar, which carries Quarto's
+// `sidebar` class and so inherits $sidebar-fg. atelier sets that per colour
+// scheme, so the entries are already the right ink for the page and the panel
+// is a tint of the page like every other surface here.
+//
+// One id is enough for the panel and the rail: Quarto's competing rule carries
+// two classes and three elements, which an id outranks. The hovered and active
+// entries are pinned with !important, which no amount of specificity beats, so
+// those two declarations match it.
+#quarto-margin-sidebar {
+  nav[role="doc-toc"] {
+    background-color: $pastel-panel;
+    border-radius: $border-radius;
+    padding: 0.75rem 0.5rem;
+  }
+
+  // `.toc-actions` (Edit this page, Report an issue) sits inside this same nav,
+  // so it is excluded: those are Quarto's own controls, not contents entries,
+  // and they keep their own styling.
+  //
+  // Colour and the rail only. Quarto indents each level of the contents through
+  // a ladder of descendant selectors, from
+  // `nav[role=doc-toc] ul>li>ul>li>a` at 1.2em down to 6em, and the id above
+  // outranks every rung of it. Setting `padding-left` here therefore flattens
+  // the whole tree to one indent, so the padding is left alone.
+  nav[role="doc-toc"] a:not(.toc-action) {
+    opacity: 0.8;
+    border-left: 2px solid $pastel-link;
+
+    &:hover {
+      opacity: 1;
+      color: $pastel-link !important;
+    }
+
+    &.active {
+      opacity: 1;
+      color: $pastel-accent !important;
+      border-left-color: $pastel-accent;
+      font-weight: 600;
+    }
+  }
+}
+
+// ===========================================================================
+// THE CHROME
+// ===========================================================================
+// Nothing. From atelier 0.9.0 the navbar, the page footer, and a docked sidebar
+// are one chrome derived from the brand: a tint of the page in each scheme,
+// with the brand primary as its accent, both inks lifted by theme-contrast()
+// if they fall under AA. That is already this palette.
+//
+// Before 0.9.0 the chrome was pinned dark in both schemes and this file carried
+// fourteen --atelier-navbar-* and --atelier-sidebar-* declarations to re-point
+// it. Overriding the tokens is the wrong lever anyway: Quarto bakes the chrome
+// foreground into the reader-mode and collapsed-navbar glyphs and contrasts the
+// sidebar link colours against $sidebar-bg, none of which CSS can reach. Set
+// $atelier-chrome and the pinned palettes in a defaults block if a repository
+// ever needs to pin the bars again.
+
+// ===========================================================================
+// PAPER TOOTH
+// ===========================================================================
+// A fixed overlay rather than a background-image on `body`: it then does not
+// scroll with the content, does not repaint on every scroll step, and cannot
+// be painted over by a child that sets its own background.
+//
+// The texture is inlined as a data URI rather than referenced from
+// assets/grain.svg. Quarto resolves a url() in a theme file against the project
+// that consumes it, not against the extension that ships it, so a relative path
+// is looked for in the site's own assets/ and the render fails. Inlining also
+// costs no extra request, and the source stays readable in assets/grain.svg.
+//
+// Fractal noise with `stitchTiles` gives real paper tooth with a seam-free
+// tile; the colour matrix drops it to grey and the transfer function flattens
+// it to a low-alpha darkening, so one texture serves both colour schemes.
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: $pastel-grain-opacity;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='t' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch' result='n'/%3E%3CfeColorMatrix in='n' type='saturate' values='0' result='g'/%3E%3CfeComponentTransfer in='g'%3E%3CfeFuncA type='linear' slope='0.55' intercept='-0.18'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url%28%23t%29'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 160px 160px;
+}
+
+// The texture is decorative, and a reader who has asked for less motion and
+// less visual noise should not have to see it.
+@media (prefers-reduced-transparency: reduce) {
+  body::before {
+    display: none;
+  }
+}
+
+// ===========================================================================
+// TINTS
+// ===========================================================================
+// Callouts keep Quarto's own left edge, which carries the deep pigment, and
+// gain a pastel wash behind the body. The wash is never the only signal.
+$pastel-callouts:
+  ("note", $brand-sky, $brand-sky-deep),
+  ("tip", $brand-mint, $brand-mint-deep),
+  ("important", $brand-coral, $brand-coral-deep),
+  ("caution", $brand-lemon, $brand-lemon-deep),
+  ("warning", $brand-peach, $brand-peach-deep);
+
+// The header wash sits on top of the body wash, so the two compound, and the
+// same multiplier lifts a dark ground far more than a light one: at 1.4 the
+// lemon header resolved to rgb(145, 137, 104), leaving mist text at 2.92
+// against it. The dark scheme therefore takes a lighter hand here too, which
+// puts the worst of the five at 4.81.
+$pastel-callout-header-alpha: if(
+  $pastel-light,
+  $pastel-tint-alpha * 1.4,
+  $pastel-tint-alpha * 0.5
+);
+
+@each $name, $pastel, $deep in $pastel-callouts {
+  .callout.callout-style-default.callout-#{$name} {
+    background-color: rgba($pastel, $pastel-tint-alpha);
+    border-left-color: $deep;
+
+    .callout-header {
+      background-color: rgba($pastel, $pastel-callout-header-alpha);
+    }
+  }
+}
+
+// Striped tables take the lightest possible mint wash. The rule between rows
+// stays a pastel-mix() edge, so the table is still readable if the tint is not.
+//
+// Bootstrap 5.3 resolves the stripe through --bs-table-striped-bg, which
+// .table-striped then assigns to --bs-table-bg-type. Setting the older
+// --bs-table-accent-bg has no effect and the stripe silently stays transparent.
+.table.table-striped {
+  --bs-table-striped-bg: #{rgba($brand-mint, 0.16)};
+  --bs-table-striped-color: inherit;
+}
+
+.table > :not(caption) > * > * {
+  border-bottom-color: pastel-mix(85%);
+}
+
+// Tabset panels sit on the same wash as a note callout, so a page that mixes
+// the two does not look like it uses two different surfaces.
+.panel-tabset > .tab-content {
+  background-color: rgba($brand-sky, $pastel-tint-alpha * 0.5);
+}
+
+// ===========================================================================
+// CHALK EDGES
+// ===========================================================================
+// A pastel line alone is invisible on the light paper, so shapes keep a
+// pastel-mix() edge and the colour goes into the fill instead.
+.callout.callout-style-default,
+.panel-tabset > .tab-content {
+  border-radius: $border-radius;
+}
+
+blockquote.blockquote {
+  border-left: 3px solid $brand-mint;
+  background-color: rgba($brand-mint, $pastel-tint-alpha * 0.45);
+  padding: 0.6rem 1rem;
+  border-radius: 0 $border-radius $border-radius 0;
+}
+
+// Horizontal rules are the one place a pure chalk stroke works, because
+// nothing depends on seeing them, so the rule sweeps the whole box of sticks.
+hr:not(.sidebar-divider) {
+  border: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba($brand-mint, 0.7) 12%,
+    rgba($brand-sky, 0.7) 30%,
+    rgba($brand-lemon, 0.7) 50%,
+    rgba($brand-peach, 0.7) 70%,
+    rgba($brand-coral, 0.7) 88%,
+    transparent
+  );
+  opacity: 0.9;
+}
