@@ -125,6 +125,40 @@ h6 {
 }
 
 // ===========================================================================
+// FRAMED EMBEDS
+// ===========================================================================
+// The one class in this file an author opts into by typing it, rather than a
+// repaint of markup Quarto emits on its own; a second such class belongs here
+// too. It lands on the element itself: Pandoc writes an image whose target is
+// not an image as a bare <embed class="embed-art"> inside a paragraph, with no
+// wrapper to hang a descendant selector on, so `margin-inline: auto` is what
+// centres it rather than a `text-align: center` wrapper around it.
+.embed-art {
+  display: block;
+  width: var(--atelier-embed-art-width, 560px);
+  max-width: 100%;
+  aspect-ratio: var(--atelier-embed-art-ratio, 1.5);
+  // Without this, an <img> whose own ratio differs from the card's is
+  // stretched to fill it; `contain` letterboxes it instead.
+  object-fit: contain;
+  margin-inline: auto;
+  padding: 0.75rem;
+  background: $body-bg;
+  border: 1.5px solid $body-color;
+  border-radius: $border-radius-lg;
+  box-shadow: 4px 4px 0 0 $body-color;
+  transform: rotate(var(--atelier-embed-art-tilt, -1.25deg));
+  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+// Hover relaxes the card toward straight. Taking a proportion of the resting
+// tilt rather than a second absolute angle keeps the gesture coherent at any
+// angle an author sets, and in either direction.
+.embed-art:hover {
+  transform: rotate(calc(var(--atelier-embed-art-tilt, -1.25deg) * 0.32));
+}
+
+// ===========================================================================
 // CODE SURFACES
 // ===========================================================================
 // Quarto bakes a fixed grey into div.sourceCode. Quarto marks the scheme with
@@ -840,9 +874,20 @@ $scrollbar-thumb: body-mix(72%);
 // ===========================================================================
 // MOTION GUARD
 // ===========================================================================
+// Every motion the theme owns or inherits is cancelled here, in one place. The
+// navbar selectors carry no transition from this file: they cancel Bootstrap's.
 @media (prefers-reduced-motion: reduce) {
   .navbar .nav-link,
-  .navbar .dropdown-item {
+  .navbar .dropdown-item,
+  .panel-tabset .nav-tabs .nav-link,
+  .embed-art {
     transition: none;
+  }
+
+  // Dropping the transition alone would leave the tilt change as an instant
+  // snap, which is still the decorative motion the preference asks for less
+  // of; hold the card at its resting angle instead.
+  .embed-art:hover {
+    transform: rotate(var(--atelier-embed-art-tilt, -1.25deg));
   }
 }
