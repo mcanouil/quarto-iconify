@@ -8,14 +8,6 @@
 /_variables.yml
 
 # The extension this repository publishes, copied from the root by
-# _scripts/sync-extension.sh. Everything directly under _extensions/ is
-# generated; the website's own dependencies live under an owner directory and
-# are re-included. See _extensions/README.md.
-/_extensions/*/
-!/_extensions/mcanouil/
-
-# The repository root ignores *.html, which the extensions above ship as
-# template partials: atelier alone carries six under html/scripts/. Left
-# excluded they are missing from the checkout the Pages workflow renders, and
-# the site loses the scripts without failing.
-!/_extensions/mcanouil/**/*.html
+# _scripts/sync-extension.sh under a `local` owner. Everything else under
+# _extensions/ is a committed dependency. See _extensions/README.md.
+/_extensions/local/

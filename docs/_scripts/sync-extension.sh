@@ -3,9 +3,9 @@
 # Documentation Extension Sync
 # Mirrors the repository's own extension into the documentation project.
 #
-# @license MIT License
-# @copyright 2026 Mickaël Canouil
-# @author Mickaël Canouil
+# @license %%license%%
+# @copyright %%year%% %%author%%
+# @author %%author%%
 #
 # The website demonstrates the extension it documents, so the extension has to
 # be resolvable from docs/. Quarto builds its extension registry while reading
@@ -24,10 +24,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCS_DIR="$(dirname "${SCRIPT_DIR}")"
 ROOT_DIR="$(dirname "${DOCS_DIR}")"
-# Directly under _extensions/, not under an owner directory: the owner
-# directories hold the website's own installed dependencies, so keeping this
-# copy beside them makes generated and vendored easy to tell apart.
-TARGET_DIR="${DOCS_DIR}/_extensions"
+# Under a `local` owner directory: the copy is generated from this repository
+# rather than installed from anywhere, and saying so in the path keeps it
+# distinct from the vendored dependencies. It also avoids a collision when the
+# extension is named after its owner.
+TARGET_DIR="${DOCS_DIR}/_extensions/local"
 
 for extension_dir in "${ROOT_DIR}"/_extensions/*/; do
 	[[ -f "${extension_dir}_extension.yml" ]] || continue
@@ -38,6 +39,6 @@ for extension_dir in "${ROOT_DIR}"/_extensions/*/; do
 	rm -rf "${target}"
 	mkdir -p "${TARGET_DIR}"
 	cp -R "${extension_dir%/}" "${target}"
-	printf '[sync] _extensions/%s -> docs/_extensions/%s\n' \
+	printf '[sync] _extensions/%s -> docs/_extensions/local/%s\n' \
 		"${extension_name}" "${extension_name}"
 done
