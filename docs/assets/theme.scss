@@ -3,29 +3,3 @@
 // Per-repository overrides only. The palette comes from the shared pastel
 // extension, which is applied just before this file, so anything set here wins
 // the cascade.
-
-// Retested against atelier 0.9.0, whose sidebar tools row does not settle this:
-// without the three rules below the column's scrollWidth goes to 299 against a
-// clientWidth of 265, and the menu's right edge to 299 against the column's 266.
-//
-// Quarto gives the docked sidebar `overflow: auto` on both axes, so anything
-// wider than the column scrolls sideways rather than being clipped. The gitlink
-// dropdown is anchored to its trigger's left edge and sized to its content, and
-// the trigger sits centred in the tools row, so the menu runs past the right
-// edge and raises a horizontal scrollbar. Anchor it to the tools row instead,
-// which is full width, so it stays inside the column.
-#quarto-sidebar .sidebar-tools-main.gitlink-widget-tools {
-  position: relative;
-}
-
-// The widget itself is positioned, so it would otherwise be the dropdown's
-// containing block and squeeze the menu to the trigger's own width.
-#quarto-sidebar .gitlink-widget-tools .gitlink-widget {
-  position: static;
-}
-
-#quarto-sidebar .gitlink-widget-tools .gitlink-widget-dropdown {
-  left: 0;
-  right: 0;
-  width: auto;
-}
