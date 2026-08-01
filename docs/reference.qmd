@@ -1,0 +1,99 @@
+---
+title: "Reference"
+subtitle: "Every option the iconify extension accepts."
+description: "The complete iconify configuration: the shortcode syntax, every attribute, document defaults, offline preloading, and the Typst SVG cache."
+---
+
+## Shortcode
+
+```markdown
+{{{< iconify set:icon >}}}
+{{{< iconify set icon >}}}
+```
+
+Both forms are accepted.
+With a default set configured, the set can be left out entirely.
+
+Icon names come from [icon-sets.iconify.design](https://icon-sets.iconify.design).
+
+## Attributes
+
+| Attribute | Description |
+| --- | --- |
+| `size` | A keyword or CSS value: `large`, `2x`, `1.5em`. |
+| `width`, `height` | Explicit dimensions. |
+| `flip` | `horizontal`, `vertical`, or `horizontal,vertical`. |
+| `rotate` | `90deg`, `180deg`, or a quarter-turn count such as `1`. |
+| `color` | Typst output only. Applied to monochrome icons through the Iconify API. |
+| `inline` | `true` or `false`. Inline icons sit on the text baseline. |
+| `mode` | `svg`, `style`, `bg`, or `mask`. |
+| `style` | Extra inline CSS. |
+| `label` | An accessible label, written as `aria-label`. |
+| `title` | A tooltip. |
+
+: Attributes accepted on the shortcode. {.striped .hover tbl-colwidths="[22,78]"}
+
+::: {.callout-note}
+An icon that carries meaning needs a `label`.
+Without one it is decoration, which is right for an icon beside text that already says the same thing.
+:::
+
+## Document defaults
+
+Every attribute above has a matching option, applied to all icons:
+
+```yaml
+extensions:
+  iconify:
+    set: octicon
+    size: 1.2em
+    inline: true
+```
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `set` | `octicon` | The icon set used when the shortcode names none. |
+| `size`, `width`, `height` | | Default dimensions. |
+| `flip`, `rotate`, `style` | | Default transformations and CSS. |
+| `inline` | `true` | Whether icons sit inline by default. |
+| `mode` | | Default rendering mode. |
+| `fallback` | | Text or an emoji shown when an icon cannot be loaded, whether the name is wrong, the CDN is unreachable, or the reader is offline. |
+| `preload` | | Paths to Iconify collection JSON files, for offline rendering. |
+
+: Document and project options. {.striped .hover tbl-colwidths="[26,14,60]"}
+
+An attribute on a shortcode overrides the default for that icon.
+
+## Offline icons
+
+```yaml
+filters:
+  - iconify
+extensions:
+  iconify:
+    preload:
+      - icons/octicon.json
+```
+
+Preloading needs the filter to be active, not the shortcode alone.
+The named collections are then available without the CDN.
+
+## Typst output
+
+An icon in Typst output is a real SVG, retrieved once and cached on disk.
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `typst-cache` | `.quarto/iconify-svg` | Where the SVGs are kept, relative to the project root. Point it at a tracked directory to commit a reproducible offline cache. |
+| `typst-cache-max-age` | `30` | Days before an unused entry is pruned. `0` disables pruning by age. |
+| `typst-cache-max-entries` | `0` | Cap on the number of entries, least recently used pruned first. `0` is unlimited. |
+
+: The Typst SVG cache. {.striped .hover tbl-colwidths="[28,16,56]"}
+
+`color` applies to monochrome icons in Typst, since the colour is baked into the retrieved SVG.
+
+## Limitations
+
+- HTML and Typst only.
+- In HTML the icon is fetched from the Iconify CDN at page load unless preloaded, so a reader offline sees the `fallback`.
+- `color` is Typst only; in HTML use `style` or the surrounding text colour.

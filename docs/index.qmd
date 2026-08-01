@@ -1,0 +1,79 @@
+---
+title: "Iconify"
+subtitle: "Two hundred thousand icons, as a shortcode."
+description: "What the iconify extension does, how to install it, and the smallest shortcode that draws an icon."
+authors:
+  - name: "Mickaël CANOUIL, _Ph.D._"
+    orcid: "0000-0002-3396-4549"
+    url: "https://mickael.canouil.fr"
+---
+
+Quarto ships Bootstrap Icons and Font Awesome, which is a few thousand icons.
+[Iconify](https://iconify.design) collects over two hundred thousand, from more than a hundred sets, behind one naming scheme.
+
+`iconify` puts them behind one shortcode: {{< iconify octicon:rocket-16 >}} `{{{< iconify octicon:rocket-16 >}}}` draws that rocket, in HTML and in Typst alike.
+
+The glyphs in this site's footer are drawn by it.
+
+## Installation
+
+```bash
+quarto add {{< var extension.reference >}}
+```
+
+This will install the extension under the `_extensions` subdirectory.
+If you are using version control, you will want to check in this directory.
+
+Or install it from your editor with [Quarto Wizard](https://m.canouil.dev/quarto-wizard):
+
+::: {.btn-group role="group" aria-label="Quarto Wizard installer options"}
+
+[Visual Studio Code](vscode://mcanouil.quarto-wizard/install?repo={{< var extension.wizard-reference >}}){.btn .btn-outline-primary title="Install {{< var extension.reference >}} in Visual Studio Code using the Quarto Wizard extension."}
+[Positron](positron://mcanouil.quarto-wizard/install?repo={{< var extension.wizard-reference >}}){.btn .btn-outline-primary title="Install {{< var extension.reference >}} in Positron using the Quarto Wizard extension."}
+[VSCodium](vscodium://mcanouil.quarto-wizard/install?repo={{< var extension.wizard-reference >}}){.btn .btn-outline-primary title="Install {{< var extension.reference >}} in VSCodium using the Quarto Wizard extension."}
+
+:::
+
+## Quick start
+
+Name the set and the icon, either way round:
+
+```markdown
+{{{< iconify octicon:rocket-16 >}}}
+{{{< iconify octicon rocket-16 >}}}
+```
+
+Both draw {{< iconify octicon:rocket-16 >}}.
+
+Size, rotate, colour, and label it with attributes:
+
+```markdown
+{{{< iconify mdi:home size=2x >}}}
+{{{< iconify mdi:home rotate=90deg label="Home" >}}}
+```
+
+{{< iconify mdi:home size=2x >}} and {{< iconify mdi:home rotate=90deg label="Home" >}}.
+
+Set a default icon set so the set can be dropped:
+
+```yaml
+extensions:
+  iconify:
+    set: octicon
+```
+
+See the [Reference](reference.qmd) for every option, and the [Examples](examples.qmd) for the attributes rendered.
+
+## Where it works
+
+HTML formats, and Typst.
+
+In HTML the icon is a web component fetched from the Iconify CDN, with a local fallback.
+For Typst the SVG is retrieved once and cached, so a build repeats without the network; the [Reference](reference.qmd#typst-output) covers the cache.
+
+## Links
+
+- [Reference](reference.qmd) for every option and attribute.
+- [Examples](examples.qmd) for icons and their attributes.
+- [Changelog](changelog.qmd) for what each release changed.
+- [Source and issues](https://github.com/mcanouil/quarto-iconify) on GitHub.

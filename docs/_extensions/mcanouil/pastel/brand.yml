@@ -1,0 +1,129 @@
+# Pastel - Shared Brand For The Quarto Extension Documentation Websites
+# A box of soft pastels: colourful and playful, chalky and muted.
+#
+# @license MIT
+# @copyright 2026 Mickaël Canouil
+# @author Mickaël Canouil
+#
+# Six sticks rather than two or three, so the family reads as cheerful, but each
+# one is greyed back to roughly 20 to 33 percent saturation, so it reads as
+# chalk rather than as candy. That is what a real box of soft pastels looks
+# like: a wide, happy range of quiet colours.
+#
+# `coral-deep` is #A04238 rather than a lighter red: on the tinted table of
+# contents panel and the inline-code blush, #B04A40 fell to 4.54 and 4.45, so
+# inline code failed AA outright. Lightening those two surfaces instead was
+# rejected, because at the lightness required the inline surface disappears
+# against the paper.
+#
+# A pastel behaves differently depending on what it is drawn on, and the palette
+# uses both behaviours:
+#
+#   - On light paper the pastel is a tint, and a deeper mix of the same hue
+#     carries text and links.
+#   - On the dark column and in dark mode the pastel is the ink.
+#
+# That makes the dark scheme the more colourful one, which is what gives the
+# family its look.
+#
+# Every pastel measures between 1.20 and 1.65 against the light paper, well
+# below even the 3:1 threshold for interface elements. They are decoration only
+# in the light scheme: fills and tints, never text, and never a border that has
+# to be seen for the page to work. Each has a `-deep` companion carrying text at
+# 4.5:1 or better, and a `-chalk` companion for the dark scheme.
+#
+# Palette names deliberately avoid a bare trailing -light or -dark: brand reads
+# those as its own colour-scheme keys, so a name such as `ink-dark` is mistaken
+# for a scheme selector, which silently swaps the two backgrounds.
+#
+# Fonts are deliberately absent. The sites inherit Quarto's defaults rather
+# than fetching a typeface from a third party.
+
+meta:
+  name:
+    full: Pastel
+    short: Pastel
+  link:
+    home: https://m.canouil.dev/quarto-pastel/
+
+color:
+  palette:
+    # Grounds. The paper is toned rather than white, so the page reads warm
+    # before any accent lands on it.
+    paper: "#F6F1E6"
+    ink: "#2B2A26"
+    night: "#191C1F"
+    mist: "#E7EAEC"
+
+    # Surfaces derived from the grounds and the sticks. Each sits between 1.05
+    # and 1.28 against its ground: visible as a panel without becoming a block
+    # of colour.
+    #
+    # The dark variants are suffixed -night, not -dark: brand reads a trailing
+    # -dark as its own colour-scheme key, as the note above records.
+    panel: "#ECECE6"        # sky at 12% over paper, for the table of contents
+    panel-night: "#293036"
+    code-surface: "#EFEAE0"
+    code-surface-night: "#22262A"
+    blush: "#F3E7E2"        # inline code
+    blush-night: "#2A2325"
+    header-tint: "#F3EBD6"  # table header, lemon
+    header-tint-night: "#262521"
+
+    # The sticks. Each is a pastel for tints, a deep hue for light-scheme text,
+    # and a chalk variant for dark-scheme text.
+    mint: "#A9DCC9"
+    mint-deep: "#1C7059"
+    mint-chalk: "#9FD9C4"
+
+    sky: "#A6C9E2"
+    sky-deep: "#1D6790"
+    sky-chalk: "#9CC6E2"
+
+    lemon: "#EFDDA0"
+    lemon-deep: "#77620F"
+    lemon-chalk: "#E7D598"
+
+    coral: "#EDAFA8"
+    coral-deep: "#A04238"
+    coral-chalk: "#EBA9A1"
+
+    peach: "#EFC6A3"
+    peach-deep: "#8E5720"
+    peach-chalk: "#EAC09B"
+
+    sage: "#C3D3A8"
+    sage-deep: "#566B2E"
+    sage-chalk: "#BCCEA0"
+
+  background:
+    light: paper
+    dark: night
+  foreground:
+    light: ink
+    dark: mist
+
+  # Mint carries primary: it is the most distinctive of the six and, unlike
+  # coral or peach, a link drawn in it is never mistaken for a warning or an
+  # error in the extension output these sites exist to demonstrate.
+  primary:
+    light: mint-deep
+    dark: mint-chalk
+  secondary:
+    light: sky-deep
+    dark: sky-chalk
+  tertiary:
+    light: lemon-deep
+    dark: lemon-chalk
+  success:
+    light: sage-deep
+    dark: sage-chalk
+  info:
+    light: sky-deep
+    dark: sky-chalk
+  warning:
+    light: peach-deep
+    dark: peach-chalk
+  danger:
+    light: coral-deep
+    dark: coral-chalk
