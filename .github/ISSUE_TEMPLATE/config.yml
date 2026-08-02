@@ -1,8 +1,11 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
+  - name: Feature Request
+    url: https://github.com/mcanouil/quarto-iconify/discussions/new?category=ideas
+    about: Suggest an idea or a new feature here.
   - name: Support
-    url: https://github.com/mcanouil/quarto-iconify/discussions
+    url: https://github.com/mcanouil/quarto-iconify/discussions/new?category=q-a
     about: Please ask and answer questions here.
   - name: Issue with Quarto CLI
     url: https://github.com/quarto-dev/quarto-cli
-    about: Please report issues with the Quarto CLI here
+    about: Please report issues with the Quarto CLI here.
