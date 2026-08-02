@@ -1,11 +1,10 @@
 title: Pastel
 author: Mickaël Canouil
 version: 0.1.1
-# The Quarto version the brand and its stylesheet are developed and verified
-# against. quarto-atelier, which these sites are built on, requires >=1.9.36.
-quarto-required: ">=1.10.18"
+quarto-required: '>=1.10.18'
+source: mcanouil/quarto-pastel@0.1.1
+source-type: registry
 contributes:
   metadata:
     project:
       brand: brand.yml
-source: mcanouil/quarto-pastel@0.1.1
