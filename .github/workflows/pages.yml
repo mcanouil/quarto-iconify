@@ -30,7 +30,7 @@ permissions:
 
 jobs:
   pages:
-    uses: mcanouil/quarto-workflows/.github/workflows/pages.yml@main
+    uses: mcanouil/quarto-workflows/.github/workflows/pages.yml@v1
     permissions:
       contents: read
       pages: write

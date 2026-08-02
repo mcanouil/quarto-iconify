@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   release:
-    uses: mcanouil/quarto-workflows/.github/workflows/release.yml@main
+    uses: mcanouil/quarto-workflows/.github/workflows/release.yml@v1
     permissions:
       contents: write
       pull-requests: write
