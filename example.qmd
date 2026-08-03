@@ -66,11 +66,11 @@ Iconify API provides additional attributes: <https://docs.iconify.design/iconify
 Currently, this extension supports the following attributes:
 
 ```markdown
-{{{< iconify <set=...> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> <mode=...> <style=...> >}}}
+{{{< iconify <set=...> <icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <aria-hidden=...> <inline=...> <mode=...> <style=...> >}}}
 ```
 
 ```markdown
-{{{< iconify <set:icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <inline=...> <mode=...> <style=...> >}}}
+{{{< iconify <set:icon> <size=...> <width=...> <height=...> <flip=...> <rotate=...> <title=...> <label=...> <aria-hidden=...> <inline=...> <mode=...> <style=...> >}}}
 ```
 
 #### Available Attributes
@@ -88,6 +88,8 @@ Currently, this extension supports the following attributes:
 - `title`: Tooltip text for the icon. Default: `Icon <icon> from <set> Iconify.design set.`.
 
 - `label` (i.e., `aria-label`): Accessibility label for screen readers. Default: `Icon <icon> from <set> Iconify.design set.`.
+
+- `aria-hidden`: Boolean attribute (`true` or `false`). When `true`, the icon is decorative: `role`, `aria-label`, and `title` are all omitted, so assistive technology skips it. Use it when visible text beside the icon already carries the meaning, such as an icon inside a link that is already labelled. Default is `false`.
 
 - `inline`: Boolean attribute (`true` or `false`). When `true`, the icon is displayed inline with text. Default is `true`.
 
@@ -115,7 +117,7 @@ extensions:
 
 :::: {.callout-note}
 
-The attributes `icon`, `title`, and `label` must be defined in the shortcode itself and cannot have default values in the YAML header.
+The attributes `icon`, `title`, `label`, and `aria-hidden` must be defined in the shortcode itself and cannot have default values in the YAML header.
 
 :::
 

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### New Features
+
+- feat: Add the `aria-hidden` attribute, marking an icon as decorative. `aria-hidden=true` omits `role`, `aria-label`, and `title` in HTML, and the `alt` text in Typst, so an icon placed beside visible text no longer doubles the accessible name of the surrounding link. It is a shortcode attribute only, with no document-level default.
+
+### Documentation
+
+- docs: Mark the documentation website's own footer icons decorative, so the two footer links are announced as "Quarto" and "Sponsor" rather than "Quarto Quarto" and "Heart Sponsor".
+
 ## 4.0.1 (2026-08-01)
 
 ### Bug Fixes
