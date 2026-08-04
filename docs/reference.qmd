@@ -28,7 +28,7 @@ A set or icon name outside the pattern Iconify enforces, lowercase letters and d
 ```
 
 Draws `simple-icons:quarto` in the Quarto blue, `#74aadb`: {{< quarto >}}.
-It takes the same attributes as `iconify`, except that `label` and `title` are fixed to `Quarto icon`.
+It takes the same attributes as `iconify`, except that `label` and `title` are fixed to `Quarto icon`, or dropped entirely under `aria-hidden="true"`.
 A `style` attribute is kept, with its `color` replaced by the Quarto blue.
 
 ## Attributes
@@ -45,6 +45,7 @@ A `style` attribute is kept, with its `color` replaced by the Quarto blue.
 | `style` | Extra inline CSS, written before the `font-size` that `size` generates. |
 | `label` | The `aria-label`. Replaces the generated one. |
 | `title` | The tooltip. Replaces the generated one. |
+| `aria-hidden` | `true` marks the icon decorative, dropping `role`, `aria-label`, and `title`. |
 | `fallback` | Text or an emoji revealed when the icon fails to load. |
 
 : Attributes accepted on both shortcodes. {.striped .hover tbl-colwidths="[22,78]"}
@@ -66,17 +67,29 @@ Anything else warns and leaves the size alone.
 
 ### Accessibility
 
-Every icon carries `role="img"`, an `aria-label`, and a `title`.
-Left unset, both read `Icon <name> from <set> Iconify.design set.`, which a screen reader announces verbatim.
+An icon carries `role="img"`, an `aria-label`, and a `title` by default.
+Left unset, both read `Icon <name> from <set> Iconify.design set.`, which a screen reader announces verbatim, so set `label` on every icon that carries meaning.
+
+An icon that carries no meaning of its own is decorative, and takes `aria-hidden="true"` instead:
+
+```markdown
+[{{{< iconify octicon:heart-fill-16 aria-hidden=true >}}} Sponsor](https://github.com/sponsors/mcanouil)
+```
+
+That icon is emitted as `<iconify-icon aria-hidden="true" …>`, with no `role`, no `aria-label`, and no `title`, so it is skipped rather than announced and no tooltip appears over it.
+Without it the link above is announced as "Heart Sponsor" and the word beside the icon is read twice.
 
 ::: {.callout-note}
-Set `label` on every icon that carries meaning, and on every icon that does not.
-There is no decorative mode: an icon with no `label` is announced by its set and file name rather than skipped.
+Use `aria-hidden` only where visible text beside the icon already says what the icon says.
+An icon standing alone, such as a bare link to a social profile, is the meaning and needs a `label`.
 :::
+
+`aria-hidden` takes `true` or `false`; any other value warns and leaves the icon announced.
+Setting it alongside `label` or `title` warns and discards both, since a decorative icon carries neither.
 
 ## Document defaults
 
-Every attribute except `label` and `title` has a matching option, applied to all icons:
+Every attribute except `label`, `title`, and `aria-hidden` has a matching option, applied to all icons:
 
 ```yaml
 extensions:
@@ -136,9 +149,12 @@ With no `color`, a `color:` declaration inside `style` is read instead, so one `
 `size` becomes the image height, so the icon scales with the surrounding text.
 Typst accepts `em`, `pt`, `cm`, `mm`, `in`, and `%`; any other unit warns and falls back to `1em`.
 
+`label`, then `title`, then the generated string become the image `alt`.
+`aria-hidden="true"` drops the `alt` instead, so one shortcode means the same thing in both outputs.
+
 ## Limitations
 
 - HTML and Typst only. The HTML path requires a format that runs JavaScript, so EPUB renders nothing.
 - In HTML the icon is fetched from the Iconify CDN at page load unless preloaded, so a reader offline sees the `fallback`.
 - `color` is Typst only; in HTML use `style` or the surrounding text colour.
-- `label` and `title` take no document default; set them per icon.
+- `label`, `title`, and `aria-hidden` take no document default; set them per icon. Whether an icon is decorative depends on the text beside that icon, which a document-wide setting cannot know.
