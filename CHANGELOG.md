@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.1.0 (2026-08-04)
+
 ### New Features
 
 - feat: Add the `aria-hidden` attribute, marking an icon as decorative. `aria-hidden=true` omits `role`, `aria-label`, and `title` in HTML, and the `alt` text in Typst, so an icon placed beside visible text no longer doubles the accessible name of the surrounding link. It is a shortcode attribute only, with no document-level default.
