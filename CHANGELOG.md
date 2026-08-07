@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Bug Fixes
+
+- fix: Recover an attribute written without quotes inside a metadata field. Quarto reads a shortcode in `title:`, `subtitle:`, or a navbar `text:` with a different parser from the one it uses for the body, and that parser demotes an unquoted `key=value` to a positional argument. `{{< iconify octicon:heart-fill-16 aria-hidden=true >}}` in a `title:` was therefore announced instead of skipped. The pair is now folded back into the attributes, so one shortcode means the same thing in a metadata field as in the body.
+
 ## 4.1.0 (2026-08-04)
 
 ### New Features
