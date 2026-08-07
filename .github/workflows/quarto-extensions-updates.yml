@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   updates:
-    uses: mcanouil/quarto-workflows/.github/workflows/quarto-extensions-updates.yml@v1
+    uses: mcanouil/quarto-workflows/.github/workflows/quarto-extensions-updates.yml@v2
     secrets: inherit
     permissions:
       contents: write

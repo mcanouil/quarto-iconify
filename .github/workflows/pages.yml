@@ -1,11 +1,15 @@
 name: Pages
 
 # The documentation website under docs/ is what this repository serves from
-# GitHub Pages. A pull request renders it as a check, from its own head.
-# Publishing happens at a release, through the Release workflow, or on a manual
-# dispatch here.
+# GitHub Pages. A pull request renders it as a check, from its own head, unless
+# it is still a draft. Publishing happens at a release, through the Release
+# workflow, or on a manual dispatch here.
 on:
   pull_request:
+    # The reusable workflow skips a draft, and the default activity types fire
+    # nothing when a pull request leaves draft, so `ready_for_review` is what
+    # runs the render once the draft is lifted.
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "docs/**"
       - "_extensions/**"
@@ -30,7 +34,7 @@ permissions:
 
 jobs:
   pages:
-    uses: mcanouil/quarto-workflows/.github/workflows/pages.yml@v1
+    uses: mcanouil/quarto-workflows/.github/workflows/pages.yml@v2
     permissions:
       contents: read
       pages: write
