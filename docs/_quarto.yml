@@ -67,9 +67,9 @@ website:
     # decorative: labelling them would have the link announced as "Quarto
     # Quarto" and "Heart Sponsor", with a browser tooltip over each.
     left: |
-      Powered by [{{< iconify simple-icons:quarto aria-hidden=true >}} Quarto](https://quarto.org).
+      Powered by [{{< iconify simple-icons:quarto aria-hidden='true' >}} Quarto](https://quarto.org).
     center: |
-      &copy; []{#current-year} [Mickaël Canouil](https://mickael.canouil.fr). [{{< iconify octicon:heart-fill-16 aria-hidden=true >}} Sponsor](https://github.com/sponsors/mcanouil?o=esb).
+      &copy; []{#current-year} [Mickaël Canouil](https://mickael.canouil.fr). [{{< iconify octicon:heart-fill-16 aria-hidden='true' >}} Sponsor](https://github.com/sponsors/mcanouil?o=esb).
     right: |
       Licence: [MIT](https://github.com/mcanouil/quarto-iconify?tab=MIT-1-ov-file#readme).
 
