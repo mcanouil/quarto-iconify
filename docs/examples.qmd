@@ -67,7 +67,7 @@ Left unset, both fall back to a generated string naming the set and the file:
 | --- | --- |
 | `{{{< iconify octicon:alert-16 >}}}` | `Icon alert-16 from octicon Iconify.design set.` |
 | `{{{< iconify octicon:alert-16 label="Warning" >}}}` | `Warning` |
-| `{{{< iconify octicon:alert-16 aria-hidden=true >}}}` | Nothing. The icon is skipped. |
+| `{{{< iconify octicon:alert-16 aria-hidden='true' >}}}` | Nothing. The icon is skipped. |
 
 : What a screen reader reads out, with a label, without one, and hidden. {.striped .hover tbl-colwidths="[55,45]"}
 
@@ -77,15 +77,15 @@ An icon inside a link that already has visible text says nothing the text does n
 Labelled, it is announced twice over and pops a tooltip; hidden, the link reads as written:
 
 ```markdown
-[{{{< iconify octicon:heart-fill-16 aria-hidden=true >}}} Sponsor](https://github.com/sponsors/mcanouil)
+[{{{< iconify octicon:heart-fill-16 aria-hidden='true' >}}} Sponsor](https://github.com/sponsors/mcanouil)
 ```
 
-[{{< iconify octicon:heart-fill-16 aria-hidden=true >}} Sponsor](https://github.com/sponsors/mcanouil)
+[{{< iconify octicon:heart-fill-16 aria-hidden='true' >}} Sponsor](https://github.com/sponsors/mcanouil)
 
 | Source | Link announced as |
 | --- | --- |
 | `[{{{< iconify octicon:heart-fill-16 label="Heart" >}}} Sponsor](…)` | `Heart Sponsor` |
-| `[{{{< iconify octicon:heart-fill-16 aria-hidden=true >}}} Sponsor](…)` | `Sponsor` |
+| `[{{{< iconify octicon:heart-fill-16 aria-hidden='true' >}}} Sponsor](…)` | `Sponsor` |
 
 : The accessible name of the surrounding link. {.striped .hover tbl-colwidths="[62,38]"}
 

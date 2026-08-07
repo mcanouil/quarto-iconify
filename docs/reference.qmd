@@ -73,7 +73,7 @@ Left unset, both read `Icon <name> from <set> Iconify.design set.`, which a scre
 An icon that carries no meaning of its own is decorative, and takes `aria-hidden="true"` instead:
 
 ```markdown
-[{{{< iconify octicon:heart-fill-16 aria-hidden=true >}}} Sponsor](https://github.com/sponsors/mcanouil)
+[{{{< iconify octicon:heart-fill-16 aria-hidden='true' >}}} Sponsor](https://github.com/sponsors/mcanouil)
 ```
 
 That icon is emitted as `<iconify-icon aria-hidden="true" …>`, with no `role`, no `aria-label`, and no `title`, so it is skipped rather than announced and no tooltip appears over it.
@@ -86,6 +86,17 @@ An icon standing alone, such as a bare link to a social profile, is the meaning 
 
 `aria-hidden` takes `true` or `false`; any other value warns and leaves the icon announced.
 Setting it alongside `label` or `title` warns and discards both, since a decorative icon carries neither.
+
+## Icons in metadata
+
+A shortcode works in a metadata field as well as in the body, so a page title, a subtitle, or a navbar entry can carry an icon:
+
+```yaml
+title: '{{{< iconify octicon:megaphone-24 aria-hidden="true" >}}} Blog'
+```
+
+Quote the attribute value where you can, as above.
+Quarto reads metadata shortcodes with a different parser from the one it uses for the body, and that parser only recognises `key="value"`; an unquoted value is recovered afterwards, which works for a single word but keeps only the first word of a value carrying a space.
 
 ## Document defaults
 
