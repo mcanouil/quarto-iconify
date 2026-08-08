@@ -5,7 +5,6 @@
 ### Bug Fixes
 
 - fix: Escape an attribute value written into the HTML output. `label`, `title`, `style`, `width`, `height`, `flip`, `rotate`, and the icon name were concatenated into double-quoted attributes as they stood, so a value carrying a `"` closed its attribute early and the rest was read as markup: `title='" onload="alert(1)'` emitted a working event handler. The `fallback` text, documented as text or an emoji, was likewise written as raw HTML. Both are now escaped. Icons written the documented way render byte for byte as before.
-
 - fix: Read a quoted attribute value in a `page-footer:` entry without warning. Quarto expands a shortcode written in a text or attribute string with a parser that hands the value over with its quote marks still attached, so `aria-hidden='true'` arrived as `'true'` and was rejected as invalid. A surrounding quote pair is now stripped when the value is read, so `aria-hidden=true`, `aria-hidden='true'`, and `aria-hidden="true"` mean the same thing wherever a shortcode is written. The same warning affected `size` and every other attribute read the same way.
 
 ## 4.1.1 (2026-08-07)
