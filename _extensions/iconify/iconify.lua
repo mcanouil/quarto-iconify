@@ -130,6 +130,7 @@ local function resolve_size_value(size)
   if str.is_empty(size) then
     return ''
   end
+  --- @cast size string
   --- @type string|nil
   local mapped = SIZE_KEYWORDS[size]
   if mapped ~= nil then
@@ -191,6 +192,19 @@ local function attr_value(kwargs, key)
     return value:sub(2, -2)
   end
   return value
+end
+
+--- Build a single HTML attribute, escaping the value.
+--- Every value reaching this point is author-supplied and lands inside a
+--- double-quoted attribute, so an unescaped `"` would close the attribute
+--- early and let the rest of the value be read as markup. Going through one
+--- function rather than concatenating at each site is what keeps that from
+--- being forgotten as attributes are added.
+--- @param name string Attribute name
+--- @param value string Attribute value
+--- @return string The attribute, with a leading space
+local function html_attribute(name, value)
+  return ' ' .. name .. '="' .. str.escape_attribute(value) .. '"'
 end
 
 --- Resolve the `aria-hidden` attribute, which marks an icon as decorative.
@@ -458,7 +472,7 @@ local function iconify(args, kwargs, meta)
   ensure_html_deps()
 
   --- @type string
-  local attributes = ' icon="' .. set .. ':' .. icon .. '"'
+  local attributes = html_attribute('icon', set .. ':' .. icon)
 
   --- @type string
   local size = resolve_size(get_iconify_options('size', kwargs, meta))
@@ -466,11 +480,11 @@ local function iconify(args, kwargs, meta)
   local style = get_iconify_options('style', kwargs, meta)
 
   if str.is_empty(style) and not str.is_empty(size) then
-    attributes = attributes .. ' style="' .. size .. '"'
+    attributes = attributes .. html_attribute('style', size)
   elseif not str.is_empty(style) and not str.is_empty(size) then
-    attributes = attributes .. ' style="' .. style .. ';' .. size .. '"'
+    attributes = attributes .. html_attribute('style', style .. ';' .. size)
   elseif not str.is_empty(style) then
-    attributes = attributes .. ' style="' .. style .. '"'
+    attributes = attributes .. html_attribute('style', style)
   end
 
   --- A decorative icon is hidden from assistive technology, so it carries
@@ -483,41 +497,39 @@ local function iconify(args, kwargs, meta)
     --- @type string
     local aria_label = attr_value(kwargs, 'label')
     if str.is_empty(aria_label) then
-      aria_label = ' aria-label="' .. default_label .. '"'
-    else
-      aria_label = ' aria-label="' .. aria_label .. '"'
+      aria_label = default_label
     end
 
     --- @type string
     local title = attr_value(kwargs, 'title')
     if str.is_empty(title) then
-      title = ' title="' .. default_label .. '"'
-    else
-      title = ' title="' .. title .. '"'
+      title = default_label
     end
 
-    attributes = attributes .. aria_label .. title
+    attributes = attributes ..
+        html_attribute('aria-label', aria_label) ..
+        html_attribute('title', title)
   end
 
   --- @type string
   local width = get_iconify_options('width', kwargs, meta)
   if not str.is_empty(width) and str.is_empty(size) then
-    attributes = attributes .. ' width="' .. width .. '"'
+    attributes = attributes .. html_attribute('width', width)
   end
   --- @type string
   local height = get_iconify_options('height', kwargs, meta)
   if not str.is_empty(height) and str.is_empty(size) then
-    attributes = attributes .. ' height="' .. height .. '"'
+    attributes = attributes .. html_attribute('height', height)
   end
   --- @type string
   local flip = get_iconify_options('flip', kwargs, meta)
   if not str.is_empty(flip) then
-    attributes = attributes .. ' flip="' .. flip .. '"'
+    attributes = attributes .. html_attribute('flip', flip)
   end
   --- @type string
   local rotate = get_iconify_options('rotate', kwargs, meta)
   if not str.is_empty(rotate) then
-    attributes = attributes .. ' rotate="' .. rotate .. '"'
+    attributes = attributes .. html_attribute('rotate', rotate)
   end
 
   --- @type string
@@ -531,7 +543,7 @@ local function iconify(args, kwargs, meta)
   --- @type table<string, boolean>
   local valid_modes = { svg = true, style = true, bg = true, mask = true }
   if not str.is_empty(mode) and valid_modes[mode] then
-    attributes = attributes .. ' mode="' .. mode .. '"'
+    attributes = attributes .. html_attribute('mode', mode)
   end
 
   --- @type string
@@ -550,7 +562,9 @@ local function iconify(args, kwargs, meta)
       'html',
       '<span class="iconify-icon-wrapper" data-iconify-fallback' .. wrapper_hidden .. '>' ..
       '<iconify-icon' .. role .. attributes .. '></iconify-icon>' ..
-      '<span class="iconify-icon-fallback" hidden>' .. fallback .. '</span>' ..
+      --- The fallback is documented as text or an emoji, so it is escaped
+      --- rather than trusted as markup.
+      '<span class="iconify-icon-fallback" hidden>' .. str.escape_html(fallback) .. '</span>' ..
       '</span>'
     )
   end
