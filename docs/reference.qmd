@@ -95,8 +95,8 @@ A shortcode works in a metadata field as well as in the body, so a page title, a
 title: '{{{< iconify octicon:megaphone-24 aria-hidden="true" >}}} Blog'
 ```
 
-Quote the attribute value where you can, as above.
-Quarto reads metadata shortcodes with a different parser from the one it uses for the body, and that parser only recognises `key="value"`; an unquoted value is recovered afterwards, which works for a single word but keeps only the first word of a value carrying a space.
+A quoted and an unquoted value mean the same thing, so `aria-hidden="true"`, `aria-hidden='true'`, and `aria-hidden=true` are interchangeable.
+Quote a value that carries a space, such as `label="Latest news"`: Quarto reads metadata shortcodes with a different parser from the one it uses for the body, and an unquoted value is recovered from its first token alone, so every word after the first is lost.
 
 ## Document defaults
 

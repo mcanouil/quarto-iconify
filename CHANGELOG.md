@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Bug Fixes
+
+- fix: Read a quoted attribute value in a `page-footer:` entry without warning. Quarto expands a shortcode written in a text or attribute string with a parser that hands the value over with its quote marks still attached, so `aria-hidden='true'` arrived as `'true'` and was rejected as invalid. A surrounding quote pair is now stripped when the value is read, so `aria-hidden=true`, `aria-hidden='true'`, and `aria-hidden="true"` mean the same thing wherever a shortcode is written. The same warning affected `size` and every other attribute read the same way.
+
 ## 4.1.1 (2026-08-07)
 
 ### Bug Fixes
