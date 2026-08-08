@@ -172,6 +172,27 @@ local function is_valid_iconify_name(value)
   return value:match('^[a-z0-9-]+$') ~= nil
 end
 
+--- Read an attribute value with a surrounding quote pair removed.
+--- Quarto's body parser strips those quotes before the value reaches the
+--- shortcode, but the parser it uses for a text or attribute string (a
+--- `page-footer:` entry, for instance) hands the raw token over instead, so
+--- `aria-hidden='true'` arrives as the five-character string `'true'`.
+--- Stripping here is what makes a quoted and an unquoted value mean the same
+--- thing in every context; drop it once Quarto's parsers agree.
+--- @param kwargs table<string, any> Key-value options for the icon
+--- @param key string The attribute name to read
+--- @return string
+local function attr_value(kwargs, key)
+  --- @type string
+  local value = str.stringify(kwargs[key])
+  --- @type string
+  local quote = value:sub(1, 1)
+  if #value > 1 and (quote == '"' or quote == "'") and value:sub(-1) == quote then
+    return value:sub(2, -2)
+  end
+  return value
+end
+
 --- Resolve the `aria-hidden` attribute, which marks an icon as decorative.
 --- A decorative icon carries no `role`, `aria-label` or `title`, so assistive
 --- technology skips it entirely. Read from the shortcode arguments alone:
@@ -186,7 +207,7 @@ end
 --- @return boolean
 local function is_decorative(kwargs, warn)
   --- @type string
-  local value = str.stringify(kwargs['aria-hidden'])
+  local value = attr_value(kwargs, 'aria-hidden')
   if str.is_empty(value) or value == 'false' then
     return false
   end
@@ -245,7 +266,7 @@ end
 --- @return string The option value as a string
 local function get_iconify_options(x, arg, meta)
   --- @type string
-  local arg_value = str.stringify(arg[x])
+  local arg_value = attr_value(arg, x)
 
   if not str.is_empty(arg_value) then
     return arg_value
@@ -315,8 +336,8 @@ local function render_typst(icon, set, default_label, decorative, kwargs, meta)
   --- @type string
   local alt = ''
   if not decorative then
-    alt = str.stringify(kwargs['label'])
-    if str.is_empty(alt) then alt = str.stringify(kwargs['title']) end
+    alt = attr_value(kwargs, 'label')
+    if str.is_empty(alt) then alt = attr_value(kwargs, 'title') end
     if str.is_empty(alt) then alt = default_label end
   end
 
@@ -420,8 +441,8 @@ local function iconify(args, kwargs, meta)
 
   --- @type boolean
   local decorative = is_decorative(kwargs, true)
-  if decorative and (not str.is_empty(str.stringify(kwargs['label'])) or
-        not str.is_empty(str.stringify(kwargs['title']))) then
+  if decorative and (not str.is_empty(attr_value(kwargs, 'label')) or
+        not str.is_empty(attr_value(kwargs, 'title'))) then
     log.log_warning(
       EXTENSION_NAME,
       'Icon "' .. set .. ':' .. icon .. '" sets aria-hidden="true" together ' ..
@@ -460,7 +481,7 @@ local function iconify(args, kwargs, meta)
     role = ' aria-hidden="true"'
   else
     --- @type string
-    local aria_label = str.stringify(kwargs['label'])
+    local aria_label = attr_value(kwargs, 'label')
     if str.is_empty(aria_label) then
       aria_label = ' aria-label="' .. default_label .. '"'
     else
@@ -468,7 +489,7 @@ local function iconify(args, kwargs, meta)
     end
 
     --- @type string
-    local title = str.stringify(kwargs['title'])
+    local title = attr_value(kwargs, 'title')
     if str.is_empty(title) then
       title = ' title="' .. default_label .. '"'
     else
@@ -562,7 +583,7 @@ local function iconify_quarto(args, kwargs, meta)
 
   if not str.is_empty(quarto_kwargs['style']) then
     --- @type string
-    local style = str.stringify(quarto_kwargs['style'])
+    local style = attr_value(quarto_kwargs, 'style')
     if string.match(style, 'color:[^;]+;') then
       quarto_kwargs['style'] = string.gsub(style, 'color:[^;]+;', quarto_colour)
     else
