@@ -33,22 +33,8 @@ A `style` attribute is kept, with its `color` replaced by the Quarto blue.
 
 ## Attributes
 
-| Attribute | Description |
-| --- | --- |
-| `size` | A keyword or CSS length. Sets `font-size`, and suppresses `width` and `height`. |
-| `width`, `height` | Explicit dimensions, used only when `size` is absent. |
-| `flip` | `horizontal`, `vertical`, or `horizontal,vertical`. |
-| `rotate` | `90deg`, `180deg`, or a quarter-turn count such as `1`. |
-| `color` | Typst output only. Applied to monochrome icons through the Iconify API. |
-| `inline` | Anything but `false` keeps the icon on the text baseline. |
-| `mode` | `svg`, `style`, `bg`, or `mask`. Any other value is dropped. |
-| `style` | Extra inline CSS, written before the `font-size` that `size` generates. |
-| `label` | The `aria-label`. Replaces the generated one. |
-| `title` | The tooltip. Replaces the generated one. |
-| `aria-hidden` | `true` marks the icon decorative, dropping `role`, `aria-label`, and `title`. |
-| `fallback` | Text or an emoji revealed when the icon fails to load. |
-
-: Attributes accepted on both shortcodes. {.striped .hover tbl-colwidths="[22,78]"}
+::: {.schema-table table="attributes"}
+:::
 
 ### Size values
 
@@ -110,17 +96,8 @@ extensions:
     inline: true
 ```
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `set` | `octicon` | The icon set used when the shortcode names none. |
-| `size`, `width`, `height` | | Default dimensions. |
-| `flip`, `rotate`, `style` | | Default transformations and CSS. |
-| `inline` | `true` | Whether icons sit inline by default. |
-| `mode` | | Default rendering mode. |
-| `fallback` | | Text or an emoji shown when an icon cannot be loaded, whether the name is wrong, the CDN is unreachable, or the reader is offline. |
-| `preload` | | Paths to Iconify collection JSON files, for offline rendering. |
-
-: Document and project options. {.striped .hover tbl-colwidths="[26,14,60]"}
+::: {.schema-table table="document"}
+:::
 
 An attribute on a shortcode overrides the default for that icon.
 Values resolve in one order throughout: the shortcode attribute, then `extensions.iconify`, then the deprecated top-level `iconify` key, which warns once per key.
@@ -146,13 +123,8 @@ A file that cannot be read, or whose content does not begin with `{`, is skipped
 
 An icon in Typst output is a real SVG, retrieved once and cached on disk.
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `typst-cache` | `.quarto/iconify-svg` | Where the SVGs are kept, relative to the project root. Point it at a tracked directory to commit a reproducible offline cache. |
-| `typst-cache-max-age` | `30` | Days before an unused entry is pruned. `0` disables pruning by age. |
-| `typst-cache-max-entries` | `0` | Cap on the number of entries, least recently used pruned first. `0` is unlimited. |
-
-: The Typst SVG cache. {.striped .hover tbl-colwidths="[28,16,56]"}
+::: {.schema-table table="typst"}
+:::
 
 `color` applies to monochrome icons in Typst, since the colour is baked into the retrieved SVG.
 With no `color`, a `color:` declaration inside `style` is read instead, so one `style` attribute covers both outputs.
