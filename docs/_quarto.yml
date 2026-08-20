@@ -93,6 +93,16 @@ format:
 filters:
   - code-window
   - gitlink
+  # Fills the `.schema-table` divs on the reference page from the extension
+  # _schema.yml, so the options and their defaults are documented from the file
+  # the extension itself reads. This is a filter rather than a pre-render step
+  # because Quarto resolves an include while it scans the project, before
+  # pre-render runs.
+  #
+  # It runs at the default stage, after Quarto's own pass. That pass maps a
+  # table's `.striped` and `.hover` onto their Bootstrap names, and a table
+  # built here arrives too late for it, so the filter adds those names itself.
+  - _filters/schema-tables.lua
 
 extensions:
   # Quarto keeps the `website` block out of the metadata it hands to Lua
