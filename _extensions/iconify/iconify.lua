@@ -13,10 +13,6 @@ local meta_mod = require(quarto.utils.resolve_path('_modules/metadata.lua'):gsub
 local typst = require(quarto.utils.resolve_path('_modules/typst.lua'):gsub('%.lua$', ''))
 local schema = require(quarto.utils.resolve_path('_modules/schema.lua'):gsub('%.lua$', ''))
 
---- Route the validator's own reporting through the extension logger.
-schema._env.warn = function(message) log.log_warning(EXTENSION_NAME, message) end
-schema._env.report_error = function(message) log.log_error(EXTENSION_NAME, message) end
-
 --- The parsed `_schema.yml`, loaded once and reused by every shortcode call.
 --- Nil means the file could not be read, in which case calls are not checked
 --- and the render carries on: a configuration file must not stop a document.
@@ -26,6 +22,16 @@ local extension_schema = nil
 --- Whether loading has already been attempted this render.
 --- @type boolean
 local schema_loaded = false
+
+--- Last resort for the two values the extension cannot render without, used
+--- only when `_schema.yml` could not be read. `_schema.yml` stays the source
+--- of truth on every normal path; without these an unreadable configuration
+--- file would turn every icon into `icon=":name"` and stop Typst caching.
+--- @type table<string, string>
+local SCHEMA_UNAVAILABLE = {
+  set = 'octicon',
+  ['typst-cache'] = '.quarto/iconify-svg',
+}
 
 --- Whether the document configuration has already been checked this render.
 --- The check lives here rather than in the companion filter because that
@@ -394,16 +400,17 @@ local function validate_call(name, args, kwargs)
     positional[index] = str.stringify(value)
   end
 
-  local valid, errors, warnings = schema.validate_shortcode(
+  local _, errors, warnings = schema.validate_shortcode(
     name, positional, plain_kwargs(kwargs), entry)
 
+  -- Reported as warnings, not errors: the rendered icon never changes because
+  -- of a schema mismatch on an attribute, so this is advice rather than a
+  -- failure. An unrecognised value is still handled by the code that reads it.
   for _, message in ipairs(warnings) do
     log.log_warning(EXTENSION_NAME, message)
   end
-  if not valid then
-    for _, message in ipairs(errors) do
-      log.log_error(EXTENSION_NAME, message)
-    end
+  for _, message in ipairs(errors) do
+    log.log_warning(EXTENSION_NAME, message)
   end
 end
 
@@ -454,7 +461,7 @@ local function document_option(key, meta)
     return option_to_string(options.defaults[key])
   end
 
-  return ''
+  return SCHEMA_UNAVAILABLE[key] or ''
 end
 
 --- Get an iconify option from arguments or metadata.
@@ -484,7 +491,9 @@ local function typst_cache_options(meta)
   local options = resolve_document_options(meta)
   return {
     cache_dir = document_option('typst-cache', meta),
-    cache_fallback = options and option_to_string(options.defaults['typst-cache']) or '',
+    cache_fallback = options
+      and option_to_string(options.defaults['typst-cache'])
+      or SCHEMA_UNAVAILABLE['typst-cache'],
     max_age_days = document_option('typst-cache-max-age', meta),
     max_entries = document_option('typst-cache-max-entries', meta),
   }

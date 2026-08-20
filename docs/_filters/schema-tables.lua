@@ -121,6 +121,9 @@ local function options_table(typst)
 end
 
 --- Build the shortcode attributes table.
+--- Only the `iconify` entry is emitted. The `quarto` entry accepts the same
+--- attributes with three differences, which the prose beside this table
+--- explains; its descriptions still reach the editor through `_schema.yml`.
 --- @return string
 local function attributes_table()
   local attributes = loaded.shortcodes
@@ -140,7 +143,7 @@ local function attributes_table()
 
   return table_markdown(
     { 'Attribute', 'Description' }, rows,
-    'Attributes accepted on both shortcodes.', '{.striped .hover tbl-colwidths="[22,78]"}'
+    'Attributes accepted on the `iconify` shortcode.', '{.striped .hover tbl-colwidths="[22,78]"}'
   )
 end
 
@@ -170,5 +173,14 @@ function Div(el)
     return nil
   end
 
-  return pandoc.read(build(), 'markdown').blocks
+  -- Wrapped rather than returned bare, so the page can style these tables.
+  -- Quarto reads a table's `.striped` and `.hover` and renders the styling
+  -- itself, in a pass that runs before any user filter, so a table built here
+  -- can never reach it: the classes stay on the AST and change nothing. The
+  -- column widths are applied later and do work. `assets/theme.scss` stripes
+  -- what this wrapper marks, from Bootstrap's own table variables.
+  return pandoc.Div(
+    pandoc.read(build(), 'markdown').blocks,
+    pandoc.Attr('', { 'schema-table-generated' })
+  )
 end

@@ -3,3 +3,18 @@
 // Per-repository overrides only. The palette comes from the shared pastel
 // extension, which is applied just before this file, so anything set here wins
 // the cascade.
+
+// The reference tables are built by _filters/schema-tables.lua. Quarto renders
+// a table's `.striped` and `.hover` in a pass that runs before user filters,
+// so a table created in one never receives that styling. These rules restore
+// it from Bootstrap's own table variables, so the generated tables match the
+// hand-written ones on the same page.
+.schema-table-generated {
+  > table > tbody > tr:nth-of-type(odd) > * {
+    background-color: var(--bs-table-striped-bg);
+  }
+
+  > table > tbody > tr:hover > * {
+    background-color: var(--bs-table-hover-bg);
+  }
+}

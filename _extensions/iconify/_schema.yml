@@ -110,7 +110,7 @@ shortcodes:
         description: "Typst output only. Applied to monochrome icons through the Iconify API."
       inline:
         type: string
-        description: "Anything but `false` keeps the icon on the text baseline."
+        description: "`true` or `false`. Any other value is treated as `true`."
         enum:
           - "true"
           - "false"
@@ -167,7 +167,7 @@ shortcodes:
         description: "Typst output only. The HTML output keeps the Quarto blue."
       inline:
         type: string
-        description: "Anything but `false` keeps the icon on the text baseline."
+        description: "`true` or `false`. Any other value is treated as `true`."
         enum:
           - "true"
           - "false"

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### New Features
+
+- feat: Add `color` as a document option, so a Typst icon colour can be set for the whole document rather than on each shortcode.
+- feat: Check the document configuration and each shortcode call against `_schema.yml`, reporting an unknown option, an unknown attribute, or a value outside the ones an option accepts.
+
 ## 4.1.2 (2026-08-08)
 
 ### Bug Fixes

@@ -264,7 +264,9 @@ local function _matches_type(value, name)
     return type(value) == 'table' and _is_array(value)
   end
   if name == 'object' then
-    return type(value) == 'table'
+    -- An array is not an object. An empty table is both, and Lua cannot tell
+    -- the two apart, so it satisfies either.
+    return type(value) == 'table' and (next(value) == nil or not _is_array(value))
   end
   return false
 end
@@ -1154,6 +1156,11 @@ local function _parse_map(lines, start, indent, depth)
       if content == '' then
         index = index + 1
       else
+        if content == '---' or content == '...' then
+          return nil, index,
+            _yaml_error(line.number, 'multiple YAML documents are not supported')
+        end
+
         if content:sub(1, 1) == '-' then
           return nil, index,
             _yaml_error(line.number, 'a sequence item cannot appear inside a mapping here')
@@ -1172,6 +1179,16 @@ local function _parse_map(lines, start, indent, depth)
           order[#order + 1] = key
         end
         index = index + 1
+
+        -- An explicit indentation indicator (`|2`, `>2-`) is reported rather
+        -- than misread: without this the whole block is stored as the string
+        -- "|2" and its body is then parsed as further mapping lines.
+        if rest:match('^[|>]%d') or rest:match('^[|>][+%-]%d') then
+          return nil, index, _yaml_error(
+            line.number,
+            'a block scalar indentation indicator is not supported: ' .. rest
+          )
+        end
 
         local block_style = rest:match('^([|>][+%-]?)$')
         if block_style then
@@ -1240,6 +1257,13 @@ local function _parse_sequence(lines, start, indent, depth)
         local value, next_index, err = _parse_block(lines, index + 1, indent, depth + 1)
         if err then
           return nil, next_index, err
+        end
+        -- A Lua array cannot hold an interior nil, so an empty item would be
+        -- dropped and every later item would shift down one index, moving the
+        -- element that `minItems` and an `items` path such as `preload[2]`
+        -- refer to. Report it instead.
+        if value == nil then
+          return nil, index, _yaml_error(line.number, 'an empty sequence item is not supported')
         end
         sequence[#sequence + 1] = value
         index = next_index
@@ -1341,13 +1365,17 @@ end
 --- @return table|nil tree
 --- @return string|nil err
 local function _parse_yaml_text(source)
-  if source:match('^%s*%-%-%-') or source:match('\n%-%-%-%s*\n') or source:match('\n%.%.%.%s*\n') then
-    return nil, 'the file contains a YAML document separator ("---" or "..."), which is not supported'
-  end
-
   local lines, scan_err = _scan_lines(source)
   if scan_err then
     return nil, scan_err
+  end
+
+  -- A single leading `---` opens one document, which is valid and common.
+  -- A later one opens a second document, which `_parse_map` reports. Testing
+  -- the raw text instead would also reject a `---` inside a block scalar.
+  local first = _skip_insignificant(lines, 1)
+  if first <= #lines and _content(lines[first]) == '---' then
+    lines[first].blank = true
   end
 
   local value, _, err = _parse_block(lines, 1, nil, 0)
@@ -1600,7 +1628,11 @@ local function _check_string_length(value, spec, path, context)
   if type(value) ~= 'string' then
     return
   end
-  local length = #value
+  -- Count characters rather than bytes, so a multi-byte glyph counts as one.
+  local length = utf8 and utf8.len(value) or nil
+  if length == nil then
+    length = #value
+  end
   if type(spec.minLength) == 'number' and length < spec.minLength then
     _report(context, 'error', path, 'minLength', string.format(
       'must be at least %d characters, got %d.', spec.minLength, length
@@ -1632,7 +1664,9 @@ local function _check_array(value, spec, path, context)
   if spec.uniqueItems == true then
     local seen = {}
     for index = 1, length do
-      local key = _format_value(value[index])
+      -- Key on the type as well as the rendering, so the number 1 and the
+      -- string "1" are not read as the same item.
+      local key = type(value[index]) .. '\0' .. _format_value(value[index])
       if seen[key] then
         _report(context, 'error', path, 'uniqueItems', string.format(
           'must not repeat items, but %s appears more than once.', key
@@ -1696,10 +1730,26 @@ local function _check_object(value, spec, path, context)
   end
 
   if type(spec.properties) == 'table' then
-    _validate_map(value, spec.properties, path, context, {
+    local sub = _validate_map(value, spec.properties, path, context, {
       unknown = spec.additionalProperties == false and 'error' or 'ignore',
       additional = type(spec.additionalProperties) == 'table' and spec.additionalProperties or nil,
     })
+
+    -- `_validate_map` builds a new table, so its defaults, coercion and alias
+    -- resolution have to be written back into the value the parent holds.
+    -- Without this a nested `properties` contributes nothing to `merged`.
+    local stale = {}
+    for key in pairs(value) do
+      if sub[key] == nil then
+        stale[#stale + 1] = key
+      end
+    end
+    for _, key in ipairs(stale) do
+      value[key] = nil
+    end
+    for key, member in pairs(sub) do
+      value[key] = member
+    end
   elseif type(spec.additionalProperties) == 'table' then
     for key, member in pairs(value) do
       local coerced = _coerce(member, spec.additionalProperties.type)
@@ -1783,6 +1833,22 @@ local function _apply_deprecation(field, spec, value, merged)
     message = message .. ' ' .. deprecated.message
   end
 
+  -- A v1 schema writes `replace-with`, which this vocabulary does not accept.
+  -- Say so, rather than dropping the forwarding without a word.
+  local unrecognised = {}
+  for key in pairs(deprecated) do
+    if key ~= 'since' and key ~= 'message' and key ~= 'replaceWith' then
+      unrecognised[#unrecognised + 1] = key
+    end
+  end
+  if #unrecognised > 0 then
+    table.sort(unrecognised)
+    message = message .. string.format(
+      ' The deprecation declares %s, which this vocabulary does not accept; use "replaceWith".',
+      table.concat(unrecognised, ', ')
+    )
+  end
+
   local cleared = false
   if deprecated.replaceWith then
     local replacement = deprecated.replaceWith
@@ -1828,6 +1894,9 @@ _validate_map = function(values, descriptors, base_path, context, options)
     }
     claimed[field] = true
 
+    -- A value found under an alias, or under the other spelling, moves to the
+    -- name the schema declares. The key it came from is removed, so `merged`
+    -- never carries the same value twice, once coerced and once raw.
     if type(spec.aliases) == 'table' then
       for _, alias in ipairs(spec.aliases) do
         claimed[alias] = true
@@ -1836,6 +1905,9 @@ _validate_map = function(values, descriptors, base_path, context, options)
           if aliased ~= nil then
             merged[field] = aliased
             claimed[alias_key] = true
+            if alias_key ~= field then
+              merged[alias_key] = nil
+            end
           end
         end
       end
@@ -1846,6 +1918,9 @@ _validate_map = function(values, descriptors, base_path, context, options)
       if found ~= nil then
         merged[field] = found
         claimed[found_key] = true
+        if found_key ~= field then
+          merged[found_key] = nil
+        end
       end
     end
   end
