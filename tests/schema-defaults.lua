@@ -56,10 +56,16 @@ for _, name in ipairs({ 'size', 'width', 'height', 'flip', 'rotate', 'style',
   end
 end
 
---- The `iconify` shortcode needs an icon to render. The schema says so with
---- `required` on the first argument, and the Lua stops when it is absent, so
---- both halves are checked here: dropping either one would let
---- `{{< iconify >}}` through again.
+--- The `iconify` shortcode needs an icon to render, and the schema says so
+--- with `required` on the first argument.
+---
+--- These checks cover the schema half only: that the flag is declared, and
+--- that the validator counts both an absent and an empty argument as missing.
+--- The Lua that acts on it, the guard in `render_icon` and the report in
+--- `validate_call`, is not exercised here, because loading `iconify.lua`
+--- needs the `quarto` runtime this suite deliberately does without. Removing
+--- that Lua would leave these checks green, so it is covered by rendering a
+--- document instead.
 local extra = 0
 
 local iconify_entry = loaded.shortcodes and loaded.shortcodes.iconify

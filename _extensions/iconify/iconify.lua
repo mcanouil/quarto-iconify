@@ -415,23 +415,30 @@ local function validate_call(name, args, kwargs)
   -- is made here rather than read out of the validator's findings because the
   -- validator reports a nested argument fault under one `arguments` entry,
   -- which cannot tell a missing argument from a malformed one.
-  --- @type table<integer, string>
+  --- @type table<integer, table>
   local missing = {}
   for index, argument in ipairs(entry.arguments or {}) do
     if argument.required == true and str.is_empty(positional[index]) then
-      missing[#missing + 1] = argument.name
+      missing[#missing + 1] = argument
     end
   end
 
   if #missing > 0 then
-    -- The only message for this call. Reporting the schema's wording as well
-    -- would say the same thing twice at two severities, and every other
-    -- finding about a call with no icon is secondary to the missing icon.
-    for _, argument_name in ipairs(missing) do
+    -- The only message about the missing argument: the schema's own `required`
+    -- wording says the same thing, and reporting both would state one fault
+    -- twice at two severities. Attribute warnings above still stand, and every
+    -- other finding about this call is secondary to there being no icon.
+    for _, argument in ipairs(missing) do
+      --- The example comes from the schema so that each shortcode carries its
+      --- own, rather than this message naming one shortcode for all of them.
+      --- @type string
+      local advice = ''
+      local example = type(argument.examples) == 'table' and argument.examples[1] or nil
+      if example ~= nil then
+        advice = string.format(' For example: {{< %s %s >}}.', name, tostring(example))
+      end
       log.log_error(EXTENSION_NAME, string.format(
-        'The "%s" shortcode needs its "%s" argument. ' ..
-        'Write {{< iconify set:icon >}} or {{< iconify set icon >}}.',
-        name, argument_name))
+        'The "%s" shortcode needs its "%s" argument.%s', name, argument.name, advice))
     end
     return
   end
