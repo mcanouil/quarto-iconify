@@ -1,4 +1,4 @@
---- @module iconify
+--- @module "iconify"
 --- @license MIT
 --- @copyright 2026 Mickaël Canouil
 --- @author Mickaël Canouil
