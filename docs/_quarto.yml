@@ -118,7 +118,7 @@ extensions:
     widget:
       enabled: true
       extra-links:
-        - text: "Ideas / Feature Requests"
+        - text: "Ideas"
           href: "/discussions/categories/ideas"
           icon: discussion
         - text: "Q&A"
