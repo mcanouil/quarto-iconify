@@ -603,6 +603,18 @@ local function render_icon(args, kwargs, meta)
     return pandoc.Null()
   end
 
+  -- A call with no positional argument names no icon. Reading `args[1]`
+  -- unguarded raises inside the filter, which ends the whole render with a
+  -- Lua stack trace rather than a message naming the document and the fix.
+  if #args == 0 then
+    log.log_error(
+      EXTENSION_NAME,
+      'The shortcode needs an icon. ' ..
+      'Write {{< iconify set:icon >}} or {{< iconify set icon >}}.'
+    )
+    return pandoc.Null()
+  end
+
   --- @type string
   local icon = str.stringify(args[1])
 

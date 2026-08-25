@@ -81,6 +81,7 @@ shortcodes:
     arguments:
       - name: set-or-icon
         type: string
+        required: true
         description: "Icon set name, or the combined 'set:icon' format."
       - name: icon
         type: string

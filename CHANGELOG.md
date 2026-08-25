@@ -7,6 +7,10 @@
 - feat: Add `color` as a document option, so a Typst icon colour can be set for the whole document rather than on each shortcode.
 - feat: Check the document configuration and each shortcode call against `_schema.yml`, reporting an unknown option, an unknown attribute, or a value outside the ones an option accepts.
 
+### Bug Fixes
+
+- fix: Report an error when the `iconify` shortcode names no icon. Such a call raised a Lua error that stopped the whole render, and `_schema.yml` now marks the first argument as required. (#87)
+
 ## 4.1.2 (2026-08-08)
 
 ### Bug Fixes
