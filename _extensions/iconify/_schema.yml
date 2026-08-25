@@ -81,6 +81,8 @@ shortcodes:
     arguments:
       - name: set-or-icon
         type: string
+        required: true
+        examples: ["mdi:home"]
         description: "Icon set name, or the combined 'set:icon' format."
       - name: icon
         type: string

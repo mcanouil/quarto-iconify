@@ -409,6 +409,40 @@ local function validate_call(name, args, kwargs)
   for _, message in ipairs(warnings) do
     log.log_warning(EXTENSION_NAME, message)
   end
+
+  -- A required argument that is absent is the one case the rule above does not
+  -- cover: without it there is no icon, so the output does change. The check
+  -- is made here rather than read out of the validator's findings because the
+  -- validator reports a nested argument fault under one `arguments` entry,
+  -- which cannot tell a missing argument from a malformed one.
+  --- @type table<integer, table>
+  local missing = {}
+  for index, argument in ipairs(entry.arguments or {}) do
+    if argument.required == true and str.is_empty(positional[index]) then
+      missing[#missing + 1] = argument
+    end
+  end
+
+  if #missing > 0 then
+    -- The only message about the missing argument: the schema's own `required`
+    -- wording says the same thing, and reporting both would state one fault
+    -- twice at two severities. Attribute warnings above still stand, and every
+    -- other finding about this call is secondary to there being no icon.
+    for _, argument in ipairs(missing) do
+      --- The example comes from the schema so that each shortcode carries its
+      --- own, rather than this message naming one shortcode for all of them.
+      --- @type string
+      local advice = ''
+      local example = type(argument.examples) == 'table' and argument.examples[1] or nil
+      if example ~= nil then
+        advice = string.format(' For example: {{< %s %s >}}.', name, tostring(example))
+      end
+      log.log_error(EXTENSION_NAME, string.format(
+        'The "%s" shortcode needs its "%s" argument.%s', name, argument.name, advice))
+    end
+    return
+  end
+
   for _, message in ipairs(errors) do
     log.log_warning(EXTENSION_NAME, message)
   end
@@ -591,6 +625,16 @@ end
 --- @param meta table<string, any> Document metadata
 --- @return any Pandoc RawInline for HTML or Pandoc Null for other formats
 local function render_icon(args, kwargs, meta)
+
+  -- Checked before the format gate below, so a call with no icon is handled
+  -- the same way for every output format rather than only the two that render
+  -- something. An empty first argument counts as no icon, which is what the
+  -- schema's `required` check already decided, so the two agree.
+  -- `validate_call` has reported this to the author; there is nothing to add
+  -- here beyond not reading a first argument that is not there.
+  if #args == 0 or str.is_empty(str.stringify(args[1])) then
+    return pandoc.Null()
+  end
 
   -- HTML (excluding epub which will not host the Web Component) renders the
   -- Web Component; Typst renders a cached SVG. Every other format renders
