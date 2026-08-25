@@ -56,6 +56,44 @@ for _, name in ipairs({ 'size', 'width', 'height', 'flip', 'rotate', 'style',
   end
 end
 
-io.stdout:write(string.format('\n%d checks, %d failed\n', #EXPECTED + 10, failed))
+--- The `iconify` shortcode needs an icon to render. The schema says so with
+--- `required` on the first argument, and the Lua stops when it is absent, so
+--- both halves are checked here: dropping either one would let
+--- `{{< iconify >}}` through again.
+local extra = 0
+
+local iconify_entry = loaded.shortcodes and loaded.shortcodes.iconify
+local first_argument = iconify_entry and iconify_entry.arguments and iconify_entry.arguments[1]
+
+extra = extra + 1
+if first_argument and first_argument.required == true then
+  io.stdout:write('ok   iconify argument 1 is required\n')
+else
+  io.stdout:write('FAIL iconify argument 1 is not declared as required\n')
+  failed = failed + 1
+end
+
+--- A call with no argument, and a call whose argument is empty, must both be
+--- reported. The schema treats an empty string as missing, and the Lua guard
+--- reads the same way, so the two never disagree about what "no icon" means.
+for _, case in ipairs({ { name = 'no argument', args = {} },
+                        { name = 'empty argument', args = { '' } } }) do
+  extra = extra + 1
+  local valid, errors = schema.validate_shortcode('iconify', case.args, {}, iconify_entry)
+  local reported = false
+  for _, message in ipairs(errors or {}) do
+    if message:find('required', 1, true) then
+      reported = true
+    end
+  end
+  if not valid and reported then
+    io.stdout:write('ok   iconify with ' .. case.name .. ' is reported as missing\n')
+  else
+    io.stdout:write('FAIL iconify with ' .. case.name .. ' is not reported as missing\n')
+    failed = failed + 1
+  end
+end
+
+io.stdout:write(string.format('\n%d checks, %d failed\n', #EXPECTED + 10 + extra, failed))
 io.stdout:flush()
 os.exit(failed == 0 and 0 or 1, true)

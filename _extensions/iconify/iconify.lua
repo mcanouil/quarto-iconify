@@ -409,6 +409,33 @@ local function validate_call(name, args, kwargs)
   for _, message in ipairs(warnings) do
     log.log_warning(EXTENSION_NAME, message)
   end
+
+  -- A required argument that is absent is the one case the rule above does not
+  -- cover: without it there is no icon, so the output does change. The check
+  -- is made here rather than read out of the validator's findings because the
+  -- validator reports a nested argument fault under one `arguments` entry,
+  -- which cannot tell a missing argument from a malformed one.
+  --- @type table<integer, string>
+  local missing = {}
+  for index, argument in ipairs(entry.arguments or {}) do
+    if argument.required == true and str.is_empty(positional[index]) then
+      missing[#missing + 1] = argument.name
+    end
+  end
+
+  if #missing > 0 then
+    -- The only message for this call. Reporting the schema's wording as well
+    -- would say the same thing twice at two severities, and every other
+    -- finding about a call with no icon is secondary to the missing icon.
+    for _, argument_name in ipairs(missing) do
+      log.log_error(EXTENSION_NAME, string.format(
+        'The "%s" shortcode needs its "%s" argument. ' ..
+        'Write {{< iconify set:icon >}} or {{< iconify set icon >}}.',
+        name, argument_name))
+    end
+    return
+  end
+
   for _, message in ipairs(errors) do
     log.log_warning(EXTENSION_NAME, message)
   end
@@ -592,6 +619,16 @@ end
 --- @return any Pandoc RawInline for HTML or Pandoc Null for other formats
 local function render_icon(args, kwargs, meta)
 
+  -- Checked before the format gate below, so a call with no icon is handled
+  -- the same way for every output format rather than only the two that render
+  -- something. An empty first argument counts as no icon, which is what the
+  -- schema's `required` check already decided, so the two agree.
+  -- `validate_call` has reported this to the author; there is nothing to add
+  -- here beyond not reading a first argument that is not there.
+  if #args == 0 or str.is_empty(str.stringify(args[1])) then
+    return pandoc.Null()
+  end
+
   -- HTML (excluding epub which will not host the Web Component) renders the
   -- Web Component; Typst renders a cached SVG. Every other format renders
   -- nothing.
@@ -600,18 +637,6 @@ local function render_icon(args, kwargs, meta)
   --- @type boolean
   local is_typst = quarto.doc.is_format('typst')
   if not is_html and not is_typst then
-    return pandoc.Null()
-  end
-
-  -- A call with no positional argument names no icon. Reading `args[1]`
-  -- unguarded raises inside the filter, which ends the whole render with a
-  -- Lua stack trace rather than a message naming the document and the fix.
-  if #args == 0 then
-    log.log_error(
-      EXTENSION_NAME,
-      'The shortcode needs an icon. ' ..
-      'Write {{< iconify set:icon >}} or {{< iconify set icon >}}.'
-    )
     return pandoc.Null()
   end
 
