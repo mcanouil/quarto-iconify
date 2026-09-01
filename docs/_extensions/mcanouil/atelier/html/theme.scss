@@ -5,6 +5,11 @@ $border-radius-sm: 0.375rem !default;
 $border-radius-lg: 0.75rem !default;
 $enable-smooth-scroll: true !default;
 
+// `.btn-close-white` asks Bootstrap to invert the dismiss icon to force a light
+// one. The icon follows the text around it instead, see DISMISS BUTTON below,
+// so there is nothing left for the class to invert.
+$btn-close-white-filter: none !default;
+
 /*-- scss:functions --*/
 
 // Mix the page background and foreground. brand injects different
@@ -754,6 +759,32 @@ body .navbar .gitlink-widget-dropdown {
   .quarto-announcement-content a {
     text-decoration-color: var(--atelier-announcement-ink);
   }
+}
+
+// ===========================================================================
+// DISMISS BUTTON
+// ===========================================================================
+// Bootstrap bakes black into the .btn-close icon and lightens it under
+// [data-bs-theme="dark"], which Quarto never sets: it marks the scheme on the
+// body and swaps the whole stylesheet bundle. The icon stayed black on the
+// dark surface of a modal, an offcanvas, or a toast.
+//
+// Painting it from the page foreground would only move the problem. A
+// contextual dismissible alert keeps its light tint in the dark bundle,
+// because Bootstrap gates the dark tints on that same attribute, and a light
+// icon is no more readable there than a black one is on a modal. The icon is
+// masked from the text colour around it instead, so it follows the surface it
+// sits on, whichever bundle is active.
+.btn-close,
+.btn-close:hover {
+  color: inherit;
+}
+
+.btn-close {
+  background-image: none;
+  background-color: currentcolor;
+  mask: var(--bs-btn-close-bg) center / $btn-close-width auto no-repeat;
+  -webkit-mask: var(--bs-btn-close-bg) center / $btn-close-width auto no-repeat;
 }
 
 // ===========================================================================
