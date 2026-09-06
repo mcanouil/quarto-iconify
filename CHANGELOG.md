@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.2.0 (2026-09-06)
+
 ### New Features
 
 - feat: Add `color` as a document option, so a Typst icon colour can be set for the whole document rather than on each shortcode.
