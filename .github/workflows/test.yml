@@ -15,13 +15,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# The called workflow declares an `issue` job asking for `issues: write`, and a
-# called job cannot request more than the caller grants. That is validated when
-# the run starts, before the job's own `if` is reached, so the permission is
-# needed even though `issue-on-failure` is not set and the job never runs.
 permissions:
   contents: read
-  issues: write
 
 jobs:
   test:
