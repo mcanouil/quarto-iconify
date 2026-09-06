@@ -7,11 +7,11 @@
 local EXTENSION_NAME = "iconify"
 
 --- Load modules
-local str = require(quarto.utils.resolve_path('_modules/string.lua'):gsub('%.lua$', ''))
-local log = require(quarto.utils.resolve_path('_modules/logging.lua'):gsub('%.lua$', ''))
-local meta_mod = require(quarto.utils.resolve_path('_modules/metadata.lua'):gsub('%.lua$', ''))
+local str = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/string.lua'):gsub('%.lua$', ''))
+local log = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/logging.lua'):gsub('%.lua$', ''))
+local meta_mod = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/metadata.lua'):gsub('%.lua$', ''))
 local typst = require(quarto.utils.resolve_path('_modules/typst.lua'):gsub('%.lua$', ''))
-local schema = require(quarto.utils.resolve_path('_modules/schema.lua'):gsub('%.lua$', ''))
+local schema = require(quarto.utils.resolve_path('_vendor/quarto-wizard/schema.lua'):gsub('%.lua$', ''))
 
 --- The parsed `_schema.yml`, loaded once and reused by every shortcode call.
 --- Nil means the file could not be read, in which case calls are not checked

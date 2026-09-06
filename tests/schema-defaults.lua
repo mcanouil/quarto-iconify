@@ -10,7 +10,7 @@
 ---     quarto pandoc lua tests/schema-defaults.lua
 
 local root = (arg and arg[0] or 'tests/schema-defaults.lua'):match('(.*/)tests/') or './'
-local schema = assert(dofile(root .. '_extensions/iconify/_modules/schema.lua'))
+local schema = assert(dofile(root .. '_extensions/iconify/_vendor/quarto-wizard/schema.lua'))
 
 local loaded, load_error = schema.load_schema(root .. '_extensions/iconify/_schema.yml')
 if load_error then
@@ -60,7 +60,7 @@ end
 --- with `required` on the first argument.
 ---
 --- These checks cover the schema half only: that the flag is declared, and
---- that the validator counts both an absent and an empty argument as missing.
+--- what the validator does with an absent and with an empty argument.
 --- The Lua that acts on it, the guard in `render_icon` and the report in
 --- `validate_call`, is not exercised here, because loading `iconify.lua`
 --- needs the `quarto` runtime this suite deliberately does without. Removing
@@ -79,23 +79,30 @@ else
   failed = failed + 1
 end
 
---- A call with no argument, and a call whose argument is empty, must both be
---- reported. The schema treats an empty string as missing, and the Lua guard
---- reads the same way, so the two never disagree about what "no icon" means.
-for _, case in ipairs({ { name = 'no argument', args = {} },
-                        { name = 'empty argument', args = { '' } } }) do
+--- The validator reports an absent argument and says nothing about an empty
+--- one. `required` asks whether the author wrote the argument, and an empty
+--- string is something they wrote.
+---
+--- The extension still rejects both. `validate_call` in `iconify.lua` runs its
+--- own `str.is_empty` check rather than reading this finding, which is why
+--- narrowing `required` in the validator did not change what an author sees.
+--- Rendering a document is what proves that half.
+for _, case in ipairs({ { name = 'no argument', args = {}, expected = true },
+                        { name = 'empty argument', args = { '' }, expected = false } }) do
   extra = extra + 1
-  local valid, errors = schema.validate_shortcode('iconify', case.args, {}, iconify_entry)
+  local _, errors = schema.validate_shortcode('iconify', case.args, {}, iconify_entry)
   local reported = false
   for _, message in ipairs(errors or {}) do
     if message:find('required', 1, true) then
       reported = true
     end
   end
-  if not valid and reported then
-    io.stdout:write('ok   iconify with ' .. case.name .. ' is reported as missing\n')
+  if reported == case.expected then
+    io.stdout:write(string.format('ok   iconify with %s: validator reports required = %s\n',
+      case.name, tostring(case.expected)))
   else
-    io.stdout:write('FAIL iconify with ' .. case.name .. ' is not reported as missing\n')
+    io.stdout:write(string.format('FAIL iconify with %s: validator reports required = %s, expected %s\n',
+      case.name, tostring(reported), tostring(case.expected)))
     failed = failed + 1
   end
 end

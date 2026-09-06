@@ -153,7 +153,7 @@ local function _lookup(map, key)
   if underscored ~= key and map[underscored] ~= nil then
     return map[underscored], underscored
   end
-  local hyphenated = (key:gsub('_', '%-'))
+  local hyphenated = (key:gsub('_', '-'))
   if hyphenated ~= key and map[hyphenated] ~= nil then
     return map[hyphenated], hyphenated
   end
@@ -167,6 +167,9 @@ end
 local function _format_value(value)
   local kind = type(value)
   if kind == 'string' then
+    if value == '' then
+      return '""'
+    end
     return value
   elseif kind == 'number' or kind == 'boolean' then
     return tostring(value)
@@ -361,6 +364,16 @@ local ESCAPE_INSIDE = {
   d = '%d', D = '%D', w = '%w_', s = '%s', S = '%S',
 }
 
+--- Escapes with a real Lua equivalent. Anything else alphanumeric is refused,
+--- because compiling it to the bare letter would accept the wrong values.
+local CONTROL_ESCAPES = {
+  n = '\n',
+  t = '\t',
+  r = '\r',
+  f = '\f',
+  v = '\v',
+}
+
 --- Characters Lua treats as magic outside a character class.
 local LUA_MAGIC = '^$()%.[]*+-?'
 
@@ -386,6 +399,7 @@ local function _compile_pattern(regex)
   local length = #regex
   local anchor_start = false
   local anchor_end = false
+  local has_top_level_alternation = false
   local parse_alternation
 
   --- Combine a set of prefixes with a set of continuations.
@@ -431,12 +445,14 @@ local function _compile_pattern(regex)
         local mapped = ESCAPE_INSIDE[next_char]
         if mapped then
           out[#out + 1] = mapped
-        elseif next_char:match('%d') then
+        elseif next_char:match('[1-9]') then
           return nil, 'unsupported backreference "\\' .. next_char .. '"'
         elseif next_char == '%' then
           out[#out + 1] = '%%'
+        elseif CONTROL_ESCAPES[next_char] then
+          out[#out + 1] = CONTROL_ESCAPES[next_char]
         elseif next_char:match('%w') then
-          out[#out + 1] = next_char
+          return nil, 'unsupported escape "\\' .. next_char .. '"'
         else
           out[#out + 1] = '%' .. next_char
         end
@@ -522,8 +538,10 @@ local function _compile_pattern(regex)
       local atom
       if mapped then
         atom = mapped
+      elseif CONTROL_ESCAPES[next_char] then
+        atom = CONTROL_ESCAPES[next_char]
       elseif next_char:match('%w') then
-        atom = next_char
+        return nil, 'unsupported escape "\\' .. next_char .. '"'
       else
         atom = _escape_literal(next_char)
       end
@@ -603,7 +621,9 @@ local function _compile_pattern(regex)
 
   parse_alternation = function(depth)
     local all = {}
+    local iterations = 0
     while true do
+      iterations = iterations + 1
       local branches, reason = parse_sequence(depth)
       if not branches then
         return nil, reason
@@ -620,6 +640,9 @@ local function _compile_pattern(regex)
         break
       end
     end
+    if depth == 0 and iterations > 1 then
+      has_top_level_alternation = true
+    end
     return all
   end
 
@@ -629,6 +652,12 @@ local function _compile_pattern(regex)
   end
   if position <= length then
     return nil, 'unbalanced ")" in pattern'
+  end
+
+  -- The anchors are collected for the expression as a whole, so applying them
+  -- to multiple top-level branches would anchor branches the author did not anchor.
+  if has_top_level_alternation and (anchor_start or anchor_end) then
+    return nil, 'unsupported anchor in a top-level alternation'
   end
 
   local prefix = anchor_start and '^' or ''
@@ -667,28 +696,47 @@ end
 --- @param value any Pandoc metadata value
 --- @return any Native Lua value
 local function _convert_pandoc_value(value)
+  local kind = _env.pandoc_type(value)
+
+  -- A bare key, `null` and `~` all arrive as an empty Pandoc `string`, which
+  -- is how Pandoc collapses YAML null. An explicit `""` arrives as an empty
+  -- `Inlines` instead, so the two are told apart before either is unwrapped.
+  if kind == 'string' and value == '' then
+    return nil
+  end
+
   if type(value) ~= 'table' then
     return value
   end
-
-  local kind = _env.pandoc_type(value)
 
   if kind == 'Inlines' or kind == 'Blocks' or kind == 'Inline' or kind == 'Block' then
     return _env.stringify(value)
   end
 
   if kind == 'List' then
+    -- A null element is absent, the same rule this module applies to a null
+    -- key. Writing it into a running count rather than the source index
+    -- keeps the result a proper sequence instead of leaving a gap.
     local result = {}
     for index = 1, #value do
-      result[index] = _convert_pandoc_value(value[index])
+      local converted = _convert_pandoc_value(value[index])
+      if converted ~= nil then
+        result[#result + 1] = converted
+      end
     end
     return result
   end
 
   if _is_array(value) and #value > 0 then
+    -- A null element is absent, the same rule this module applies to a null
+    -- key. Writing it into a running count rather than the source index
+    -- keeps the result a proper sequence instead of leaving a gap.
     local result = {}
     for index = 1, #value do
-      result[index] = _convert_pandoc_value(value[index])
+      local converted = _convert_pandoc_value(value[index])
+      if converted ~= nil then
+        result[#result + 1] = converted
+      end
     end
     return result
   end
@@ -1123,6 +1171,7 @@ local function _read_block_scalar(lines, start, parent_indent, style)
 end
 
 local _parse_block
+local _parse_sequence
 
 --- The order in which each parsed mapping declared its keys.
 --- Lua tables have no key order, but a schema is authored in a meaningful one,
@@ -1200,6 +1249,23 @@ local function _parse_map(lines, start, indent, depth)
           if err then
             return nil, next_index, err
           end
+
+          -- A block sequence may sit at the column of its own key, which
+          -- `_parse_block` declines because its guard wants a deeper line.
+          -- Nothing was consumed in that case, so read the sequence here.
+          if value == nil and next_index == index then
+            local peek = _skip_insignificant(lines, index)
+            if peek <= #lines and lines[peek].indent == indent then
+              local ahead = _content(lines[peek])
+              if ahead == '-' or ahead:sub(1, 2) == '- ' then
+                value, next_index, err = _parse_sequence(lines, peek, indent, depth + 1)
+                if err then
+                  return nil, next_index, err
+                end
+              end
+            end
+          end
+
           map[key] = value
           index = next_index
         elseif rest:sub(1, 1) == '[' or rest:sub(1, 1) == '{' then
@@ -1232,7 +1298,7 @@ end
 --- @return table|nil sequence
 --- @return number next_index
 --- @return string|nil err
-local function _parse_sequence(lines, start, indent, depth)
+_parse_sequence = function(lines, start, indent, depth)
   local sequence = {}
   local index = start
 
@@ -1664,12 +1730,18 @@ local function _check_array(value, spec, path, context)
   if spec.uniqueItems == true then
     local seen = {}
     for index = 1, length do
-      -- Key on the type as well as the rendering, so the number 1 and the
-      -- string "1" are not read as the same item.
-      local key = type(value[index]) .. '\0' .. _format_value(value[index])
+      local element = value[index]
+      local rendered = _format_value(element)
+      -- The key carries the type so 1 and "1" are different items. A string
+      -- keys on its own text rather than on the rendering, because
+      -- `_format_value` renders an empty string as `""`, which would make it
+      -- collide with the two-character string `""`. The message carries only
+      -- the rendering, because the key is not the author's text.
+      local raw = type(element) == 'string' and element or rendered
+      local key = type(element) .. '\0' .. raw
       if seen[key] then
         _report(context, 'error', path, 'uniqueItems', string.format(
-          'must not repeat items, but %s appears more than once.', key
+          'must not repeat items, but %s appears more than once.', rendered
         ))
         break
       end
@@ -1686,7 +1758,7 @@ local function _check_items(value, spec, path, context)
   for index = 1, #value do
     local element = _coerce(value[index], spec.items.type)
     value[index] = element
-    if element ~= nil and element ~= '' then
+    if element ~= nil then
       _validate_value(element, spec.items, string.format('%s[%d]', path, index), context)
     end
   end
@@ -1715,22 +1787,10 @@ local function _check_object(value, spec, path, context)
     end
   end
 
-  if type(spec.dependentRequired) == 'table' then
-    for key, dependents in pairs(spec.dependentRequired) do
-      if _lookup(value, key) ~= nil and type(dependents) == 'table' then
-        for _, dependent in ipairs(dependents) do
-          if _lookup(value, dependent) == nil then
-            _report(context, 'error', path, 'dependentRequired', string.format(
-              'requires "%s" when "%s" is present.', dependent, key
-            ))
-          end
-        end
-      end
-    end
-  end
+  local defaulted = {}
 
   if type(spec.properties) == 'table' then
-    local sub = _validate_map(value, spec.properties, path, context, {
+    local sub, filled = _validate_map(value, spec.properties, path, context, {
       unknown = spec.additionalProperties == false and 'error' or 'ignore',
       additional = type(spec.additionalProperties) == 'table' and spec.additionalProperties or nil,
     })
@@ -1750,12 +1810,34 @@ local function _check_object(value, spec, path, context)
     for key, member in pairs(sub) do
       value[key] = member
     end
+    defaulted = filled
   elseif type(spec.additionalProperties) == 'table' then
     for key, member in pairs(value) do
       local coerced = _coerce(member, spec.additionalProperties.type)
       value[key] = coerced
-      if coerced ~= nil and coerced ~= '' then
+      if coerced ~= nil then
         _validate_value(coerced, spec.additionalProperties, path .. '.' .. tostring(key), context)
+      end
+    end
+  end
+
+  -- Runs after the properties block, which writes the resolved members back
+  -- into `value`. Before that, a dependent supplied under an alias is not yet
+  -- there to be found. A `default` is an annotation and does not change the
+  -- instance, so a key that only holds one neither triggers a requirement nor
+  -- satisfies it.
+  if type(spec.dependentRequired) == 'table' then
+    for key, dependents in pairs(spec.dependentRequired) do
+      local trigger, trigger_key = _lookup(value, key)
+      if trigger ~= nil and not defaulted[trigger_key] and type(dependents) == 'table' then
+        for _, dependent in ipairs(dependents) do
+          local supplied, dependent_key = _lookup(value, dependent)
+          if supplied == nil or defaulted[dependent_key] then
+            _report(context, 'error', path, 'dependentRequired', string.format(
+              'requires "%s" when "%s" is present.', dependent, key
+            ))
+          end
+        end
       end
     end
   end
@@ -1863,6 +1945,40 @@ local function _apply_deprecation(field, spec, value, merged)
   return message, cleared
 end
 
+--- Record that a descriptor accepts a spelling, and report a contested one.
+---
+--- Two descriptors can name the same spelling, when one declares as an alias
+--- what another declares as its own name, or when two of them declare the same
+--- alias. `pairs` yields descriptors in no particular order, so which field a
+--- contested spelling resolves to is not decidable from the schema. It is
+--- reported rather than resolved in silence, because the schema is what is
+--- wrong and only its author can settle it.
+---
+--- @param sources table Map of spelling to declared name
+--- @param spelling string The spelling being declared
+--- @param field string The declared name that accepts it
+--- @param base_path string|nil Path prefix for findings
+--- @param context table Validation context
+local function _declare_spelling(sources, spelling, field, base_path, context)
+  -- The owner is read through `_lookup`, like every other name comparison in
+  -- this module, so a contest between the hyphen and the underscore spelling
+  -- of one name is found as well. Those sit under different keys but reach the
+  -- same document key at merge time, so they contest just as directly.
+  local owner = _lookup(sources, spelling)
+  if owner ~= nil and owner ~= field then
+    _report(context, 'warning', base_path and (base_path .. '.' .. spelling) or spelling,
+      'aliases', string.format(
+        'is declared by both "%s" and "%s"; which one accepts it is not defined.',
+        owner, field))
+  end
+  -- Stored under the literal spelling either way. The map is also the set of
+  -- keys a descriptor claimed, and a contested spelling is still claimed: the
+  -- schema is ambiguous, which the warning says, and treating the key as
+  -- undeclared on top of that would report it as unknown as well.
+  sources[spelling] = sources[spelling] or field
+end
+
+
 --- Validate a map of values against a map of field descriptors.
 --- @param values table Values to validate
 --- @param descriptors table Field descriptor map
@@ -1870,6 +1986,13 @@ end
 --- @param context table Validation context
 --- @param options table|nil {unknown = 'warn'|'error'|'ignore', additional = descriptor}
 --- @return table merged Values with aliases, coercion and defaults applied
+--- @return table defaulted Set of field names whose value came from `default`
+--- @return table sources Map of every spelling the schema accepts to the
+---   declared name it resolves to. A reader that has to answer a question
+---   about a name the caller wrote asks this rather than walking the
+---   descriptors again, because the merge has already decided the answer.
+---   It doubles as the set of keys a descriptor claimed, which is what the
+---   unknown key pass below reads.
 _validate_map = function(values, descriptors, base_path, context, options)
   options = options or {}
   local unknown_policy = options.unknown or 'ignore'
@@ -1879,7 +2002,8 @@ _validate_map = function(values, descriptors, base_path, context, options)
     merged[key] = value
   end
 
-  local claimed = {}
+  local defaulted = {}
+  local sources = {}
   local fields = {}
 
   -- Three passes, because `pairs` yields descriptors in no particular order.
@@ -1892,34 +2016,50 @@ _validate_map = function(values, descriptors, base_path, context, options)
       spec = spec,
       path = base_path and (base_path .. '.' .. field) or field,
     }
-    claimed[field] = true
+    -- Two writes with different weight. Declaring a spelling fills an empty
+    -- slot only, while claiming the value under one overwrites whatever was
+    -- there. The value lands under whichever descriptor claimed it, so the
+    -- claim is what the map has to follow: a declaration that outranked it
+    -- would send a reader to a field the merge has already emptied.
+    _declare_spelling(sources, field, field, base_path, context)
 
     -- A value found under an alias, or under the other spelling, moves to the
     -- name the schema declares. The key it came from is removed, so `merged`
     -- never carries the same value twice, once coerced and once raw.
-    if type(spec.aliases) == 'table' then
-      for _, alias in ipairs(spec.aliases) do
-        claimed[alias] = true
-        if merged[field] == nil then
-          local aliased, alias_key = _lookup(merged, alias)
-          if aliased ~= nil then
-            merged[field] = aliased
-            claimed[alias_key] = true
-            if alias_key ~= field then
-              merged[alias_key] = nil
-            end
-          end
-        end
+    -- The declared name is read first, so it wins over any alias.
+    local supplied_key
+    local found, found_key = _lookup(merged, field)
+    if found ~= nil then
+      merged[field] = found
+      sources[found_key] = field
+      supplied_key = found_key
+      if found_key ~= field then
+        merged[found_key] = nil
       end
     end
 
-    if merged[field] == nil then
-      local found, found_key = _lookup(merged, field)
-      if found ~= nil then
-        merged[field] = found
-        claimed[found_key] = true
-        if found_key ~= field then
-          merged[found_key] = nil
+    if type(spec.aliases) == 'table' then
+      for _, alias in ipairs(spec.aliases) do
+        _declare_spelling(sources, alias, field, base_path, context)
+        local aliased, alias_key = _lookup(merged, alias)
+        if aliased ~= nil then
+          sources[alias_key] = field
+          if merged[field] == nil then
+            merged[field] = aliased
+            supplied_key = alias_key
+          elseif alias_key ~= field then
+            -- Two spellings were supplied. The first one read wins, and the
+            -- other is reported rather than left behind unvalidated. Both
+            -- names come from the document, never from the schema.
+            _report(context, 'warning',
+              base_path and (base_path .. '.' .. field) or field,
+              'aliases',
+              string.format('was given as both "%s" and "%s"; "%s" was used.',
+                supplied_key, alias_key, supplied_key))
+          end
+          if alias_key ~= field then
+            merged[alias_key] = nil
+          end
         end
       end
     end
@@ -1927,7 +2067,7 @@ _validate_map = function(values, descriptors, base_path, context, options)
 
   for _, entry in ipairs(fields) do
     local value = merged[entry.name]
-    if entry.spec.deprecated and value ~= nil and value ~= '' then
+    if entry.spec.deprecated and value ~= nil then
       local message, cleared = _apply_deprecation(entry.name, entry.spec, value, merged)
       _report(context, 'warning', entry.path, 'deprecated', message)
       entry.cleared = cleared
@@ -1944,29 +2084,30 @@ _validate_map = function(values, descriptors, base_path, context, options)
       value = _coerce(merged[field], spec.type)
       merged[field] = value
 
-      if (value == nil or value == '') and spec.default ~= nil then
+      if value == nil and spec.default ~= nil then
         value = spec.default
         merged[field] = value
+        defaulted[field] = true
       end
     end
 
-    local is_empty = value == nil or value == ''
-
-    if spec.required == true and is_empty then
+    -- An empty string is a value the author wrote. Only a missing key is
+    -- absent, so `minLength`, `const` and `enum` can be tested against ''.
+    if spec.required == true and value == nil then
       _report(context, 'error', path, 'required', 'is required but was not provided.')
-    elseif not is_empty then
+    elseif value ~= nil then
       _validate_value(value, spec, path, context)
     end
   end
 
   if unknown_policy ~= 'ignore' or options.additional then
     for key, value in pairs(values) do
-      if not claimed[key] then
+      if sources[key] == nil then
         local path = base_path and (base_path .. '.' .. tostring(key)) or tostring(key)
         if options.additional then
           local coerced = _coerce(value, options.additional.type)
           merged[key] = coerced
-          if coerced ~= nil and coerced ~= '' then
+          if coerced ~= nil then
             _validate_value(coerced, options.additional, path, context)
           end
         elseif unknown_policy == 'error' then
@@ -1978,7 +2119,7 @@ _validate_map = function(values, descriptors, base_path, context, options)
     end
   end
 
-  return merged
+  return merged, defaulted, sources
 end
 
 --- Start a validation run.
@@ -2105,15 +2246,14 @@ function M.validate_arguments(args, argument_specs, options)
     local path = string.format('argument %d ("%s")', index, name)
 
     local value = _coerce(args[index], spec.type)
-    if (value == nil or value == '') and spec.default ~= nil then
+    if value == nil and spec.default ~= nil then
       value = spec.default
     end
     merged[name] = value
 
-    local is_empty = value == nil or value == ''
-    if spec.required == true and is_empty then
+    if spec.required == true and value == nil then
       _report(context, 'error', path, 'required', 'is required but was not provided.')
-    elseif not is_empty then
+    elseif value ~= nil then
       _validate_value(value, spec, path, context)
     end
   end
@@ -2160,15 +2300,50 @@ function M.validate_shortcode(name, args, kwargs, entry, options)
     end
   end
 
-  if type(entry.attributes) == 'table' then
-    merged.attributes = _validate_map(kwargs or {}, entry.attributes, name, context, {
+  local declared = type(entry.attributes) == 'table'
+  local spellings
+  if declared then
+    local attributes, _, resolved = _validate_map(kwargs or {}, entry.attributes, name, context, {
       unknown = options.unknown or 'warn',
     })
+    merged.attributes = attributes
+    spellings = resolved
   end
 
   if type(entry.required) == 'table' then
+    -- `merged.attributes` is filled only when the entry declares `attributes`,
+    -- and it is authoritative when it is: it keeps every unclaimed key and it
+    -- drops a key that a deprecation cleared. The vocabulary allows `required`
+    -- on its own, so fall back to what the caller supplied only when the
+    -- entry declares no `attributes`. A name that names an alias is not
+    -- missing either: `_validate_map` moves its value to the field that
+    -- declares the alias and clears the alias spelling, the same way it
+    -- clears a deprecated key, so look for the value under that field. The
+    -- merge reports which declared name each spelling resolves to, so that
+    -- is one lookup rather than a second walk over the descriptors. It goes
+    -- through `_lookup`, the same as every other name comparison in this
+    -- module, so a hyphen in one spelling and an underscore in the other
+    -- still match.
+    --
+    -- This asks what the shortcode receives, not what the author wrote, so
+    -- a `default` present in `merged.attributes` satisfies a name here.
+    -- That is the opposite of `dependentRequired` above, which asks what
+    -- the author wrote and treats a default as an annotation nobody
+    -- supplied. Neither reading is a bug: they answer different questions
+    -- about the same instance.
+    local function _required_satisfied(required)
+      local field = (spellings and _lookup(spellings, required)) or required
+      if _lookup(merged.attributes, field) ~= nil then
+        return true
+      end
+      if not declared then
+        return _lookup(kwargs or {}, required) ~= nil
+      end
+      return false
+    end
+
     for _, required in ipairs(entry.required) do
-      if _lookup(merged.attributes, required) == nil then
+      if not _required_satisfied(required) then
         _report(context, 'error', name .. '.' .. required, 'required',
           'is required but was not provided.')
       end
