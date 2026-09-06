@@ -1,0 +1,14 @@
+# _schema.yml for "extension-test" metadata extension
+# Describes metadata options for IDE tooling and runtime validation.
+
+$schema: https://m.canouil.dev/quarto-wizard/assets/schema/v2/extension-schema.json
+
+# Extension-level metadata options.
+# Configured in _quarto.yml, _metadata.yml, or document front matter:
+#   extensions:
+#     extension-test:
+#       example-option: "value"
+options:
+  example-option:
+    type: string
+    description: "An example option for the extension-test metadata extension."

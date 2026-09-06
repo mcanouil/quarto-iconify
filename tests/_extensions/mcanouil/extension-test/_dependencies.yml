@@ -1,0 +1,11 @@
+schema: 1
+sources:
+  quarto-wizard:
+    origin: https://github.com/mcanouil/quarto-wizard
+    fetch: "https://raw.githubusercontent.com/mcanouil/quarto-wizard/{version}/packages/schema/src/validation/{file}"
+    version: "3.4.0"
+    licence: MIT
+    files:
+      schema.lua:
+        sha256: 30b830304ddeb410e507edf176ce4e056cdc242d51161f5f8a8d65a2e01ecd5a
+        runtime: any

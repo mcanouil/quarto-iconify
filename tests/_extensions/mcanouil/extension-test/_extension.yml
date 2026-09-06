@@ -1,0 +1,9 @@
+title: Extension Test
+author: Mickaël Canouil
+version: 0.0.0
+quarto-required: ">=1.6"
+contributes:
+  project:
+    project:
+      type: default
+      output-dir: _output
