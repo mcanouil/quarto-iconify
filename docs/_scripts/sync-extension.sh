@@ -3,9 +3,9 @@
 # Documentation Extension Sync
 # Mirrors the repository's own extension into the documentation project.
 #
-# @license %%license%%
-# @copyright %%year%% %%author%%
-# @author %%author%%
+# @license MIT License
+# @copyright 2026 Mickaël Canouil
+# @author Mickaël Canouil
 #
 # The website demonstrates the extension it documents, so the extension has to
 # be resolvable from docs/. Quarto builds its extension registry while reading
