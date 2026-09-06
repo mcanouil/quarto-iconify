@@ -1,4 +1,4 @@
---- @module code-window
+--- @module "code-window"
 --- @license MIT
 --- @copyright 2026 Mickaël Canouil
 --- @author Mickaël Canouil
@@ -12,12 +12,14 @@
 -- ============================================================================
 
 local EXTENSION_NAME = 'code-window'
-local str = require(quarto.utils.resolve_path('_modules/string.lua'):gsub('%.lua$', ''))
-local log = require(quarto.utils.resolve_path('_modules/logging.lua'):gsub('%.lua$', ''))
-local meta_mod = require(quarto.utils.resolve_path('_modules/metadata.lua'):gsub('%.lua$', ''))
-local pdoc = require(quarto.utils.resolve_path('_modules/pandoc-helpers.lua'):gsub('%.lua$', ''))
-local html_mod = require(quarto.utils.resolve_path('_modules/html.lua'):gsub('%.lua$', ''))
+local str = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/string.lua'):gsub('%.lua$', ''))
+local log = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/logging.lua'):gsub('%.lua$', ''))
+local meta_mod = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/metadata.lua'):gsub('%.lua$', ''))
+local pdoc = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/pandoc-helpers.lua'):gsub('%.lua$', ''))
+local html_mod = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/html.lua'):gsub('%.lua$', ''))
+local cell_output = require(quarto.utils.resolve_path('_modules/cell-output.lua'):gsub('%.lua$', ''))
 local code_annotations = nil
+local checker = nil
 
 -- ============================================================================
 -- DEFAULTS AND STATE
@@ -27,6 +29,7 @@ local code_annotations = nil
 --- @field enabled boolean Whether code-window styling is enabled
 --- @field auto_filename boolean Whether to auto-generate filename from language
 --- @field style string Window decoration style ('macos', 'windows', 'default')
+--- @field cell_output boolean Whether the output of an executed cell is framed
 --- @field typst_wrapper string Typst wrapper function name
 --- @field hotfix_code_annotations boolean Whether to apply the code-annotations hot-fix for Typst
 --- @field hotfix_skylighting boolean Whether to apply the Skylighting hot-fix for Typst
@@ -37,6 +40,7 @@ local DEFAULTS = {
   ['enabled'] = 'true',
   ['auto-filename'] = 'true',
   ['style'] = 'macos',
+  ['cell-output'] = 'false',
   ['wrapper'] = 'code-window',
   ['collapse'] = 'false',
   ['lines-label'] = 'true',
@@ -59,6 +63,18 @@ local CURRENT_FORMAT = nil
 local CONFIG = nil
 local TYPST_BG_COLOUR = nil
 local ANNOTATION_BLOCK_COUNTER = 0
+
+-- ============================================================================
+-- CELL OUTPUT
+-- ============================================================================
+
+--- Check whether a block holds the output of an executed cell that the engine
+--- did not name. Such a block keeps the shape Quarto gave it.
+--- @param block pandoc.CodeBlock Code block element
+--- @return boolean
+local function is_unnamed_cell_output(block)
+  return cell_output.is_marked(block) and str.is_empty(block.attributes['filename'])
+end
 
 -- ============================================================================
 -- BLOCK-LEVEL STYLE OVERRIDE
@@ -480,6 +496,12 @@ end
 --- @param block pandoc.CodeBlock Code block element
 --- @return pandoc.Div|pandoc.CodeBlock Wrapped block or original
 local function process_html(block)
+  -- Default/unknown/no-language blocks carry their label on
+  -- code-window-auto-label (set by the language module). Read it here so no
+  -- return path can leak it into the rendered document.
+  local auto_label = block.attributes['code-window-auto-label']
+  block.attributes['code-window-auto-label'] = nil
+
   -- Per-block opt-out: code-window-enabled="false" skips window chrome.
   local block_enabled = block.attributes['code-window-enabled']
   if block_enabled then
@@ -520,11 +542,8 @@ local function process_html(block)
     return block
   end
 
-  -- Default/unknown/no-language blocks carry their label on
-  -- code-window-auto-label (set by the language module); everything else uses
-  -- its language class.
-  local filename = block.attributes['code-window-auto-label'] or block.classes[1]
-  block.attributes['code-window-auto-label'] = nil
+  -- Blocks with a language of their own are labelled with its class.
+  local filename = auto_label or block.classes[1]
 
   -- Set the filename attribute so Quarto creates its own .code-with-filename
   -- wrapper. This preserves the CodeBlock+OrderedList sibling structure
@@ -633,9 +652,18 @@ end
 --- Load configuration and inject CSS/JS dependencies.
 function Meta(meta)
   CURRENT_FORMAT = pdoc.get_quarto_format()
+
+  -- This is the pass that reads the configuration, so the check runs here,
+  -- before the first option is read. An option the check rejects is still
+  -- read below, because the report says what the extension cannot use and the
+  -- document renders either way.
+  checker:options(meta)
+
   local opts = meta_mod.get_options({
     extension = EXTENSION_NAME,
-    keys = { 'enabled', 'auto-filename', 'style', 'wrapper', 'collapse', 'lines-label' },
+    keys = {
+      'enabled', 'auto-filename', 'style', 'cell-output', 'wrapper', 'collapse', 'lines-label',
+    },
     meta = meta,
     defaults = DEFAULTS,
   })
@@ -698,6 +726,7 @@ function Meta(meta)
     enabled = opts['enabled'] == 'true',
     auto_filename = opts['auto-filename'] == 'true',
     style = VALID_STYLES[opts['style']] and opts['style'] or 'macos',
+    cell_output = opts['cell-output'] == 'true',
     typst_wrapper = opts['wrapper'],
     collapse = global_collapse,
     lines_label = opts['lines-label'] == 'true',
@@ -746,8 +775,20 @@ end
 --- Process CodeBlock elements for HTML/Reveal.js only.
 --- Typst processing is handled by the Blocks filter.
 function CodeBlock(block)
+  -- The Typst path reads the marker in the Pandoc filter, which runs first, so
+  -- this pass is where it is removed for every format.
+  local is_plain_output = is_unnamed_cell_output(block)
+  if cell_output.is_marked(block) then
+    cell_output.strip(block)
+  end
+
   if not CURRENT_FORMAT or not CONFIG or not CONFIG.enabled then
     block.attributes['code-window-no-auto-filename'] = nil
+    block.attributes['code-window-auto-label'] = nil
+    return block
+  end
+
+  if is_plain_output then
     return block
   end
 
@@ -767,7 +808,6 @@ end
 --- @return string|nil filename
 --- @return boolean is_auto
 --- @return string|nil block_style
---- @return boolean window_opted_out True when code-window-enabled="false" was set
 --- @return string|nil lines_label Highlighted-lines spec for the title bar
 local function resolve_window_params(block)
   -- Per-block opt-out: code-window-enabled="false" skips window chrome.
@@ -776,7 +816,7 @@ local function resolve_window_params(block)
     block.attributes['code-window-enabled'] = nil
   end
   if block_enabled == 'false' then
-    return nil, false, nil, true, nil
+    return nil, false, nil, nil
   end
 
   local block_style = read_block_style(block)
@@ -803,7 +843,7 @@ local function resolve_window_params(block)
     lines_label = read_block_lines_label(block)
   end
 
-  return filename, is_auto, block_style, false, lines_label
+  return filename, is_auto, block_style, lines_label
 end
 
 --- Process a single CodeBlock for Typst, returning replacement blocks.
@@ -814,7 +854,13 @@ end
 --- @return boolean consumed_next Whether the next block was consumed
 --- @return integer|nil annotation_block_id Block ID if annotations were found (for parent propagation)
 local function process_typst_block(block, next_block)
-  local filename, is_auto, block_style, window_opted_out, lines_label = resolve_window_params(block)
+  -- The output of an executed cell keeps the shape Quarto gave it, annotations
+  -- included, unless the engine gave it a filename of its own.
+  if is_unnamed_cell_output(block) then
+    return { block }, false, nil
+  end
+
+  local filename, is_auto, block_style, lines_label = resolve_window_params(block)
   local has_window = filename and filename ~= ''
   local effective_style = block_style or CONFIG.style
 
@@ -1115,8 +1161,16 @@ local function set_code_annotations(mod)
   code_annotations = mod
 end
 
+--- Inject the schema checker.
+--- Called by main.lua before any filter handlers run.
+--- @param mod table The checker built from the vendored validator
+local function set_checker(mod)
+  checker = mod
+end
+
 return {
   set_code_annotations = set_code_annotations,
+  set_checker = set_checker,
   Meta = Meta,
   Pandoc = Pandoc,
   CodeBlock = CodeBlock,

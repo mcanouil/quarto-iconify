@@ -7,16 +7,27 @@
 local EXTENSION_NAME = 'gitlink'
 
 --- Load modules
-local str = require(quarto.utils.resolve_path('_modules/string.lua'):gsub('%.lua$', ''))
-local log = require(quarto.utils.resolve_path('_modules/logging.lua'):gsub('%.lua$', ''))
-local meta_mod = require(quarto.utils.resolve_path('_modules/metadata.lua'):gsub('%.lua$', ''))
-local html_mod = require(quarto.utils.resolve_path('_modules/html.lua'):gsub('%.lua$', ''))
-local paths = require(quarto.utils.resolve_path('_modules/paths.lua'):gsub('%.lua$', ''))
-local git = require(quarto.utils.resolve_path('_modules/git.lua'):gsub('%.lua$', ''))
+local str = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/string.lua'):gsub('%.lua$', ''))
+local log = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/logging.lua'):gsub('%.lua$', ''))
+local meta_mod = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/metadata.lua'):gsub('%.lua$', ''))
+local html_mod = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/html.lua'):gsub('%.lua$', ''))
+local paths = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/paths.lua'):gsub('%.lua$', ''))
+local git = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/git.lua'):gsub('%.lua$', ''))
 local bitbucket = require(quarto.utils.resolve_path('_modules/bitbucket.lua'):gsub('%.lua$', ''))
 local platforms = require(quarto.utils.resolve_path('_modules/platforms.lua'):gsub('%.lua$', ''))
-local colour = require(quarto.utils.resolve_path('_modules/colour.lua'):gsub('%.lua$', ''))
+local colour = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/colour.lua'):gsub('%.lua$', ''))
 local widget = require(quarto.utils.resolve_path('_modules/widget.lua'):gsub('%.lua$', ''))
+local schema = require(quarto.utils.resolve_path('_vendor/quarto-wizard/schema.lua'):gsub('%.lua$', ''))
+local check = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/schema-check.lua'):gsub('%.lua$', ''))
+
+--- Checks the document configuration against `_schema.yml` and reports what the
+--- extension cannot use.
+--- The validator is injected rather than required by the checker, so the two
+--- vendored sources stay independent of each other.
+--- The schema is read once here, at file scope, rather than once per document.
+--- An unreadable schema is reported and never stops a render, because a fault
+--- in the configuration must not remove the document.
+local checker = check.new(schema, EXTENSION_NAME)
 
 --- @type string The platform type (github, gitlab, codeberg, gitea, bitbucket)
 local platform = 'github'
@@ -310,6 +321,10 @@ local function get_repository(meta)
   -- Reset module-level state at the start of every document so a previous
   -- render in a batch does not bleed into this one.
   reset_state()
+
+  -- After the reset and before the first option read, so that every option this
+  -- pass goes on to read has already been reported on.
+  checker:options(meta)
 
   -- Allow opt-out at the document level for drafts, templates, or any
   -- document where automatic link rewriting is undesirable. The navbar
