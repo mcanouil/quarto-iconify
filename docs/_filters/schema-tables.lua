@@ -33,7 +33,7 @@ local schema_path = root_dir .. '_extensions/iconify/_schema.yml'
 --- Loaded with `dofile` rather than `require`, because `require` reads a
 --- module name and turns every `.` in it into a directory separator, which
 --- destroys the `../..` this relative path needs.
-local ok, schema = pcall(dofile, root_dir .. '_extensions/iconify/_modules/schema.lua')
+local ok, schema = pcall(dofile, root_dir .. '_extensions/iconify/_vendor/quarto-wizard/schema.lua')
 if not ok or type(schema) ~= 'table' then
   io.stderr:write('[schema-tables] could not load the schema module: ' .. tostring(schema) .. '\n')
   return {}

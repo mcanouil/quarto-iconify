@@ -9,3 +9,6 @@ docs
 
 # The repository's own citation metadata, not the new project's.
 CITATION.cff
+
+# The test framework and the cases it runs against this extension.
+tests

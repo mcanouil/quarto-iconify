@@ -11,6 +11,11 @@
 
 - fix: Report an error when the `iconify` shortcode names no icon. Such a call raised a Lua error that stopped the whole render, and `_schema.yml` now marks the first argument as required. (#87)
 
+### Refactoring
+
+- build: Declare the vendored Lua modules in `_extensions/iconify/_dependencies.yml` and move them to `_extensions/iconify/_vendor/`, so each one names the release it came from and can be checked against it.
+- build: Update the vendored schema validator to the one Quarto Wizard 3.4.0 publishes.
+
 ## 4.1.2 (2026-08-08)
 
 ### Bug Fixes

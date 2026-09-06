@@ -6,3 +6,11 @@ index.html
 /.quarto
 /.quarto/
 **/*.quarto_ipynb
+
+# Written by the extension test framework's runner. It renders the repository's
+# own documents, so `example.qmd` leaves its Typst output at the root under the
+# name that document's `output-file` gives it. `tests/` keeps its own
+# `.gitignore` for the project directory Quarto creates there.
+/tests/_results/
+/tests/_output/
+/iconify-typst.pdf

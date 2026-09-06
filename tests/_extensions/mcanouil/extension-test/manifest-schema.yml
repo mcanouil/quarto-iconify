@@ -1,0 +1,49 @@
+# Descriptors for an extension's `_extension.yml`.
+#
+# Quarto publishes no meta-schema for `_extension.yml`, so this file supplies
+# one in the same v2 vocabulary the runner already validates `_schema.yml`
+# with. Reusing the validator means there is one implementation of the
+# keyword semantics rather than two, and this file is itself checked by the
+# conformance layer when the framework tests itself.
+#
+# The `contributes` key allowlist is deliberately NOT expressed as
+# `propertyNames` here. An unrecognised contribution key is reported as a
+# warning by `conformance.lua`, not an error, because the full set Quarto
+# accepts has not been confirmed against the CLI source. Promote it to
+# `propertyNames` once it has.
+#
+# `version` avoids an optional group: the reference validator refuses a
+# quantifier applied to a group and fails closed, so the pre-release and
+# build suffixes are matched with a character class instead.
+
+$schema: https://m.canouil.dev/quarto-wizard/assets/schema/v2/extension-schema.json
+
+options:
+  title:
+    type: string
+    required: true
+    minLength: 1
+    description: "The extension's display name."
+
+  author:
+    type: [string, array]
+    required: true
+    items:
+      type: string
+    description: "The extension's author, or a list of authors."
+
+  version:
+    type: string
+    required: true
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+[0-9A-Za-z.+-]*$'
+    description: "A semantic version, such as `1.4.0` or `2.0.0-beta.1`."
+
+  quarto-required:
+    type: string
+    pattern: '^[<>=~^ .0-9|*x-]+$'
+    description: "The Quarto version range the extension supports, such as `>=1.8.0`."
+
+  contributes:
+    type: object
+    required: true
+    description: "What the extension contributes: shortcodes, filters, formats, project, metadata, revealjs-plugins."

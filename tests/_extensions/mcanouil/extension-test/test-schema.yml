@@ -1,0 +1,61 @@
+# The `test:` front-matter vocabulary.
+#
+# Written in the same v2 vocabulary the runner validates `_schema.yml` with,
+# so the framework's own configuration is checked by the validator whose
+# behaviour the framework exists to protect. It also gives Quarto Wizard
+# completion inside a `test:` block at no extra cost.
+#
+# Every key is optional. A test document with no `test:` block behaves as
+# `test: {}`: rendered to every format `quarto inspect` reports, strictly,
+# expecting success. That is the zero-authoring case.
+#
+# The vocabulary is additive only. The catalogue sweep runs one pinned
+# framework version against repositories that pinned an older one, so a key
+# this version does not know must warn and be ignored rather than fail.
+# `schema` carries the vocabulary version for the same reason.
+
+$schema: https://m.canouil.dev/quarto-wizard/assets/schema/v2/extension-schema.json
+
+options:
+  schema:
+    type: integer
+    default: 1
+    minimum: 1
+    description: "The `test:` vocabulary version this document is written against."
+
+  name:
+    type: string
+    description: "A human name for the case. Defaults to the document's file stem."
+
+  description:
+    type: string
+    default: ""
+    description: "What the case covers."
+
+  formats:
+    type: [string, array]
+    items:
+      type: string
+    description: "Target formats. Defaults to every format `quarto inspect` reports for the document."
+
+  skip:
+    type: [boolean, string]
+    default: false
+    description: "Skip the case. A string is reported as the reason."
+
+  expect:
+    type: string
+    enum: [pass, fail]
+    default: pass
+    description: "Whether the render is expected to succeed. `fail` passes the case when the render fails."
+
+  strict:
+    type: boolean
+    default: true
+    description: "Fail on an error in the render log. `false` reports errors without failing."
+
+  timeout:
+    type: integer
+    default: 300
+    minimum: 1
+    description: "Seconds allowed per format."
