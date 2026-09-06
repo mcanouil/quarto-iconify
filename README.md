@@ -7,7 +7,7 @@ Works in HTML and in Typst.
 ## Installation
 
 ```bash
-quarto add mcanouil/quarto-iconify@4.1.2
+quarto add mcanouil/quarto-iconify@4.2.0
 ```
 
 This will install the extension under the `_extensions` subdirectory.
