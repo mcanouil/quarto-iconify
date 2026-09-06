@@ -12,39 +12,22 @@ local log = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/loggin
 local meta_mod = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/metadata.lua'):gsub('%.lua$', ''))
 local typst = require(quarto.utils.resolve_path('_modules/typst.lua'):gsub('%.lua$', ''))
 local schema = require(quarto.utils.resolve_path('_vendor/quarto-wizard/schema.lua'):gsub('%.lua$', ''))
+local check = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/schema-check.lua'):gsub('%.lua$', ''))
 
---- The parsed `_schema.yml`, loaded once and reused by every shortcode call.
---- Nil means the file could not be read, in which case calls are not checked
---- and the render carries on: a configuration file must not stop a document.
---- @type table|nil
-local extension_schema = nil
-
---- Whether loading has already been attempted this render.
---- @type boolean
-local schema_loaded = false
-
---- Last resort for the two values the extension cannot render without, used
---- only when `_schema.yml` could not be read. `_schema.yml` stays the source
---- of truth on every normal path; without these an unreadable configuration
---- file would turn every icon into `icon=":name"` and stop Typst caching.
---- @type table<string, string>
-local SCHEMA_UNAVAILABLE = {
-  set = 'octicon',
-  ['typst-cache'] = '.quarto/iconify-svg',
-}
-
---- Whether the document configuration has already been checked this render.
---- The check lives here rather than in the companion filter because that
---- filter is opt-in (`filters: [iconify]`), while a shortcode always runs
---- when there is an icon to render.
---- @type boolean
-local options_validated = false
-
---- The document configuration resolved against `_schema.yml`, holding the
---- `provided`, `merged` and `defaults` tables. Nil until the first shortcode
---- runs, and left nil when there is no readable schema.
---- @type table|nil
-local resolved_options = nil
+--- The schema check, built once and reused by every shortcode call. It reads
+--- `_schema.yml` on the way in, checks the document configuration once, and
+--- checks each call against the entry that describes it.
+---
+--- The validator is injected rather than required by the check module, so the
+--- two vendored sources stay independent of where the other was placed.
+---
+--- The check runs from here rather than from the companion filter because that
+--- filter is opt-in (`filters: [iconify]`), while a shortcode always runs when
+--- there is an icon to render.
+---
+--- A schema that cannot be read is reported by the module as an error and the
+--- render carries on: a configuration file must not stop a document.
+local checker = check.new(schema, EXTENSION_NAME)
 
 --- Per-key deprecation warning tracker. Each deprecated metadata key warns
 --- at least once per render rather than once total. The companion filter
@@ -304,150 +287,6 @@ local function recover_kwargs(args, kwargs)
   return positional
 end
 
---- Load `_schema.yml` once per render.
---- @return table|nil The parsed schema, or nil when it could not be read
-local function load_extension_schema()
-  if not schema_loaded then
-    schema_loaded = true
-    local loaded, err = schema.load_schema(quarto.utils.resolve_path('_schema.yml'))
-    if err then
-      log.log_error(EXTENSION_NAME, err)
-    else
-      extension_schema = loaded
-    end
-  end
-  return extension_schema
-end
-
---- Flatten a shortcode's named options to plain strings for validation.
---- Every value is read through `attr_value`, so a quoted and an unquoted
---- value are checked as the same thing.
---- @param kwargs table<string, any> Key-value options for the icon
---- @return table<string, string>
-local function plain_kwargs(kwargs)
-  --- @type table<string, string>
-  local plain = {}
-  for key in pairs(kwargs) do
-    plain[tostring(key)] = attr_value(kwargs, key)
-  end
-  return plain
-end
-
---- Check `extensions.iconify` against `_schema.yml` once per render, and keep
---- what it resolves. `_schema.yml` holds every default this extension applies,
---- so the values it produces are read back here rather than restated in Lua.
----
---- Three tables are kept, because they answer different questions:
----   provided  what the document actually set, which is the only way to tell
----             a deliberate `false` or `0` from an absent key,
----   merged    the same values with coercion and defaults applied,
----   defaults  the schema defaults on their own, from a pass over an empty
----             table, used as the last resort in `document_option`.
---- @param meta table<string, any> Document metadata
---- @return table|nil The resolved tables, or nil when there is no schema
-local function resolve_document_options(meta)
-  if resolved_options ~= nil then
-    return resolved_options
-  end
-  if options_validated then
-    return nil
-  end
-  options_validated = true
-
-  --- @type table|nil
-  local loaded = load_extension_schema()
-  if loaded == nil or next(loaded.options) == nil then return nil end
-
-  --- @type table<string, any>
-  local provided = schema.extract_meta_options(meta, EXTENSION_NAME)
-  local valid, errors, warnings, merged = schema.validate(provided, loaded.options)
-
-  for _, message in ipairs(warnings) do
-    log.log_warning(EXTENSION_NAME, message)
-  end
-  if not valid then
-    for _, message in ipairs(errors) do
-      log.log_error(EXTENSION_NAME, message)
-    end
-  end
-
-  --- Validating an empty configuration yields the declared defaults alone.
-  local _, _, _, defaults = schema.validate({}, loaded.options, { unknown = 'ignore' })
-
-  resolved_options = { provided = provided, merged = merged, defaults = defaults }
-  return resolved_options
-end
-
---- Check one shortcode call against its entry in `_schema.yml` and report
---- whatever it finds. This reports only; nothing about the rendered icon
---- changes, so an unrecognised attribute is surfaced rather than dropped.
---- @param name string Shortcode name, 'iconify' or 'quarto'
---- @param args table<integer, any> Positional arguments
---- @param kwargs table<string, any> Key-value options for the icon
---- @return nil
-local function validate_call(name, args, kwargs)
-  --- @type table|nil
-  local loaded = load_extension_schema()
-  if loaded == nil then return end
-
-  --- @type table|nil
-  local entry = loaded.shortcodes and loaded.shortcodes[name]
-  if entry == nil then return end
-
-  --- @type table<integer, string>
-  local positional = {}
-  for index, value in ipairs(args) do
-    positional[index] = str.stringify(value)
-  end
-
-  local _, errors, warnings = schema.validate_shortcode(
-    name, positional, plain_kwargs(kwargs), entry)
-
-  -- Reported as warnings, not errors: the rendered icon never changes because
-  -- of a schema mismatch on an attribute, so this is advice rather than a
-  -- failure. An unrecognised value is still handled by the code that reads it.
-  for _, message in ipairs(warnings) do
-    log.log_warning(EXTENSION_NAME, message)
-  end
-
-  -- A required argument that is absent is the one case the rule above does not
-  -- cover: without it there is no icon, so the output does change. The check
-  -- is made here rather than read out of the validator's findings because the
-  -- validator reports a nested argument fault under one `arguments` entry,
-  -- which cannot tell a missing argument from a malformed one.
-  --- @type table<integer, table>
-  local missing = {}
-  for index, argument in ipairs(entry.arguments or {}) do
-    if argument.required == true and str.is_empty(positional[index]) then
-      missing[#missing + 1] = argument
-    end
-  end
-
-  if #missing > 0 then
-    -- The only message about the missing argument: the schema's own `required`
-    -- wording says the same thing, and reporting both would state one fault
-    -- twice at two severities. Attribute warnings above still stand, and every
-    -- other finding about this call is secondary to there being no icon.
-    for _, argument in ipairs(missing) do
-      --- The example comes from the schema so that each shortcode carries its
-      --- own, rather than this message naming one shortcode for all of them.
-      --- @type string
-      local advice = ''
-      local example = type(argument.examples) == 'table' and argument.examples[1] or nil
-      if example ~= nil then
-        advice = string.format(' For example: {{< %s %s >}}.', name, tostring(example))
-      end
-      log.log_error(EXTENSION_NAME, string.format(
-        'The "%s" shortcode needs its "%s" argument.%s', name, argument.name, advice))
-    end
-    return
-  end
-
-  for _, message in ipairs(errors) do
-    log.log_warning(EXTENSION_NAME, message)
-  end
-end
-
 --- Render a resolved option for the string contract every caller expects.
 --- A schema `inline: true` therefore reads as "true", which is what
 --- `meta_mod.get_metadata_value` produces for the same value in metadata.
@@ -475,12 +314,19 @@ end
 --- Presence is tested with `~= nil` rather than truthiness, so a deliberate
 --- `inline: false` or `typst-cache-max-age: 0` is honoured instead of being
 --- read as an absent key and replaced by its own default.
+---
+--- With no readable schema there is no tier left to fall back to, so the value
+--- is empty. The module has already reported that as an error, and the author
+--- has to restore the file rather than read a default the extension invented.
 --- @param key string The option name to retrieve
 --- @param meta table<string, any> Document metadata table
 --- @return string The option value as a string
 local function document_option(key, meta)
-  --- @type table|nil
-  local options = resolve_document_options(meta)
+  --- The second return holds the `provided`, `merged` and `defaults` tables,
+  --- and is nil when there is no readable schema. They belong to the checker
+  --- and are read, never written to. The first return is a copy of the
+  --- defaults, which `options.defaults` already answers for.
+  local _, options = checker:options(meta)
 
   if options ~= nil and options.provided[key] ~= nil then
     return option_to_string(options.merged[key])
@@ -495,7 +341,7 @@ local function document_option(key, meta)
     return option_to_string(options.defaults[key])
   end
 
-  return SCHEMA_UNAVAILABLE[key] or ''
+  return ''
 end
 
 --- Get an iconify option from arguments or metadata.
@@ -521,13 +367,12 @@ end
 --- @param meta table<string, any> Document metadata
 --- @return table<string, string>
 local function typst_cache_options(meta)
-  --- @type table|nil
-  local options = resolve_document_options(meta)
+  local _, options = checker:options(meta)
   return {
     cache_dir = document_option('typst-cache', meta),
     cache_fallback = options
       and option_to_string(options.defaults['typst-cache'])
-      or SCHEMA_UNAVAILABLE['typst-cache'],
+      or '',
     max_age_days = document_option('typst-cache-max-age', meta),
     max_entries = document_option('typst-cache-max-entries', meta),
   }
@@ -630,7 +475,7 @@ local function render_icon(args, kwargs, meta)
   -- the same way for every output format rather than only the two that render
   -- something. An empty first argument counts as no icon, which is what the
   -- schema's `required` check already decided, so the two agree.
-  -- `validate_call` has reported this to the author; there is nothing to add
+  -- The schema check has reported this to the author; there is nothing to add
   -- here beyond not reading a first argument that is not there.
   if #args == 0 or str.is_empty(str.stringify(args[1])) then
     return pandoc.Null()
@@ -823,9 +668,9 @@ end
 --- @param meta table<string, any> Document metadata
 --- @return any Pandoc RawInline for HTML or Pandoc Null for other formats
 local function iconify(args, kwargs, meta)
-  resolve_document_options(meta)
+  checker:options(meta)
   args = recover_kwargs(args, kwargs)
-  validate_call('iconify', args, kwargs)
+  checker:call('iconify', args, kwargs)
   return render_icon(args, kwargs, meta)
 end
 
@@ -839,9 +684,9 @@ local function iconify_quarto(args, kwargs, meta)
   local quarto_args = { 'simple-icons:quarto' }
   --- @type table<string, any>
   local quarto_kwargs = kwargs or {}
-  resolve_document_options(meta)
+  checker:options(meta)
   recover_kwargs(args, quarto_kwargs)
-  validate_call('quarto', {}, quarto_kwargs)
+  checker:call('quarto', {}, quarto_kwargs)
   -- A decorative icon carries neither, and setting them here would re-introduce
   -- exactly what `aria-hidden` removes.
   if not is_decorative(quarto_kwargs, false) then
