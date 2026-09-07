@@ -4,6 +4,10 @@
 
 ## 4.2.1 (2026-09-07)
 
+### Documentation
+
+- docs: Serve the extension's social card as the Open Graph image, so a shared link shows the card rather than the first image on the page. (#93)
+
 ### Refactoring
 
 - refactor: Take the runtime schema check from the shared `schema-check.lua` module instead of the copy written in this extension. The check reports the same faults as before. (#91)
