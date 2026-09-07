@@ -2,8 +2,9 @@
 
 `og-image.png` is the Open Graph preview for this site, 1200x630, referenced from
 `website.open-graph.image` and `website.twitter-card.image` in `_quarto.yml`.
-The keys sit inside those two blocks because a project-level `website.image` is not inherited
-into them, and is ignored.
+The keys sit inside those two blocks because that is the only form that beats Quarto's own
+first-image harvest. A project-level `website.image` loses to that harvest on any page whose
+first inline image is a data URI, which is what this site served as `og:image` before.
 
 It is not authored here.
 The card comes from [quarto-social-cards](https://github.com/mcanouil/quarto-social-cards), a Typst
