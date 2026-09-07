@@ -3,20 +3,20 @@ sources:
   quarto-lua-modules:
     origin: "https://github.com/mcanouil/quarto-lua-modules"
     fetch: "{origin}/releases/download/{version}/{file}"
-    version: "2.1.0"
+    version: "2.3.0"
     licence: MIT
     files:
       logging.lua:
-        sha256: "0c3ded6020d3739c91bb6a492328751b284d1ada5763a1b8ca6fc5536ac01c95"
+        sha256: "5d99ceb89c813fbe4491310e42b4a4cff62e11dda42f01b4f61f969aa58e0706"
         runtime: any
       metadata.lua:
-        sha256: "f42599d322e3ea68c247078da26959041f3fdebf0aa4d406a415240a2a0f6ddd"
+        sha256: "1186431acc50e35797eef68808e4c52321c845a3be4f29bbd7de695b1db2f6cc"
         runtime: any
       schema-check.lua:
-        sha256: "2fda875db97479f69c2c4d49f3073ac6ec458cb502c08c380918fdfadcd1e799"
+        sha256: "7c4dc34f31b85ff7bc4e2511f73e2301377e964e57ea5374ad97e7817a10af4b"
         runtime: any
       string.lua:
-        sha256: "a80255adaf7b7f2588aecb127030d950379479a2a1b266efc5b943364ac96cf4"
+        sha256: "7801d2f217e803951313ef86f1f899cb6350a44cbb468b2d7c28dd6911a0fadc"
         runtime: any
   quarto-wizard:
     origin: "https://github.com/mcanouil/quarto-wizard"

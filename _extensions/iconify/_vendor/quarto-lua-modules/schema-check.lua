@@ -3,11 +3,14 @@
 --- @license MIT
 --- @copyright 2026 Mickaël Canouil
 --- @author Mickaël Canouil
---- @version 2.1.0
 ---
---- Holds the wiring that every extension would otherwise copy: read
---- `_schema.yml` once, check the document configuration against it, check one
---- shortcode call against it, and report what it finds through `logging`.
+--- Holds the wiring that every extension would otherwise copy: read the schema
+--- once, check the document configuration against it, check one shortcode call
+--- against it, and report what it finds through `logging`.
+---
+--- The schema is `_schema.yml` beside the entry point that runs. An extension
+--- whose entry points sit in a subdirectory names its own path instead, with
+--- `'../_schema.yml'` for one level down.
 ---
 --- The validator arrives as an argument rather than through `require`. A
 --- vendored copy of this module then knows nothing about where the validator
@@ -310,15 +313,23 @@ end
 -- PUBLIC API
 -- ============================================================================
 
---- Build a checker for one extension, reading `_schema.yml` once.
+--- Build a checker for one extension, reading its schema once.
 --- A schema that cannot be read is reported, and the checker it returns does
 --- nothing: `options` gives an empty table and `call` gives no message.
+---
+--- The path is resolved with `quarto.utils.resolve_path`, which answers
+--- relative to the entry point that is running rather than to the extension
+--- directory. An entry point in a subdirectory therefore has to say where the
+--- schema is, and the checker it builds belongs at file scope, so that the
+--- schema is read once for the render and not once for each call.
 --- @param validator table The validator, with `load_schema`, `validate`,
 ---   `validate_shortcode` and `extract_meta_options`
 --- @param extension_name string The extension name every message carries
+--- @param schema_path string|nil The schema to read, relative to the entry
+---   point that is running. Defaults to `_schema.yml`.
 --- @return Checker
---- @usage local checker = M.new(validator, 'iconify')
-function M.new(validator, extension_name)
+--- @usage local checker = M.new(validator, 'iconify', '../_schema.yml')
+function M.new(validator, extension_name, schema_path)
   --- @type Checker
   local checker = setmetatable({
     validator = validator,
@@ -329,7 +340,11 @@ function M.new(validator, extension_name)
     options_checked = false,
   }, Checker)
 
-  local loaded, err = validator.load_schema(quarto.utils.resolve_path('_schema.yml'))
+  -- The default is chosen here rather than in the signature, so a caller that
+  -- passes two arguments reads the same file it read before this argument
+  -- existed.
+  local loaded, err = validator.load_schema(
+    quarto.utils.resolve_path(schema_path or '_schema.yml'))
   if err then
     checker:_report('schema', err)
   else

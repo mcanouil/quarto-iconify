@@ -3,7 +3,6 @@
 --- @license MIT
 --- @copyright 2026 Mickaël Canouil
 --- @author Mickaël Canouil
---- @version 2.1.0
 
 local M = {}
 
