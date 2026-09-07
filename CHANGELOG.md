@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.2.1 (2026-09-07)
+
 ### Refactoring
 
 - refactor: Take the runtime schema check from the shared `schema-check.lua` module instead of the copy written in this extension. The check reports the same faults as before. (#91)
