@@ -1,6 +1,6 @@
 title: Atelier
 author: Mickaël Canouil
-version: 0.10.3
+version: 0.10.4
 quarto-required: ">=1.9.36"
 contributes:
   project:
@@ -84,4 +84,5 @@ contributes:
         - file: html/scripts/ordinal-dates.html
         - file: html/scripts/a11y-fixes.html
         - file: html/scripts/navbar-tooltips.html
-source: mcanouil/quarto-atelier@0.10.3
+source: mcanouil/quarto-atelier@0.10.4
+source-type: github

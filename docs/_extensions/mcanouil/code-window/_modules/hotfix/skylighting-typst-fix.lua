@@ -1,4 +1,4 @@
---- @module skylighting-typst-fix
+--- @module "skylighting-typst-fix"
 --- @license MIT
 --- @copyright 2026 Mickaël Canouil
 --- @author Mickaël Canouil

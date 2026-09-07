@@ -14,6 +14,10 @@ options:
     enum: ["default", "macos", "windows"]
     default: "macos"
     description: "Window decoration style: 'macos' (traffic lights), 'windows' (title bar buttons), or 'default' (plain filename). Can be overridden per block with the 'code-window-style' attribute."
+  cell-output:
+    type: boolean
+    default: false
+    description: "Frame the output of an executed cell like a code block. Off by default, so output keeps the shape Quarto gives it."
   wrapper:
     type: string
     default: "code-window"
