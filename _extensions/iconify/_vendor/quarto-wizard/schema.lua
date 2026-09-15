@@ -3,7 +3,7 @@
 --- @license MIT
 --- @copyright 2026 Mickaël Canouil
 --- @author Mickaël Canouil
---- @version 2.0.0
+--- @version 2.1.0
 ---
 --- Implements the v2 extension schema vocabulary published at
 --- <https://m.canouil.dev/quarto-wizard/assets/schema/v2/extension-schema.json>.
@@ -313,11 +313,18 @@ local function _coerce_scalar(value, name)
       return number, true
     end
   elseif name == 'boolean' then
+    -- Only `true` and `false`, which is what YAML 1.2 calls a boolean and what
+    -- Pandoc reads. `yes` and `no` are booleans in YAML 1.1 alone, and Pandoc
+    -- hands them over as strings, so accepting them here made this validator
+    -- disagree with the YAML the documents are written in.
+    --
+    -- The coercion is still needed for the words that do name a boolean,
+    -- because an attribute and a shortcode argument always arrive as strings.
     local lowered = value:lower()
-    if lowered == 'true' or lowered == 'yes' then
+    if lowered == 'true' then
       return true, true
     end
-    if lowered == 'false' or lowered == 'no' then
+    if lowered == 'false' then
       return false, true
     end
   end
