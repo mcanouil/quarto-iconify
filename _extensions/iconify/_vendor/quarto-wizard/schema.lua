@@ -3,7 +3,7 @@
 --- @license MIT
 --- @copyright 2026 Mickaël Canouil
 --- @author Mickaël Canouil
---- @version 2.1.0
+--- @version 2.2.0
 ---
 --- Implements the v2 extension schema vocabulary published at
 --- <https://m.canouil.dev/quarto-wizard/assets/schema/v2/extension-schema.json>.
@@ -1798,7 +1798,7 @@ local function _check_object(value, spec, path, context)
 
   if type(spec.properties) == 'table' then
     local sub, filled = _validate_map(value, spec.properties, path, context, {
-      unknown = spec.additionalProperties == false and 'error' or 'ignore',
+      unknown = spec.additionalProperties == false and 'warn' or 'ignore',
       additional = type(spec.additionalProperties) == 'table' and spec.additionalProperties or nil,
     })
 
