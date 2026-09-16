@@ -668,7 +668,9 @@ end
 --- @param meta table<string, any> Document metadata
 --- @return any Pandoc RawInline for HTML or Pandoc Null for other formats
 local function iconify(args, kwargs, meta)
-  checker:options(meta)
+  if quarto.doc.is_format('html:js') or quarto.doc.is_format('typst') then
+    checker:options(meta)
+  end
   args = recover_kwargs(args, kwargs)
   checker:call('iconify', args, kwargs)
   return render_icon(args, kwargs, meta)
@@ -684,7 +686,9 @@ local function iconify_quarto(args, kwargs, meta)
   local quarto_args = { 'simple-icons:quarto' }
   --- @type table<string, any>
   local quarto_kwargs = kwargs or {}
-  checker:options(meta)
+  if quarto.doc.is_format('html:js') or quarto.doc.is_format('typst') then
+    checker:options(meta)
+  end
   recover_kwargs(args, quarto_kwargs)
   checker:call('quarto', {}, quarto_kwargs)
   -- A decorative icon carries neither, and setting them here would re-introduce
