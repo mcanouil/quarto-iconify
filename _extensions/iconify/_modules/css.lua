@@ -28,7 +28,9 @@ local M = {}
 --- The property name is compared in full and without regard to case, so
 --- `background-color` never answers for `color`. The last matching
 --- declaration wins, as it does in CSS. A declaration with no value is
---- invalid, so it is ignored rather than clearing an earlier one.
+--- invalid, so it is ignored rather than clearing an earlier one. An
+--- `!important` marker belongs to the declaration rather than to the value,
+--- so it is removed.
 ---
 --- @param style string|nil The inline CSS, such as `color: red; font-size: 2em`
 --- @param property string The property name to read, in lower case
@@ -41,8 +43,17 @@ function M.declaration(style, property)
   local found = ''
   for declaration in (style .. ';'):gmatch('([^;]*);') do
     local name, value = declaration:match('^%s*([%w%-]+)%s*:%s*(.-)%s*$')
-    if name and value ~= '' and name:lower() == property then
-      found = value
+    if name and name:lower() == property then
+      -- `!important` is part of the declaration, not of the value. Passing it
+      -- on would hand a colour function a string that names no colour.
+      value = value
+        :gsub('%s*!%s*[Ii][Mm][Pp][Oo][Rr][Tt][Aa][Nn][Tt]%s*$', '')
+        :gsub('%s*$', '')
+      -- A declaration with no value is invalid, so it is ignored rather than
+      -- clearing an earlier one.
+      if value ~= '' then
+        found = value
+      end
     end
   end
 
