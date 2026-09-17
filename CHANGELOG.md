@@ -6,6 +6,7 @@
 
 - fix: Gate the options check at both shortcode call sites on the html:js and typst formats so non-acting formats stay silent. (#98)
 - fix: Report a key nested inside an option as a warning rather than an error, so one nested typo does not invalidate the whole configuration. This matches how the extension already reports an unknown key at the top of its own block. (#98)
+- fix: Read the icon colour from the `color` declaration of a `style` attribute only. A property whose name ends the same way, such as `background-color`, painted the icon its value in Typst output.
 
 ### Refactoring
 

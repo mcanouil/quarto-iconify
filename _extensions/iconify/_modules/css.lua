@@ -1,0 +1,46 @@
+--- MC Iconify CSS - Reading one declaration out of an inline `style` value
+--- @module "css"
+--- @license MIT
+--- @copyright 2026 Mickaël Canouil
+--- @author Mickaël Canouil
+--- @version 1.0.0
+---
+--- The shortcode accepts a `style` attribute, and Typst output needs the icon
+--- colour out of it. A plain search for `color:` finds the colour inside
+--- `background-color`, `border-color` and every other property whose name ends
+--- the same way, so the icon is painted a colour the author never asked for.
+---
+--- This module reads the declaration list one declaration at a time and
+--- compares the whole property name, which is the only way to tell
+--- `background-color` from `color`.
+---
+--- It depends on nothing, so `tests/style-colour.lua` can load it directly.
+
+local M = {}
+
+--- Read one property from an inline CSS declaration list.
+---
+--- The property name is compared in full and without regard to case, so
+--- `background-color` never answers for `color`. The last matching
+--- declaration wins, as it does in CSS.
+---
+--- @param style string|nil The inline CSS, such as `color: red; font-size: 2em`
+--- @param property string The property name to read, in lower case
+--- @return string value The declared value, trimmed, or an empty string
+function M.declaration(style, property)
+  if type(style) ~= 'string' or style == '' then
+    return ''
+  end
+
+  local found = ''
+  for declaration in (style .. ';'):gmatch('([^;]*);') do
+    local name, value = declaration:match('^%s*([%w%-]+)%s*:%s*(.-)%s*$')
+    if name and name:lower() == property then
+      found = value
+    end
+  end
+
+  return found
+end
+
+return M
