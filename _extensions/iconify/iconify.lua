@@ -11,6 +11,7 @@ local str = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/string
 local log = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/logging.lua'):gsub('%.lua$', ''))
 local meta_mod = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/metadata.lua'):gsub('%.lua$', ''))
 local typst = require(quarto.utils.resolve_path('_modules/typst.lua'):gsub('%.lua$', ''))
+local css = require(quarto.utils.resolve_path('_modules/css.lua'):gsub('%.lua$', ''))
 local schema = require(quarto.utils.resolve_path('_vendor/quarto-wizard/schema.lua'):gsub('%.lua$', ''))
 local check = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/schema-check.lua'):gsub('%.lua$', ''))
 
@@ -410,7 +411,7 @@ local function render_typst(icon, set, default_label, decorative, kwargs, meta)
     --- @type string
     local style = get_iconify_options('style', kwargs, meta)
     if not str.is_empty(style) then
-      colour = str.trim(style:match('color%s*:%s*([^;]+)') or '')
+      colour = css.declaration(style, 'color')
     end
   end
 
