@@ -3,7 +3,7 @@
 ---
 --- A search for `color:` anywhere in the string also matches inside
 --- `background-color`, `border-color`, `outline-color` and the rest, which
---- painted the icon a colour the author had asked for something else.
+--- painted the icon a colour the author never asked for.
 ---
 --- Run with the Pandoc that Quarto ships, from the repository root:
 ---
@@ -26,6 +26,8 @@ local CASES = {
   { 'background-color: firebrick; color: blue', 'blue', 'the real one after a decoy' },
   { 'color: blue; background-color: firebrick', 'blue', 'the real one before a decoy' },
   { 'color: red; color: blue', 'blue', 'the last declaration wins' },
+  { 'color: red; color:', 'red', 'an empty value is invalid and ignored' },
+  { 'color:', '', 'an empty value on its own' },
   { 'font-size: 2em', '', 'no colour at all' },
   { 'color: rgb(1, 2, 3)', 'rgb(1, 2, 3)', 'a function value' },
   { '', '', 'an empty string' },

@@ -22,7 +22,8 @@ local M = {}
 ---
 --- The property name is compared in full and without regard to case, so
 --- `background-color` never answers for `color`. The last matching
---- declaration wins, as it does in CSS.
+--- declaration wins, as it does in CSS. A declaration with no value is
+--- invalid, so it is ignored rather than clearing an earlier one.
 ---
 --- @param style string|nil The inline CSS, such as `color: red; font-size: 2em`
 --- @param property string The property name to read, in lower case
@@ -35,7 +36,7 @@ function M.declaration(style, property)
   local found = ''
   for declaration in (style .. ';'):gmatch('([^;]*);') do
     local name, value = declaration:match('^%s*([%w%-]+)%s*:%s*(.-)%s*$')
-    if name and name:lower() == property then
+    if name and value ~= '' and name:lower() == property then
       found = value
     end
   end
