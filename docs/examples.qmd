@@ -7,6 +7,15 @@ description: "Iconify icons drawn by the extension, one section per attribute, w
 Every icon below is drawn by the extension as this page renders.
 The site sets `octicon` as its default set.
 
+Two topics have a page of their own.
+
+| Page | Covers |
+| --- | --- |
+| [Rendering modes](examples/rendering-modes.qmd) | The `mode` attribute in HTML, the colour each mode gives you, and the `inline` attribute. |
+| [Typst output and the cache](examples/typst-output-and-cache.qmd) | Colour and size in Typst, and the on-disk SVG cache behind a Typst render. |
+
+: The per-topic pages. {.striped .hover tbl-colwidths="[38,62]"}
+
 ## Naming an icon
 
 | Source | Renders as |
@@ -50,6 +59,9 @@ The site sets `octicon` as its default set.
 : Colouring an icon in HTML. {.striped .hover tbl-colwidths="[55,45]"}
 
 The `color` attribute is for Typst output, where the colour is baked into the retrieved SVG.
+[Typst output and the cache](examples/typst-output-and-cache.qmd) shows both.
+
+How an icon takes a colour in HTML depends on the rendering mode, which [Rendering modes](examples/rendering-modes.qmd) covers.
 
 ## Accessibility
 

@@ -1,0 +1,134 @@
+---
+title: "Typst output and the cache"
+subtitle: "Colour, size, and the SVG cache behind a Typst render."
+description: "How an Iconify icon reaches a Typst document, how colour is baked into the fetched SVG, and how the on-disk cache is named, committed, and kept bounded."
+---
+
+Typst cannot reach the Iconify library on its own.
+The extension fetches the SVG for each icon from the Iconify API, keeps it on disk, and writes a Typst `#image` pointing at the file.
+The [Reference](../reference.qmd#typst-output) lists every option and its default.
+
+This site renders HTML only, so nothing on this page exercises the cache.
+The icons in the tables are the HTML rendering of the same shortcodes.
+
+## What the extension writes
+
+```markdown
+{{{< iconify mdi:home >}}}
+```
+
+A Typst render turns that into one image call:
+
+```typst
+#box(baseline: 0.125em, image("/assets/icons/mdi-home-5895ac3a.svg", height: 1em, alt: "Icon home from mdi Iconify.design set."))
+```
+
+The directory in that path is the one `typst-cache` names, covered below.
+The leading slash makes the path relative to the Typst project root.
+`size` becomes the image height, so the icon scales with the text around it.
+`inline=false` drops the surrounding `#box`, and `aria-hidden="true"` drops the `alt`.
+
+## Colour is baked into the file
+
+A monochrome icon arrives written with `currentColor`.
+Typst has no text colour to give it, so the icon is painted black.
+Ask the Iconify API for a colour instead, and the fetched file carries that colour:
+
+```markdown
+{{{< iconify mdi:home color=firebrick >}}}
+```
+
+The cached file then reads `fill="firebrick"` rather than `fill="currentColor"`.
+
+`color` does nothing in HTML, where the colour comes from the text instead.
+A `color:` declaration inside `style` covers both outputs at once, so one attribute is enough:
+
+| Source | Renders as, in HTML |
+| --- | --- |
+| `{{{< iconify mdi:home size=2x style="color: firebrick;" >}}}` | {{< iconify mdi:home size=2x style="color: firebrick;" >}} |
+| `{{{< iconify mdi:home size=2x color=firebrick >}}}` | {{< iconify mdi:home size=2x color=firebrick >}} |
+
+: The same colour, written for both outputs and then for Typst alone. {.striped .hover tbl-colwidths="[62,38]"}
+
+A multicolour icon keeps the colours its author gave it, and `color` leaves it alone.
+
+Set the colour once for a whole document when every icon should match:
+
+```yaml
+extensions:
+  iconify:
+    color: firebrick
+```
+
+## A size Typst cannot use
+
+A size keyword resolves to a length in `em`, which Typst accepts, so every keyword works.
+A CSS unit that Typst does not accept fails:
+
+```markdown
+{{{< iconify mdi:home size=32px >}}}
+```
+
+That render reports the unit and falls back to `1em`:
+
+```text
+(W) [iconify] Size "32px" uses a unit Typst does not support; falling back to
+1em for Typst output. Use em, pt, cm, mm, in or % for Typst sizing.
+```
+
+The HTML output of the same shortcode is unaffected, because `px` is a CSS length.
+
+## Where the SVGs are kept
+
+```yaml
+extensions:
+  iconify:
+    typst-cache: assets/icons
+```
+
+The directory is read relative to the project root.
+A `..` segment is dropped rather than followed, so the cache cannot be written outside the project.
+
+Each file is named after the set, the icon, and a short hash of the request:
+
+```text
+assets/icons/mdi-home-5895ac3a.svg
+assets/icons/mdi-home-5895ac3a.svg.used
+```
+
+The `.used` file beside each icon records when that icon was last drawn.
+The hash covers the colour, the flip, and the rotation, so each variant of an icon is a separate file.
+Asking for `mdi:home` and for `mdi:home` in firebrick therefore leaves two files behind.
+
+## Committing the cache
+
+Point `typst-cache` at a tracked directory and turn the age limit off.
+The repository then carries every icon it needs:
+
+```yaml
+extensions:
+  iconify:
+    typst-cache: assets/icons
+    typst-cache-max-age: 0
+```
+
+A later build then renders with no network at all.
+The `.used` files need not be committed.
+An entry that arrives with no stamp is stamped again on the next render, and is never pruned by that render.
+
+## Keeping the cache bounded
+
+```yaml
+extensions:
+  iconify:
+    typst-cache-max-age: 30
+    typst-cache-max-entries: 200
+```
+
+The extension prunes the cache once per render.
+It first removes each entry unused for longer than the age limit.
+It then removes the least recently used entries until the count fits.
+An entry drawn during the last few minutes is never removed, so a render can never delete the icons it is placing.
+
+`0` turns either limit off.
+The [Reference](../reference.qmd#typst-output) gives the value each limit takes when you set neither.
