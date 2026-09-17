@@ -15,6 +15,11 @@
 --- `background-color` from `color`.
 ---
 --- It depends on nothing, so `tests/style-colour.lua` can load it directly.
+---
+--- Declarations are split on every semicolon, including one inside a quoted
+--- value. A value such as `"a; b"` is therefore read as two declarations.
+--- No property that takes a quoted value has any bearing on an icon, so the
+--- parser is left simple rather than made quote-aware.
 
 local M = {}
 
