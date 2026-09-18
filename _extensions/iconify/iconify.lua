@@ -12,6 +12,7 @@ local log = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/loggin
 local meta_mod = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/metadata.lua'):gsub('%.lua$', ''))
 local typst = require(quarto.utils.resolve_path('_modules/typst.lua'):gsub('%.lua$', ''))
 local css = require(quarto.utils.resolve_path('_modules/css.lua'):gsub('%.lua$', ''))
+local name_mod = require(quarto.utils.resolve_path('_modules/name.lua'):gsub('%.lua$', ''))
 local schema = require(quarto.utils.resolve_path('_vendor/quarto-wizard/schema.lua'):gsub('%.lua$', ''))
 local check = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/schema-check.lua'):gsub('%.lua$', ''))
 
@@ -176,19 +177,6 @@ local function resolve_size(size)
     return ''
   end
   return 'font-size: ' .. value .. ';'
-end
-
---- Validate an Iconify icon or set name.
---- Matches the pattern enforced by the Iconify Web Component itself
---- (`/^[a-z0-9]+(-[a-z0-9]+)*$/`): lowercase letters or digits separated
---- by single hyphens, with no leading or trailing hyphen.
---- @param value string
---- @return boolean
-local function is_valid_iconify_name(value)
-  if value == nil or value == '' then return false end
-  if value:find('%-%-') then return false end
-  if value:sub(1, 1) == '-' or value:sub(-1) == '-' then return false end
-  return value:match('^[a-z0-9-]+$') ~= nil
 end
 
 --- Read an attribute value with a surrounding quote pair removed.
@@ -519,9 +507,13 @@ local function render_icon(args, kwargs, meta)
     icon = str.stringify(args[2])
   end
 
-  -- Validate icon and set names. Invalid names still render so that authors
-  -- can see what went wrong in the output, but a warning is emitted.
-  if not is_valid_iconify_name(set) then
+  -- Validate icon and set names. In HTML the invalid name still renders, so
+  -- that authors see what went wrong in the browser, and a warning is
+  -- emitted. Typst is handled below.
+  --- @type boolean
+  local named_well = true
+  if not name_mod.is_valid(set) then
+    named_well = false
     log.log_warning(
       EXTENSION_NAME,
       'Icon set name "' .. set .. '" is invalid. ' ..
@@ -529,13 +521,22 @@ local function render_icon(args, kwargs, meta)
       'The icon will likely fail to load.'
     )
   end
-  if not is_valid_iconify_name(icon) then
+  if not name_mod.is_valid(icon) then
+    named_well = false
     log.log_warning(
       EXTENSION_NAME,
       'Icon name "' .. icon .. '" is invalid. ' ..
       'Use lowercase letters, digits and single hyphens (e.g. "exploding-head"). ' ..
       'The icon will likely fail to load.'
     )
+  end
+
+  -- Typst renders nothing for an invalid name. The name is a path segment in
+  -- the Iconify API request and in the cache file name, so a value carrying
+  -- `/` or `..` would leave the cache directory. The Iconify API has no icon
+  -- under such a name either, so nothing is lost by stopping here.
+  if is_typst and not named_well then
+    return pandoc.Null()
   end
 
   --- @type string
