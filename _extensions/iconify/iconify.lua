@@ -507,13 +507,11 @@ local function render_icon(args, kwargs, meta)
     icon = str.stringify(args[2])
   end
 
-  -- Validate icon and set names. In HTML the invalid name still renders, so
-  -- that authors see what went wrong in the browser, and a warning is
-  -- emitted. Typst is handled below.
-  --- @type boolean
-  local named_well = true
+  -- Validate icon and set names. Invalid names still render so that authors
+  -- can see what went wrong in the output, but a warning is emitted. Typst
+  -- renders the fallback instead, because the Typst module refuses a name
+  -- that is not a single path segment.
   if not name_mod.is_valid(set) then
-    named_well = false
     log.log_warning(
       EXTENSION_NAME,
       'Icon set name "' .. set .. '" is invalid. ' ..
@@ -522,21 +520,12 @@ local function render_icon(args, kwargs, meta)
     )
   end
   if not name_mod.is_valid(icon) then
-    named_well = false
     log.log_warning(
       EXTENSION_NAME,
       'Icon name "' .. icon .. '" is invalid. ' ..
       'Use lowercase letters, digits and single hyphens (e.g. "exploding-head"). ' ..
       'The icon will likely fail to load.'
     )
-  end
-
-  -- Typst renders nothing for an invalid name. The name is a path segment in
-  -- the Iconify API request and in the cache file name, so a value carrying
-  -- `/` or `..` would leave the cache directory. The Iconify API has no icon
-  -- under such a name either, so nothing is lost by stopping here.
-  if is_typst and not named_well then
-    return pandoc.Null()
   end
 
   --- @type string

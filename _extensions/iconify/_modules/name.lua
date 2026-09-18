@@ -27,7 +27,7 @@ local M = {}
 --- @param value string|nil The set or icon name
 --- @return boolean valid `true` when the value is a safe single path segment
 function M.is_valid(value)
-  if type(value) ~= 'string' or value == '' then return false end
+  if type(value) ~= 'string' then return false end
   if value:find('%-%-') then return false end
   if value:sub(1, 1) == '-' or value:sub(-1) == '-' then return false end
   return value:match('^[a-z0-9-]+$') ~= nil
