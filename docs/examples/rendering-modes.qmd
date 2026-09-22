@@ -1,0 +1,115 @@
+---
+title: "Rendering modes"
+subtitle: "How the icon is painted, and where it sits on the line."
+description: "The mode attribute in HTML output, the four values it accepts, the colour each one gives you, and the inline attribute that puts an icon on the text baseline."
+---
+
+HTML output draws each icon with the `iconify-icon` web component.
+The `mode` attribute tells that component how to paint the icon.
+Typst output ignores `mode`, because a Typst icon is an SVG file rather than a component.
+
+Every icon on this page is drawn by the extension as the page renders.
+The [Reference](../reference.qmd#attributes) lists the values `mode` accepts.
+
+## The four modes
+
+| Source | Renders as |
+| --- | --- |
+| `{{{< iconify mdi:home size=2x >}}}` | {{< iconify mdi:home size=2x >}} |
+| `{{{< iconify mdi:home size=2x mode=svg >}}}` | {{< iconify mdi:home size=2x mode=svg >}} |
+| `{{{< iconify mdi:home size=2x mode=style >}}}` | {{< iconify mdi:home size=2x mode=style >}} |
+| `{{{< iconify mdi:home size=2x mode=bg >}}}` | {{< iconify mdi:home size=2x mode=bg >}} |
+| `{{{< iconify mdi:home size=2x mode=mask >}}}` | {{< iconify mdi:home size=2x mode=mask >}} |
+
+: One icon, no mode and then each of the four. {.striped .hover tbl-colwidths="[62,38]"}
+
+Each value picks a different shape of output.
+
+- `svg` draws the icon as an `svg` element.
+- `bg` draws a `span` carrying the icon as a background image.
+- `mask` draws a `span` filled with the current text colour, then cuts the icon shape out of it.
+- `style` reads the icon and picks `mask` or `bg` for you.
+
+An icon named with no `mode` is drawn as an `svg` element.
+An animated icon is the exception: outside Safari the component treats it as though `mode=style` was named.
+Write `mode=svg` to get an `svg` element in every case.
+
+## Colour follows the mode
+
+A monochrome icon uses `currentColor`, so it takes the colour of the text around it.
+A background image cannot read that colour, so `bg` is the wrong mode for a monochrome icon.
+This is the choice `style` makes for you.
+It picks `mask` for an icon that uses `currentColor`, and `bg` for every other icon.
+
+`mdi:home` is monochrome, so `style` picks `mask` and the icon follows the text colour:
+
+| Source | Renders as |
+| --- | --- |
+| `{{{< iconify mdi:home size=2x style="color: firebrick;" >}}}` | {{< iconify mdi:home size=2x style="color: firebrick;" >}} |
+| `{{{< iconify mdi:home size=2x mode=style style="color: firebrick;" >}}}` | {{< iconify mdi:home size=2x mode=style style="color: firebrick;" >}} |
+| `{{{< iconify mdi:home size=2x mode=mask style="color: firebrick;" >}}}` | {{< iconify mdi:home size=2x mode=mask style="color: firebrick;" >}} |
+
+: A monochrome icon, coloured through the text colour. {.striped .hover tbl-colwidths="[62,38]"}
+
+`twemoji:rocket` carries its own colours, so `style` picks `bg` and the colours stay.
+`mask` throws them away and leaves one solid shape:
+
+| Source | Renders as |
+| --- | --- |
+| `{{{< iconify twemoji:rocket size=2x >}}}` | {{< iconify twemoji:rocket size=2x >}} |
+| `{{{< iconify twemoji:rocket size=2x mode=style >}}}` | {{< iconify twemoji:rocket size=2x mode=style >}} |
+| `{{{< iconify twemoji:rocket size=2x mode=bg >}}}` | {{< iconify twemoji:rocket size=2x mode=bg >}} |
+| `{{{< iconify twemoji:rocket size=2x mode=mask style="color: firebrick;" >}}}` | {{< iconify twemoji:rocket size=2x mode=mask style="color: firebrick;" >}} |
+
+: A multicolour icon under each mode. {.striped .hover tbl-colwidths="[62,38]"}
+
+Use `mask` when you want an icon to match the text beside it.
+Use `bg` or `svg` when you want the icon to keep the colours its author gave it.
+
+## What the page source holds
+
+The component builds its output inside a shadow root, whatever the mode.
+The page source therefore holds the element the extension wrote, and nothing else:
+
+```html
+<iconify-icon role="img" inline="" icon="mdi:home" style="font-size: 2em;" aria-label="Icon home from mdi Iconify.design set." title="Icon home from mdi Iconify.design set." mode="mask"></iconify-icon>
+```
+
+A stylesheet on the page cannot reach the `svg` or the `span` inside.
+Style the `iconify-icon` element itself, through `style` or a CSS rule, and let the colour and the size inherit.
+
+## One mode for the whole document
+
+```yaml
+extensions:
+  iconify:
+    mode: mask
+```
+
+Every icon is then drawn that way.
+A `mode` on one shortcode overrides the document value for that icon.
+
+## A value outside the four
+
+```markdown
+{{{< iconify mdi:home mode=outline >}}}
+```
+
+`outline` is not one of the four, so the extension reports it and drops it.
+The icon still renders, drawn as though no `mode` was named.
+
+## Where the icon sits on the line
+
+`inline` is the other attribute that changes how an icon is drawn.
+An inline icon is pulled down by `0.125em` so it sits on the baseline of the text beside it.
+
+| Source | Renders as |
+| --- | --- |
+| `Text {{{< iconify mdi:home size=2x >}}} text` | Text {{< iconify mdi:home size=2x >}} text |
+| `Text {{{< iconify mdi:home size=2x inline=false >}}} text` | Text {{< iconify mdi:home size=2x inline=false >}} text |
+
+: The same icon on the text baseline and off it. {.striped .hover tbl-colwidths="[62,38]"}
+
+`inline` is the one attribute on this page that Typst honours as well.
+An inline icon becomes `#box(baseline: 0.125em, image(…))` there, and `inline=false` becomes a bare `#image(…)`.
+The [Typst output and the cache](typst-output-and-cache.qmd) page covers the rest of the Typst path.

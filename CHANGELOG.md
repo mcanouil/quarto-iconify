@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Documentation
+
+- docs: Add a page for the HTML rendering modes and a page for the Typst output and its SVG cache, linked from the examples overview.
+
 ### Bug Fixes
 
 - fix: Gate the options check at both shortcode call sites on the html:js and typst formats so non-acting formats stay silent. (#98)

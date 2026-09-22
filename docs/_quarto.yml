@@ -63,8 +63,13 @@ website:
         text: "Home"
       - href: reference.qmd
         text: "Reference"
-      - href: examples.qmd
+      - section: examples.qmd
         text: "Examples"
+        contents:
+          - href: examples/rendering-modes.qmd
+            text: "Rendering modes"
+          - href: examples/typst-output-and-cache.qmd
+            text: "Typst output and the cache"
       - text: "---"
       - href: changelog.qmd
         text: "Changelog"
