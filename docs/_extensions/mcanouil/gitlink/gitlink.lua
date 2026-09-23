@@ -122,21 +122,6 @@ local function colour_to_hex(value)
   return colour.named_to_HTML(value)
 end
 
---- Read a boolean metadata value with a default.
---- Reads the raw value rather than going through `get_metadata_value()`, so a
---- boolean, a quoted string, and a bare YAML `false` all resolve the same way.
---- @param gitlink_meta table|nil The `extensions.gitlink` metadata sub-table
---- @param key string The option key
---- @param default boolean The default when the option is absent
---- @return boolean The resolved boolean value
-local function read_boolean_meta(gitlink_meta, key, default)
-  local value = gitlink_meta and gitlink_meta[key]
-  if value == nil then
-    return default
-  end
-  return str.stringify(value):lower() ~= 'false'
-end
-
 --- Reset all module-level state to defaults.
 --- Quarto can render multiple documents in one process, so module-level state
 --- from a previous document must be cleared at the start of each Meta pass.
@@ -334,7 +319,10 @@ local function get_repository(meta)
   local gitlink_meta = extensions_meta and extensions_meta['gitlink']
   local widget_meta = gitlink_meta and gitlink_meta['widget']
   local widget_enabled = widget.is_enabled(widget_meta)
-  is_enabled = read_boolean_meta(gitlink_meta, 'enabled', true)
+  -- The schema decides each of these, so `enabled: no` turns the filter off.
+  -- Reading the document itself treated every spelling but `false` as true,
+  -- and treated every spelling but `true` as false one flag over.
+  is_enabled = checker:option('enabled') ~= false
   if not is_enabled and not widget_enabled then
     return meta
   end
@@ -415,7 +403,7 @@ local function get_repository(meta)
     repository_name = git.get_repository()
   end
 
-  show_platform_badge = read_boolean_meta(gitlink_meta, 'show-platform-badge', true)
+  show_platform_badge = checker:option('show-platform-badge') ~= false
 
   local badge_pos_meta = meta_mod.get_metadata_value(meta, 'gitlink', 'badge-position')
   if badge_pos_meta ~= nil then
@@ -438,14 +426,9 @@ local function get_repository(meta)
     end
   end
 
-  normalize_links = read_boolean_meta(gitlink_meta, 'normalize-links', true)
+  normalize_links = checker:option('normalize-links') ~= false
 
-  -- Default-false flag: only literal 'true' enables it (matches YAML boolean
-  -- coercion). Anything else falls back to false.
-  local fetch_titles_meta = gitlink_meta and gitlink_meta['fetch-titles']
-  if fetch_titles_meta ~= nil then
-    fetch_titles = (str.stringify(fetch_titles_meta):lower() == 'true')
-  end
+  fetch_titles = checker:option('fetch-titles') == true
 
   -- Read the optional `mentions` list (citation IDs to force-treat as mentions).
   -- Direct table access because get_metadata_value flattens lists via stringify.

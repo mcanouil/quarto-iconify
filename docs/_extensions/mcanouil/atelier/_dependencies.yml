@@ -3,15 +3,15 @@ sources:
   quarto-lua-modules:
     origin: "https://github.com/mcanouil/quarto-lua-modules"
     fetch: "{origin}/releases/download/{version}/{file}"
-    version: "2.2.0"
+    version: "2.5.0"
     licence: MIT
     files:
       logging.lua:
-        sha256: "1a8339db434d4cc8f794a2e2526ffe002124b3f71df3e3ef47eb9db3a3b24296"
+        sha256: "5d99ceb89c813fbe4491310e42b4a4cff62e11dda42f01b4f61f969aa58e0706"
         runtime: any
       metadata.lua:
-        sha256: "83fc3757c1ca7d7d63fcf5bf6a8d4ac60144adfc95af2a90559d52d203e153fb"
+        sha256: "1186431acc50e35797eef68808e4c52321c845a3be4f29bbd7de695b1db2f6cc"
         runtime: any
       string.lua:
-        sha256: "f14a487f61d027e38c9cb32f280bd5266e73ef76e31bd61fdff184c2e588698d"
+        sha256: "7801d2f217e803951313ef86f1f899cb6350a44cbb468b2d7c28dd6911a0fadc"
         runtime: any

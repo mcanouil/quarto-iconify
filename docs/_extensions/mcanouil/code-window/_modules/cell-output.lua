@@ -48,6 +48,18 @@ function M.is_marked(block)
   return block.attributes[MARKER] == 'true'
 end
 
+--- Check whether an attribute name is this module's marker.
+--- The window passes remove every attribute carrying the extension's prefix,
+--- and the marker carries it too, so they ask here and leave this one alone.
+--- The marker outlives those passes on purpose: it answers whether a block
+--- holds the output of an executed cell, and it is removed once, below, after
+--- every pass that asks.
+--- @param key string Attribute name
+--- @return boolean
+function M.is_marker(key)
+  return key == MARKER
+end
+
 --- Remove the marker, so it never reaches the output document.
 --- @param block pandoc.CodeBlock
 function M.strip(block)

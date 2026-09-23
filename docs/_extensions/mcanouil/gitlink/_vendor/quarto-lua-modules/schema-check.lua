@@ -3,7 +3,6 @@
 --- @license MIT
 --- @copyright 2026 Mickaël Canouil
 --- @author Mickaël Canouil
---- @version 2.2.0
 ---
 --- Holds the wiring that every extension would otherwise copy: read the schema
 --- once, check the document configuration against it, check one shortcode call
@@ -16,8 +15,17 @@
 --- The validator arrives as an argument rather than through `require`. A
 --- vendored copy of this module then knows nothing about where the validator
 --- was vendored, so the two sources stay independent. The validator must
---- provide `load_schema`, `validate`, `validate_shortcode` and
---- `extract_meta_options`.
+--- provide `load_schema`, `validate`, `validate_shortcode`,
+--- `extract_meta_options`, `validate_attributes` and `validate_format`.
+---
+--- The last two are newer than the rest of that list, so a validator vendored
+--- before either exists is reported rather than called. The others are required
+--- outright and a validator without one of them raises.
+---
+--- `validate_format` must also be the one that reads the top level of the
+--- metadata, which is Quarto Wizard 3.6.0 or newer. An older one looks for the
+--- format name as a metadata key, which a document never has, so it would
+--- report nothing whatever the document wrote.
 ---
 --- Nothing here stops a render. A schema is configuration, and a fault in the
 --- configuration must not remove the document.
@@ -52,7 +60,18 @@ local str = load_sibling('string.lua')
 --- document.
 ---
 --- A rejected document option keeps the error level it has today: it names a
---- value the extension cannot use, and the author has to correct it.
+--- value the extension cannot use, and the author has to correct it. A rejected
+--- format option is the same finding about the same document, one section over,
+--- so it takes the same level.
+---
+--- A finding about an element's attribute is a warning instead. The attribute
+--- stays on the element whatever the schema says, so the rendered output does
+--- not change because of it, which is the reason a shortcode attribute is a
+--- warning too.
+---
+--- `misuse` is the one kind that is not about the document. It reports a fault
+--- in the extension calling this module, and it is an error because the caller
+--- is handed no value and would otherwise carry on with nil.
 --- @type table<string, string>
 local SEVERITY = {
   schema = 'error',
@@ -61,6 +80,11 @@ local SEVERITY = {
   call_error = 'warning',
   call_warning = 'warning',
   missing_argument = 'error',
+  misuse = 'error',
+  attribute_error = 'warning',
+  attribute_warning = 'warning',
+  format_error = 'error',
+  format_warning = 'warning',
 }
 
 --- The reporting function for each level.
@@ -162,6 +186,9 @@ end
 --- @field defaults table<string, any> The defaults the schema declares
 --- @field resolved table|nil The three tables the configuration resolves to
 --- @field options_checked boolean Whether the configuration was already checked
+--- @field meta table|nil The metadata `options` was given, which `format` reads
+--- @field formats table<string, table> What each format checked so far resolved to
+--- @field unavailable table<string, boolean> Validator functions already reported missing
 local Checker = {}
 Checker.__index = Checker
 
@@ -181,6 +208,31 @@ function Checker:_report(kind, message)
     return
   end
   REPORTERS[level](self.extension, message)
+end
+
+--- Whether the validator provides one function, reporting it once if not.
+---
+--- `validate_attributes` and `validate_format` are newer than the rest of the
+--- contract, so a validator vendored before either exists satisfies everything
+--- else and still lacks them. Calling one raises, and a raise removes the
+--- document, which is the one thing this module promises not to do.
+---
+--- It is reported once for the render rather than once for each caller. A
+--- filter reaches these for every element and every format it handles, and the
+--- condition is a fact about the vendored pair, so the second message says
+--- nothing the first did not.
+--- @param name string The function the caller is about to use
+--- @return boolean available
+function Checker:_provides(name)
+  if type(self.validator[name]) == 'function' then
+    return true
+  end
+  if not self.unavailable[name] then
+    self.unavailable[name] = true
+    self:_report('misuse', string.format(
+      'schema-check: the validator provides no `%s`, so nothing was checked with it', name))
+  end
+  return false
 end
 
 --- Check the document configuration and return what it resolves to. The check
@@ -203,7 +255,16 @@ end
 --- The defaults are a fresh copy on every call, so a caller may treat them as
 --- its own. The tables inside the second return are the checker's, and every
 --- later reader of the same checker sees them, so they must not be written to.
---- @param meta table<string, any> Document metadata
+---
+--- Only the first call reads `meta`. A later call returns what the first one
+--- resolved, whatever it is handed. A caller that needs a second document
+--- checked builds a second checker.
+---
+--- The argument cannot be read on a later call without losing the single check
+--- this function promises. Quarto hands a shortcode a new metadata table on
+--- every call, and the content is the same each time. A checker that read it
+--- again repeats every finding once per shortcode.
+--- @param meta table<string, any> Document metadata, read on the first call only
 --- @return table<string, any> defaults A copy of the defaults, empty when there is no schema
 --- @return table|nil resolved {provided, merged, defaults}, nil when there is no schema
 function Checker:options(meta)
@@ -211,6 +272,10 @@ function Checker:options(meta)
     return deep_copy(self.defaults), self.resolved
   end
   self.options_checked = true
+  -- Kept for `format`, which reads the same document. Quarto merges the options
+  -- of the selected format into the top level of this table, so the format
+  -- check has nowhere else to read them from.
+  self.meta = meta
 
   --- @type table|nil
   local loaded = self.schema
@@ -239,6 +304,156 @@ function Checker:options(meta)
   self.resolved = { provided = provided, merged = merged, defaults = self.defaults }
 
   return deep_copy(self.defaults), self.resolved
+end
+
+--- Read what one option resolves to, after `options` has run.
+---
+--- This is the value the schema decides, not the text the document holds. An
+--- extension that reads the metadata itself has to decide what counts as true,
+--- and each one that did decided something different, so `enabled: no` turned
+--- one filter off and left another on. Here the schema is the only answer: the
+--- validator coerces the written value toward the declared type, and a key the
+--- document never set resolves to its declared default.
+---
+--- It answers nil when there is no schema, which the checker has already
+--- reported once. A key the schema does not declare answers nil as well,
+--- because a schema that omits an option is the author's statement that the
+--- extension does not have it.
+--- @param key string The option name, as the schema declares it
+--- @return any value The resolved value, nil when there is nothing to resolve
+function Checker:option(key)
+  if type(key) ~= 'string' then
+    self:_report('misuse', string.format(
+      'schema-check: the key given to `option` must be a string, got %s', type(key)))
+    return nil
+  end
+  if not self.options_checked then
+    self:_report('misuse', string.format(
+      'schema-check: `option("%s")` was called before `options`', key))
+    return nil
+  end
+  if self.resolved == nil then
+    return nil
+  end
+  return self.resolved.merged[key]
+end
+
+--- Check one element's attributes against the `attributes` section, and return
+--- what they resolve to.
+---
+--- The section declares a map of groups. A group is named after the element it
+--- describes, such as `Header` or `CodeBlock`, or after the class the extension
+--- gives it, such as `modal`. `_any` is the group every element takes, and it
+--- is additive rather than an alternative: quarto-revealjs-tabset declares
+--- `panel-tabset` for a tabset's own attributes and `_any` for one that any
+--- slide can carry, and an element can meet both.
+---
+--- So both apply, and the named group runs last, over what `_any` resolved. The
+--- validator hands an undeclared attribute straight back, so chaining the two
+--- passes is the whole of the merge and there is no rule here about which group
+--- wins. The one that declares the attribute decides it.
+---
+--- This reports only. The attribute stays on the element whatever the schema
+--- says, so nothing about the rendered output changes, which is why a finding
+--- here is a warning as it is for a shortcode attribute.
+--- The attributes may arrive as Pandoc's `AttributeList` rather than as a
+--- table, which is what an element filter holds, so nothing here assumes a
+--- plain table. The validator reads them with `pairs`, which both answer.
+--- @param attributes table<string, any> The element's attributes
+--- @param group string|nil The element's own group, nil when it has none
+--- @return table<string, any>|nil resolved The attributes with the schema applied
+function Checker:attributes(attributes, group)
+  if group ~= nil and type(group) ~= 'string' then
+    self:_report('misuse', string.format(
+      'schema-check: the group given to `attributes` must be a string, got %s', type(group)))
+    return nil
+  end
+
+  attributes = attributes or {}
+
+  --- @type table|nil
+  local loaded = self.schema
+  -- The validator is injected from an independent source, so the shape of what
+  -- it returns is not this module's to assume, as `options` and `call` allow
+  -- for `options` and `shortcodes`.
+  if loaded == nil or next(loaded.attributes or {}) == nil then
+    return attributes
+  end
+
+  if not self:_provides('validate_attributes') then
+    return attributes
+  end
+
+  --- @type table<string, any>
+  local resolved = attributes
+  -- `_any` is the group every element takes, so a caller that names it has
+  -- already asked for the only pass there is. Running the list would report
+  -- each of its findings twice for every element handed over.
+  local groups = (group == nil or group == '_any') and { '_any' } or { '_any', group }
+  for _, name in ipairs(groups) do
+    local _, errors, warnings, merged =
+      self.validator.validate_attributes(resolved, name, loaded)
+    for _, message in ipairs(errors) do
+      self:_report('attribute_error', message)
+    end
+    for _, message in ipairs(warnings) do
+      self:_report('attribute_warning', message)
+    end
+    resolved = merged
+  end
+  return resolved
+end
+
+--- Check one output format's options against the `formats` section, and return
+--- what they resolve to.
+---
+--- Quarto merges the options of the selected format into the top level of the
+--- document metadata, and the format name is never a key there. So this reads
+--- the metadata `options` was given, and it must be called after `options`.
+---
+--- The extension names its own format, as it names an attribute group. A format
+--- name such as `letter-pdf` is a name the extension contributes, and nothing
+--- here can work out which of several declared formats a render selected.
+---
+--- The answer is kept, so a filter that asks again in the same render gets the
+--- same table and the findings are reported once.
+--- @param name string The format name, as the schema declares it
+--- @return table<string, any>|nil resolved The format's options, nil when there is nothing to resolve
+function Checker:format(name)
+  if type(name) ~= 'string' then
+    self:_report('misuse', string.format(
+      'schema-check: the name given to `format` must be a string, got %s', type(name)))
+    return nil
+  end
+  if not self.options_checked then
+    self:_report('misuse', string.format(
+      'schema-check: `format("%s")` was called before `options`', name))
+    return nil
+  end
+  if self.formats[name] ~= nil then
+    return self.formats[name]
+  end
+
+  --- @type table|nil
+  local loaded = self.schema
+  if loaded == nil or next(loaded.formats or {}) == nil then
+    return nil
+  end
+  if not self:_provides('validate_format') then
+    return nil
+  end
+
+  local _, errors, warnings, merged =
+    self.validator.validate_format(self.meta, name, loaded)
+  for _, message in ipairs(errors) do
+    self:_report('format_error', message)
+  end
+  for _, message in ipairs(warnings) do
+    self:_report('format_warning', message)
+  end
+
+  self.formats[name] = merged
+  return merged
 end
 
 --- Check one shortcode call against its entry in the schema.
@@ -324,7 +539,8 @@ end
 --- schema is, and the checker it builds belongs at file scope, so that the
 --- schema is read once for the render and not once for each call.
 --- @param validator table The validator, with `load_schema`, `validate`,
----   `validate_shortcode` and `extract_meta_options`
+---   `validate_shortcode`, `extract_meta_options`, `validate_attributes` and
+---   `validate_format`
 --- @param extension_name string The extension name every message carries
 --- @param schema_path string|nil The schema to read, relative to the entry
 ---   point that is running. Defaults to `_schema.yml`.
@@ -339,6 +555,9 @@ function M.new(validator, extension_name, schema_path)
     defaults = {},
     resolved = nil,
     options_checked = false,
+    meta = nil,
+    formats = {},
+    unavailable = {},
   }, Checker)
 
   -- The default is chosen here rather than in the signature, so a caller that
