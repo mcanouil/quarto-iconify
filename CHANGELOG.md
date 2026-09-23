@@ -4,7 +4,7 @@
 
 ### Documentation
 
-- docs: Add a page for the HTML rendering modes and a page for the Typst output and its SVG cache, linked from the examples overview.
+- docs: Add a page for the HTML rendering modes and a page for the Typst output and its SVG cache, linked from the examples overview. (#101)
 
 ### Bug Fixes
 
