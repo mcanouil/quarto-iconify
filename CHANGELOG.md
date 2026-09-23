@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.2.2 (2026-09-23)
+
 ### Documentation
 
 - docs: Add a page for the HTML rendering modes and a page for the Typst output and its SVG cache, linked from the examples overview. (#101)
