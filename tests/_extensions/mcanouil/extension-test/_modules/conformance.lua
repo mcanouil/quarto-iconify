@@ -634,9 +634,14 @@ local function check_dependencies(ext, dependencies_schema, emit)
         local digest, digest_err = util.sha256(file_path)
         if digest_err == 'no-tool' then
           -- Neither hashing tool is available. A checksum that cannot be
-          -- computed is not a checksum that does not match.
-          emit(advisory(file_id, string.format(
-            'cannot verify `%s`: no SHA-256 tool is available', file_name)))
+          -- computed is not a checksum that does not match, and it is not a
+          -- checksum that matches either. Graded as a skip rather than an
+          -- advisory, which passes: this case guards the manifest contract the
+          -- whole fleet run depends on, so it must not report success on the
+          -- strength of never having looked.
+          emit(case(file_id, 'skip', string.format(
+            'cannot verify `%s`: no SHA-256 tool is available',
+            file_name), 'conformance', 'vendored-checksum-unverifiable'))
         elseif not digest then
           -- The machine has a tool and it produced nothing, so the entry
           -- names something that is not a readable file.

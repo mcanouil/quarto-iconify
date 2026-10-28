@@ -2,8 +2,8 @@ schema: 1
 sources:
   quarto-wizard:
     origin: https://github.com/mcanouil/quarto-wizard
-    fetch: "https://raw.githubusercontent.com/mcanouil/quarto-wizard/{version}/packages/schema/src/validation/{file}"
-    version: "3.4.0"
+    fetch: "{origin}/releases/download/{version}/{file}"
+    version: "3.5.0"
     licence: MIT
     files:
       schema.lua:

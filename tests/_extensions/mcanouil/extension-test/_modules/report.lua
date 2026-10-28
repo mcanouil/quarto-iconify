@@ -49,13 +49,14 @@ function M.add(results, case)
   assert(case.layer, 'a case needs a layer')
   assert(case.status, 'a case needs a status')
   case.diagnostics = case.diagnostics or { warnings = {}, errors = {} }
-  -- Present and empty in v1 so v2 can fill it without a schema change
-  -- downstream in publish-results.sh, build-index.sh, or the renderer.
+  -- One entry for each check a render ran. Defaulted here for the cases that
+  -- never reached the assertions, so every reader can rely on the field.
   case.assertions = case.assertions or {}
   results.cases[#results.cases + 1] = case
 end
 
 --- Roll per-case results up into per-layer and overall summaries.
+--- The tier is `check` when any case holds a `check` entry.
 --- @param results table
 --- @return table results
 function M.finalise(results)
@@ -72,6 +73,11 @@ function M.finalise(results)
     layer[case.status] = (layer[case.status] or 0) + 1
     total.total = total.total + 1
     total[case.status] = (total[case.status] or 0) + 1
+    for _, entry in ipairs(case.assertions or {}) do
+      if entry.kind == 'check' then
+        results.tier = 'check'
+      end
+    end
   end
 
   for _, name in ipairs(order) do

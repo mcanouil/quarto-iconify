@@ -261,6 +261,10 @@ function M.timeout_command()
   return nil
 end
 
+--- Seconds between SIGTERM and SIGKILL, so a command that ignores SIGTERM
+--- still stops.
+M.TIMEOUT_GRACE = 10
+
 --- A command prefix bounding a run to `seconds`, empty when unavailable.
 --- @param seconds number
 --- @return string
@@ -269,7 +273,25 @@ function M.timeout_prefix(seconds)
   if not command then
     return ''
   end
-  return string.format('%s %d ', command, math.floor(tonumber(seconds) or 300))
+  return string.format('%s -k %d %d ', command, M.TIMEOUT_GRACE, math.floor(tonumber(seconds) or 300))
+end
+
+--- Whether an exit code means the time limit stopped the command.
+---
+--- `timeout` exits 124 after SIGTERM, and 137 when it has to send SIGKILL.
+--- Any SIGKILL gives 137, the OOM killer's too, so 137 counts only once the
+--- limit and the grace period have passed. `elapsed` is in whole seconds and
+--- can run up to one second over, hence the one second of slack. Without a
+--- time limit, neither code says anything about time.
+--- @param code integer
+--- @param limit number|nil the time limit in seconds, nil when none applied
+--- @param elapsed number seconds the command ran
+--- @return boolean
+function M.timed_out(code, limit, elapsed)
+  if not limit then
+    return false
+  end
+  return code == 124 or (code == 137 and elapsed >= limit + M.TIMEOUT_GRACE - 1)
 end
 
 --- Split text into lines, dropping a trailing empty line.

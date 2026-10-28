@@ -89,4 +89,31 @@ function M.unstage(tests)
   util.remove_tree(util.join(tests, '_extensions', M.STAGE_OWNER))
 end
 
+--- Stage the extensions and check the project they are staged into.
+---
+--- Every failure unstages, so a part-copied extension is never left in the
+--- tree for anything else that looks at it before the next run.
+--- @param root string repository root
+--- @param tests string tests directory
+--- @return table|nil staged {names, dir}, nil on failure
+--- @return string|nil reason `staging-failed`, `nothing-to-stage` or `no-project-file`
+--- @return string|nil message
+function M.prepare(root, tests)
+  local staged, stage_err = M.stage(root, tests)
+  if stage_err then
+    M.unstage(tests)
+    return nil, 'staging-failed', stage_err
+  end
+  if #staged.names == 0 then
+    M.unstage(tests)
+    return nil, 'nothing-to-stage', 'the repository ships no extension to stage'
+  end
+  local missing = M.missing_project(tests)
+  if missing then
+    M.unstage(tests)
+    return nil, 'no-project-file', missing
+  end
+  return staged, nil, nil
+end
+
 return M

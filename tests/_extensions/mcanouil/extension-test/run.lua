@@ -69,6 +69,8 @@ Options:
   --json <path>         Write the result JSON. Default: tests/_results/results.json.
   --tap <path>          Write TAP 13. `-` means stdout. Default: stdout.
   --list                Print the plan and run nothing.
+  --stage               Stage the extension, print the documents q2 can test, and stop.
+  --unstage             Remove the staged extension, and stop.
   --quiet               Suppress the human summary on stderr.
   --version             Print the framework version.
   --help                Print this message.
@@ -137,6 +139,10 @@ local function parse_args(argv)
       options.tap = value()
     elseif flag == '--list' then
       options.list = true
+    elseif flag == '--stage' then
+      options.stage = true
+    elseif flag == '--unstage' then
+      options.unstage = true
     elseif flag == '--quiet' then
       options.quiet = true
     elseif flag == '--version' then
@@ -152,6 +158,9 @@ local function parse_args(argv)
     index = index + 1
   end
 
+  if options.stage and options.unstage then
+    return nil, '`--stage` and `--unstage` cannot be used together'
+  end
   if #options.layers == 0 then
     options.layers = { 'conformance', 'render', 'smoke' }
   end
@@ -199,7 +208,7 @@ local function quarto_environment()
   return { version = version, channel = channel }
 end
 
---- Read the `test:` descriptors the framework ships.
+--- Read the `_quarto.tests.run.extension-test` descriptors the framework ships.
 --- @param options table
 --- @return table descriptors
 local function load_test_descriptors(options)
@@ -207,7 +216,7 @@ local function load_test_descriptors(options)
   if loaded then
     return loaded.options
   end
-  io.stderr:write('warning: cannot read the `test:` descriptors: ' .. tostring(load_err) .. '\n')
+  io.stderr:write('warning: cannot read the `run.extension-test` descriptors: ' .. tostring(load_err) .. '\n')
   return {}
 end
 
@@ -242,32 +251,13 @@ local function run_smoke(options, extensions, descriptors, emit)
     return
   end
 
-  local staged, stage_err = stage.stage(options.root, options.tests)
-  if stage_err or #staged.names == 0 then
-    -- Undone on the error path too: a part-copied extension left behind would
-    -- be rendered by anything else that looks at the tree before the next run.
-    stage.unstage(options.tests)
+  local staged, reason, message = stage.prepare(options.root, options.tests)
+  if not staged then
     emit({
       id = 'smoke/stage',
       layer = 'smoke',
-      status = stage_err and 'fail' or 'skip',
-      failure = {
-        stage = 'stage',
-        reason = stage_err and 'staging-failed' or 'nothing-to-stage',
-        message = stage_err or 'the repository ships no extension to stage',
-      },
-    })
-    return
-  end
-
-  local missing = stage.missing_project(options.tests)
-  if missing then
-    stage.unstage(options.tests)
-    emit({
-      id = 'smoke/stage',
-      layer = 'smoke',
-      status = 'fail',
-      failure = { stage = 'stage', reason = 'no-project-file', message = missing },
+      status = reason == 'nothing-to-stage' and 'skip' or 'fail',
+      failure = { stage = 'stage', reason = reason, message = message },
     })
     return
   end
@@ -316,6 +306,13 @@ local function run_smoke(options, extensions, descriptors, emit)
         relative = relative,
         absolute = util.join(options.tests, relative),
         origin = 'generated',
+        -- A generated document carries no policy, and the generator makes
+        -- inputs that a careful extension warns about, so warnings are
+        -- allowed. The promoted warnings still apply.
+        default_policy = 'noErrors',
+        -- It cannot expect a warning either, so a project default of
+        -- `warnings: exhaustive` does not apply.
+        ignores_exhaustive = true,
       }
     end
     render.execute(options, documents, descriptors, 'smoke', emit)
@@ -334,6 +331,34 @@ local function run_smoke(options, extensions, descriptors, emit)
       failure = { stage = 'generate', reason = 'harness-error', message = tostring(err) },
     })
   end
+end
+
+--- Stage the extension and list the documents that `q2 call test` can judge.
+---
+--- Standard output holds only the absolute path of each selected document,
+--- one for each line, so a caller can pass it to q2 as it is. Everything else
+--- goes to standard error. The staged copy is left in place for q2 to use.
+--- @param options table
+--- @return integer exit code
+local function stage_for_q2(options)
+  local staged, _, message = stage.prepare(options.root, options.tests)
+  if not staged then
+    io.stderr:write('error: ', message, '\n')
+    return 2
+  end
+
+  local records = render.q2_documents(options, load_test_descriptors(options))
+  local included = 0
+  for _, record in ipairs(records) do
+    if record.included then
+      included = included + 1
+      io.stdout:write(record.absolute, '\n')
+    else
+      io.stderr:write(string.format('skip %s: %s\n', record.relative, record.reason))
+    end
+  end
+  io.stderr:write(string.format('%d of %d documents go to q2\n', included, #records))
+  return 0
 end
 
 local function main(argv)
@@ -356,6 +381,14 @@ local function main(argv)
   if not util.is_dir(options.root) then
     io.stderr:write(string.format('error: repository root `%s` is not a directory\n', options.root))
     return 2
+  end
+
+  if options.unstage then
+    stage.unstage(options.tests)
+    return 0
+  end
+  if options.stage then
+    return stage_for_q2(options)
   end
 
   local results = report.new({

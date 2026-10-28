@@ -21,6 +21,8 @@ website:
   description: "A Quarto shortcode for Iconify icons: over two hundred thousand of them, in HTML and Typst."
   # No trailing slash: Quarto builds the social image URL by concatenating this
   # with the image path, without normalising.
+  # quarto-dev/quarto-cli#15053 normalises this join. Drop this note once the
+  # minimum Quarto version is the first release after 1.11.6.
   site-url: &site-url https://m.canouil.dev/quarto-iconify
   repo-url: https://github.com/mcanouil/quarto-iconify
   open-graph:

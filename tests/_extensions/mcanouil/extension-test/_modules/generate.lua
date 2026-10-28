@@ -6,9 +6,12 @@
 --- without writing a single test.
 ---
 --- What a pass means here is narrow and worth stating plainly. The document
---- was generated, it rendered, no error was logged, no promoted warning
---- appeared, and no shortcode text survived into the output. Nothing about
---- the content of the output is asserted. Authored assertions are v2.
+--- was generated, it rendered under `noErrors`: no error was logged, no
+--- promoted warning appeared, and no shortcode text survived into the output.
+--- Other warnings are recorded without failing, because the generated inputs
+--- are ones a careful extension is right to warn about.
+--- Nothing about the content of the output is asserted. Assertions belong in
+--- authored documents, under `_quarto.tests`.
 
 local util = require('util')
 local schema = require('schema')
@@ -83,7 +86,6 @@ local function front_matter(title, wiring)
   if #wiring.plugins > 0 then
     front['revealjs-plugins'] = wiring.plugins
   end
-  front.test = { formats = wiring.formats }
   return front
 end
 
