@@ -1,7 +1,8 @@
 name: Quarto Extensions Updates
 
 # Keeps the documentation website's own dependencies current: atelier, iconify,
-# and gitlink under docs/_extensions/.
+# and gitlink under docs/_extensions/. Also keeps the extension test framework
+# under tests/_extensions/ current.
 on:
   workflow_dispatch:
   schedule:
@@ -21,3 +22,4 @@ jobs:
       gh-app-id: ${{ vars.APP_ID }}
       scan-directories: |
         docs
+        tests
