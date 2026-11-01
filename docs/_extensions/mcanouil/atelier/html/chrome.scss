@@ -1,3 +1,19 @@
+/*-- scss:functions --*/
+
+// Mix $color towards black or white, as Quarto's `theme-contrast()` does, until
+// it reads at 4.5:1 on its own soft tint: $color at $alpha over $bg. The tint
+// darkens with the colour, so it is recomputed at every step.
+@function atelier-contrast-on-tint($color, $bg, $alpha) {
+  $toward: if(tone($bg) == "light", #000, #fff);
+  @for $step from 0 through 100 {
+    $candidate: mix($toward, $color, $step * 1%);
+    @if quarto-contrast($candidate, mix($candidate, $bg, $alpha * 100%)) >= 4.5 {
+      @return $candidate;
+    }
+  }
+  @return $toward;
+}
+
 /*-- scss:defaults --*/
 
 // ===========================================================================
@@ -44,6 +60,26 @@ $atelier-chrome-page-bg: if(variable-exists(body-bg), $body-bg, #fff);
 $atelier-chrome-page-fg: if(variable-exists(body-color), $body-color, #212529);
 $atelier-chrome-page-accent: if(variable-exists(primary), $primary, #0d6efd);
 
+// ===========================================================================
+// RADIUS AND MERMAID TOKENS
+// ===========================================================================
+// These sit in this file because it is listed first, so its defaults are
+// evaluated after those of the project theme and of `brand`, which therefore
+// win. The `null` reset in `html/theme.scss` is what leaves them free to apply.
+// The small and large radii follow `$border-radius` at the ratios of these
+// defaults, so a brand that sets only `$border-radius` keeps the three in
+// proportion.
+$border-radius: 0.5rem !default;
+$border-radius-sm: $border-radius * 0.75 !default;
+$border-radius-lg: $border-radius * 1.5 !default;
+
+// Quarto paints a Mermaid subgraph with `--mermaid-fg-color--lightest`, a
+// lightened text colour, which is a dark grey on a light page and white on a
+// dark one. Paint it from the page surface instead.
+// Upstream: https://github.com/quarto-dev/quarto-cli/issues/9178
+// Remove when: the minimum Quarto version includes the fix.
+$mermaid-fg-color--lightest: mix($atelier-chrome-page-bg, $atelier-chrome-page-fg, 92%) !default;
+
 // In `auto` the bar is a light tint of the page rather than the page colour
 // itself, so it still reads as a bar without a hard colour break, and the
 // mix resolves per bundle: a paler paper in the light one, a lifted slate in
@@ -58,11 +94,10 @@ $atelier-chrome-bg: if(
   )
 ) !default;
 
-// Both inks are run through Quarto's own `theme-contrast()`, which mixes a
-// colour towards black or white only until it clears the ratio asked of it and
-// returns it untouched otherwise. In `auto` that matters for the accent: a
-// brand primary is picked against the page, and the bar is a tint of the page,
-// so a primary sitting just above 4.5:1 on the page can fall under it here.
+// Both inks are mixed towards black or white only until they clear 4.5:1, and
+// returned untouched when they already do; a ratio that cannot be met ends at
+// black or white. In `auto` the bar is a tint of the page, so a brand colour
+// sitting just above 4.5:1 on the page can fall under it here.
 // Setting either variable in a project skips the correction, since a `!default`
 // assignment is not evaluated at all once the variable is set.
 $atelier-chrome-fg: theme-contrast(
@@ -79,7 +114,14 @@ $atelier-chrome-fg: theme-contrast(
   "AA"
 ) !default;
 
-$atelier-chrome-accent: theme-contrast(
+// The surface of dropdown menus, a step from the bar towards the ink.
+$atelier-chrome-surface: mix($atelier-chrome-bg, $atelier-chrome-fg, 90%) !default;
+
+// The accent sits on the bar, and on the accent-soft pill of the active sidebar
+// item and of a hovered dropdown item. The pill over the surface is the closest
+// of these to the accent, so holding the accent to AA there covers the rest.
+$atelier-chrome-accent-soft-alpha: 0.16 !default;
+$atelier-chrome-accent: atelier-contrast-on-tint(
   if(
     $atelier-chrome == dark,
     $atelier-chrome-dark-accent,
@@ -89,15 +131,33 @@ $atelier-chrome-accent: theme-contrast(
       $atelier-chrome-page-accent
     )
   ),
-  $atelier-chrome-bg,
-  "AA"
+  $atelier-chrome-surface,
+  $atelier-chrome-accent-soft-alpha
 ) !default;
 
 // Everything else follows from that triple, so a project re-points three
 // colours rather than eight.
-$atelier-chrome-surface: mix($atelier-chrome-bg, $atelier-chrome-fg, 90%) !default;
-$atelier-chrome-muted: mix($atelier-chrome-fg, $atelier-chrome-bg, 65%) !default;
-$atelier-chrome-accent-soft: rgba($atelier-chrome-accent, 0.16) !default;
+$atelier-chrome-muted: theme-contrast(
+  mix($atelier-chrome-fg, $atelier-chrome-bg, 65%),
+  $atelier-chrome-bg,
+  "AA"
+) !default;
+$atelier-chrome-accent-soft: rgba($atelier-chrome-accent, $atelier-chrome-accent-soft-alpha) !default;
+
+// ===========================================================================
+// PAGE VARIABLES
+// ===========================================================================
+// The website listing layer pins $text-muted to a fixed #6c757d ahead of this
+// file, which is under 4.5:1 on most pages; derive it from the page instead,
+// held to AA. A `!default` would lose to that layer, so it is handed over by
+// plain assignment, like the chrome variables below; a project sets
+// $atelier-text-muted instead.
+$atelier-text-muted: theme-contrast(
+  mix($atelier-chrome-page-fg, $atelier-chrome-page-bg, 65%),
+  $atelier-chrome-page-bg,
+  "AA"
+) !default;
+$text-muted: $atelier-text-muted;
 
 // A hairline between two surfaces, which is what the bar edges and the section
 // dividers want.
