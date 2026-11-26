@@ -45,8 +45,8 @@ A `color:` declaration inside `style` covers both outputs at once, so one attrib
 
 | Source | Renders as, in HTML |
 | --- | --- |
-| `{{{< iconify mdi:home size=2x style="color: firebrick;" >}}}` | {{< iconify mdi:home size=2x style="color: firebrick;" >}} |
-| `{{{< iconify mdi:home size=2x color=firebrick >}}}` | {{< iconify mdi:home size=2x color=firebrick >}} |
+| `{{{< iconify mdi:home size="2x" style="color: firebrick;" >}}}` | {{< iconify mdi:home size="2x" style="color: firebrick;" >}} |
+| `{{{< iconify mdi:home size="2x" color=firebrick >}}}` | {{< iconify mdi:home size="2x" color=firebrick >}} |
 
 : The same colour, written for both outputs and then for Typst alone. {.striped .hover tbl-colwidths="[62,38]"}
 
@@ -66,7 +66,7 @@ A size keyword resolves to a length in `em`, which Typst accepts, so every keywo
 A CSS unit that Typst does not accept fails:
 
 ```markdown
-{{{< iconify mdi:home size=32px >}}}
+{{{< iconify mdi:home size="32px" >}}}
 ```
 
 That render reports the unit and falls back to `1em`:
