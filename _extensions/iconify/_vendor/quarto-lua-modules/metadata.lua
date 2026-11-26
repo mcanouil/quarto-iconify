@@ -228,6 +228,8 @@ function M.get_project_metadata()
 end
 
 --- Get repo-url from Quarto project metadata via QUARTO_EXECUTE_INFO.
+--- Quarto 2 does not set QUARTO_EXECUTE_INFO: use `engine.project_repo_url(meta)`,
+--- which gives the same value on both engines.
 --- Extracts repo-url from website or book metadata, website first.
 --- The QUARTO_EXECUTE_INFO file is read only when no table is given.
 --- @param format_meta table|nil The project format.metadata table, as returned

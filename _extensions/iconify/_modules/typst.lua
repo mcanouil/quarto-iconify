@@ -38,11 +38,13 @@ local TYPST_UNITS = {
 -- PATH / NAMING HELPERS
 -- ============================================================================
 
---- Resolve the Quarto project root. Falls back to the working directory for
---- single-file renders where no project is active.
+--- Resolve the Quarto project root. Falls back to the working directory when
+--- Quarto gives no project directory.
+--- `quarto.project.directory` gives the same value in Quarto 1 and Quarto 2,
+--- which does not set `QUARTO_PROJECT_DIR`.
 --- @return string
 local function project_base()
-  local base = os.getenv('QUARTO_PROJECT_DIR')
+  local base = quarto.project and quarto.project.directory
   if base == nil or base == '' then
     return '.'
   end
