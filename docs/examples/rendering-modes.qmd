@@ -15,11 +15,11 @@ The [Reference](../reference.qmd#attributes) lists the values `mode` accepts.
 
 | Source | Renders as |
 | --- | --- |
-| `{{{< iconify mdi:home size=2x >}}}` | {{< iconify mdi:home size=2x >}} |
-| `{{{< iconify mdi:home size=2x mode=svg >}}}` | {{< iconify mdi:home size=2x mode=svg >}} |
-| `{{{< iconify mdi:home size=2x mode=style >}}}` | {{< iconify mdi:home size=2x mode=style >}} |
-| `{{{< iconify mdi:home size=2x mode=bg >}}}` | {{< iconify mdi:home size=2x mode=bg >}} |
-| `{{{< iconify mdi:home size=2x mode=mask >}}}` | {{< iconify mdi:home size=2x mode=mask >}} |
+| `{{{< iconify mdi:home size="2x" >}}}` | {{< iconify mdi:home size="2x" >}} |
+| `{{{< iconify mdi:home size="2x" mode=svg >}}}` | {{< iconify mdi:home size="2x" mode=svg >}} |
+| `{{{< iconify mdi:home size="2x" mode=style >}}}` | {{< iconify mdi:home size="2x" mode=style >}} |
+| `{{{< iconify mdi:home size="2x" mode=bg >}}}` | {{< iconify mdi:home size="2x" mode=bg >}} |
+| `{{{< iconify mdi:home size="2x" mode=mask >}}}` | {{< iconify mdi:home size="2x" mode=mask >}} |
 
 : One icon, no mode and then each of the four. {.striped .hover tbl-colwidths="[62,38]"}
 
@@ -45,9 +45,9 @@ It picks `mask` for an icon that uses `currentColor`, and `bg` for every other i
 
 | Source | Renders as |
 | --- | --- |
-| `{{{< iconify mdi:home size=2x style="color: firebrick;" >}}}` | {{< iconify mdi:home size=2x style="color: firebrick;" >}} |
-| `{{{< iconify mdi:home size=2x mode=style style="color: firebrick;" >}}}` | {{< iconify mdi:home size=2x mode=style style="color: firebrick;" >}} |
-| `{{{< iconify mdi:home size=2x mode=mask style="color: firebrick;" >}}}` | {{< iconify mdi:home size=2x mode=mask style="color: firebrick;" >}} |
+| `{{{< iconify mdi:home size="2x" style="color: firebrick;" >}}}` | {{< iconify mdi:home size="2x" style="color: firebrick;" >}} |
+| `{{{< iconify mdi:home size="2x" mode=style style="color: firebrick;" >}}}` | {{< iconify mdi:home size="2x" mode=style style="color: firebrick;" >}} |
+| `{{{< iconify mdi:home size="2x" mode=mask style="color: firebrick;" >}}}` | {{< iconify mdi:home size="2x" mode=mask style="color: firebrick;" >}} |
 
 : A monochrome icon, coloured through the text colour. {.striped .hover tbl-colwidths="[62,38]"}
 
@@ -56,10 +56,10 @@ It picks `mask` for an icon that uses `currentColor`, and `bg` for every other i
 
 | Source | Renders as |
 | --- | --- |
-| `{{{< iconify twemoji:rocket size=2x >}}}` | {{< iconify twemoji:rocket size=2x >}} |
-| `{{{< iconify twemoji:rocket size=2x mode=style >}}}` | {{< iconify twemoji:rocket size=2x mode=style >}} |
-| `{{{< iconify twemoji:rocket size=2x mode=bg >}}}` | {{< iconify twemoji:rocket size=2x mode=bg >}} |
-| `{{{< iconify twemoji:rocket size=2x mode=mask style="color: firebrick;" >}}}` | {{< iconify twemoji:rocket size=2x mode=mask style="color: firebrick;" >}} |
+| `{{{< iconify twemoji:rocket size="2x" >}}}` | {{< iconify twemoji:rocket size="2x" >}} |
+| `{{{< iconify twemoji:rocket size="2x" mode=style >}}}` | {{< iconify twemoji:rocket size="2x" mode=style >}} |
+| `{{{< iconify twemoji:rocket size="2x" mode=bg >}}}` | {{< iconify twemoji:rocket size="2x" mode=bg >}} |
+| `{{{< iconify twemoji:rocket size="2x" mode=mask style="color: firebrick;" >}}}` | {{< iconify twemoji:rocket size="2x" mode=mask style="color: firebrick;" >}} |
 
 : A multicolour icon under each mode. {.striped .hover tbl-colwidths="[62,38]"}
 
@@ -105,8 +105,8 @@ An inline icon is pulled down by `0.125em` so it sits on the baseline of the tex
 
 | Source | Renders as |
 | --- | --- |
-| `Text {{{< iconify mdi:home size=2x >}}} text` | Text {{< iconify mdi:home size=2x >}} text |
-| `Text {{{< iconify mdi:home size=2x inline=false >}}} text` | Text {{< iconify mdi:home size=2x inline=false >}} text |
+| `Text {{{< iconify mdi:home size="2x" >}}} text` | Text {{< iconify mdi:home size="2x" >}} text |
+| `Text {{{< iconify mdi:home size="2x" inline=false >}}} text` | Text {{< iconify mdi:home size="2x" inline=false >}} text |
 
 : The same icon on the text baseline and off it. {.striped .hover tbl-colwidths="[62,38]"}
 

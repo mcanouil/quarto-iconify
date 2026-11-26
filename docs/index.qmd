@@ -48,11 +48,11 @@ Both draw {{< iconify octicon:rocket-16 >}}.
 Size, rotate, colour, and label it with attributes:
 
 ```markdown
-{{{< iconify mdi:home size=2x >}}}
-{{{< iconify mdi:home rotate=90deg label="Home" >}}}
+{{{< iconify mdi:home size="2x" >}}}
+{{{< iconify mdi:home rotate="90deg" label="Home" >}}}
 ```
 
-{{< iconify mdi:home size=2x >}} and {{< iconify mdi:home rotate=90deg label="Home" >}}.
+{{< iconify mdi:home size="2x" >}} and {{< iconify mdi:home rotate="90deg" label="Home" >}}.
 
 Set a default icon set so the set can be dropped:
 

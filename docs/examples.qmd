@@ -32,8 +32,8 @@ Two topics have a page of their own.
 | Source | Renders as |
 | --- | --- |
 | `{{{< iconify mdi:home >}}}` | {{< iconify mdi:home >}} |
-| `{{{< iconify mdi:home size=2x >}}}` | {{< iconify mdi:home size=2x >}} |
-| `{{{< iconify mdi:home size=3em >}}}` | {{< iconify mdi:home size=3em >}} |
+| `{{{< iconify mdi:home size="2x" >}}}` | {{< iconify mdi:home size="2x" >}} |
+| `{{{< iconify mdi:home size="3em" >}}}` | {{< iconify mdi:home size="3em" >}} |
 | `{{{< iconify mdi:home width=48 height=48 >}}}` | {{< iconify mdi:home width=48 height=48 >}} |
 
 : Keywords, multiples, CSS values, and explicit dimensions. {.striped .hover tbl-colwidths="[55,45]"}
@@ -42,9 +42,9 @@ Two topics have a page of their own.
 
 | Source | Renders as |
 | --- | --- |
-| `{{{< iconify mdi:arrow-up size=2x >}}}` | {{< iconify mdi:arrow-up size=2x >}} |
-| `{{{< iconify mdi:arrow-up size=2x rotate=90deg >}}}` | {{< iconify mdi:arrow-up size=2x rotate=90deg >}} |
-| `{{{< iconify mdi:arrow-up size=2x flip=vertical >}}}` | {{< iconify mdi:arrow-up size=2x flip=vertical >}} |
+| `{{{< iconify mdi:arrow-up size="2x" >}}}` | {{< iconify mdi:arrow-up size="2x" >}} |
+| `{{{< iconify mdi:arrow-up size="2x" rotate="90deg" >}}}` | {{< iconify mdi:arrow-up size="2x" rotate="90deg" >}} |
+| `{{{< iconify mdi:arrow-up size="2x" flip=vertical >}}}` | {{< iconify mdi:arrow-up size="2x" flip=vertical >}} |
 
 : Rotating and flipping. {.striped .hover tbl-colwidths="[55,45]"}
 
@@ -54,7 +54,7 @@ Two topics have a page of their own.
 
 | Source | Renders as |
 | --- | --- |
-| `{{{< iconify mdi:heart size=2x style="color: firebrick;" >}}}` | {{< iconify mdi:heart size=2x style="color: firebrick;" >}} |
+| `{{{< iconify mdi:heart size="2x" style="color: firebrick;" >}}}` | {{< iconify mdi:heart size="2x" style="color: firebrick;" >}} |
 
 : Colouring an icon in HTML. {.striped .hover tbl-colwidths="[55,45]"}
 
@@ -71,7 +71,7 @@ An icon is announced by default, so label every icon that carries meaning and hi
 {{{< iconify octicon:alert-16 label="Warning" title="Warning" >}}}
 ```
 
-{{< iconify octicon:alert-16 size=2x label="Warning" title="Warning" >}} carries an `aria-label` and a tooltip reading `Warning`.
+{{< iconify octicon:alert-16 size="2x" label="Warning" title="Warning" >}} carries an `aria-label` and a tooltip reading `Warning`.
 
 Left unset, both fall back to a generated string naming the set and the file:
 
@@ -108,7 +108,7 @@ Labelled, it is announced twice over and pops a tooltip; hidden, the link reads 
 | Source | Renders as |
 | --- | --- |
 | `{{{< quarto >}}}` | {{< quarto >}} |
-| `{{{< quarto size=2x >}}}` | {{< quarto size=2x >}} |
+| `{{{< quarto size="2x" >}}}` | {{< quarto size="2x" >}} |
 
 : The `quarto` shortcode, which takes the same attributes as `iconify`. {.striped .hover tbl-colwidths="[55,45]"}
 
